@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<modDesc descVersion="99">
+    <author>YourName</author>
+    <version>1.0.0.0</version>
+    <title>
+        <en>Helper Profiles</en>
+    </title>
+    <description>
+        <en>Create persistent AI worker avatars with custom appearance and skills. Supports AutoDrive and Courseplay integration. Manage up to 20 unique AI workers with individual statistics, appearance customization, and behavior settings.</en>
+    </description>
+    <multiplayer supported="true"/>
+    <extraSourceFiles>
+        <sourceFile filename="HelperProfiles.lua"/>
+    </extraSourceFiles>
+</modDesc>

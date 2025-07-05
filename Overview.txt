@@ -1,0 +1,61 @@
+**FS25 Helper Customization Mod**
+
+**Overview:**
+A mod for Farming Simulator 25 that enhances and expands the in-game helpers system, giving players deep customization over helper appearance, behavior, and task assignments.
+
+---
+
+## 1. Objectives
+
+* Enable persistent helper names loaded from XML profiles
+* (Later) support appearance and other profile settings
+* Integrate with Courseplay and AutoDrive for seamless profile-driven helper behavior
+
+## 2. Target Audience
+
+* Farming Simulator players seeking more control over AI helpers
+* Modders wanting a flexible framework to extend
+* Server operators looking for enhanced multiplayer helper management
+
+## 3. MVP Features
+
+1. **Appearance Customization**
+
+   * Upload or select from preset skins
+   * Color picker for outfits and vehicles
+2. **Behavior Profiles**
+
+   * Predefined helper personality templates (e.g., "Efficient", "Careful", "Speedy")
+   * Adjustable settings: field plowing speed, pathing tolerance, resource usage
+3. **Task Scheduler UI**
+
+   * In-game menu to queue tasks by helper
+   * Calendar view for multi-day operations
+4. **Mod Configuration File**
+
+   * XML/JSON file for advanced per-helper settings outside UI
+
+## 4. Architecture & Tech Stack
+
+* **Language:** Lua (Giants Engine scripting)
+* **Assets:** XML definitions, DDS textures for skins
+* **UI:** In-game GUI via Farming Simulator's HUD API
+* **Build Tools:** Giants Editor, GIANTS Engine SDK
+* **Version Control:** GitHub repository
+
+## 5. Development Roadmap
+
+* **Phase 1 (2 weeks):** Core helper behavior hooks + basic UI stub
+* **Phase 2 (3 weeks):** Appearance customization flow + texture loader
+* **Phase 3 (2 weeks):** Task scheduler implementation & calendar UI
+* **Phase 4 (1 week):** Testing, compatibility checks, documentation
+
+## 6. Next Steps
+
+* Confirm core feature set and any additional requirements
+* Set up GitHub repo and project board
+* Allocate tasks and define coding standards
+
+---
+
+*Feel free to suggest edits or add more details!*

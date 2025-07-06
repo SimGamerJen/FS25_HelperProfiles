@@ -92,6 +92,21 @@ function HelperProfiles:rebuildHelperList()
     print(string.format("[FS25_HelperProfiles] Total helpers loaded: %d", g_helperManager.numHelpers))
 end
 
+-- Debug utility: print full g_helperManager state
+function HelperProfiles:printHelperManagerState(header)
+    print("\n========== "..(header or "Helper Manager State").." ==========")
+    if DebugUtil and DebugUtil.printTableRecursively then
+        print("g_helperManager:")
+        DebugUtil.printTableRecursively(g_helperManager, "--", 0, 0)
+        print("helpers:")
+        DebugUtil.printTableRecursively(g_helperManager.helpers, "--", 0, 1)
+        print("availableHelpers:")
+        DebugUtil.printTableRecursively(g_helperManager.availableHelpers, "--", 0, 1)
+    else
+        print("DebugUtil not found! Make sure it's loaded by FS25.")
+    end
+end
+
 function HelperProfiles:onCycleHelper(actionName, inputValue, callbackState, eventUsed)
     if #self.profiles == 0 then return end
     self.currentHelperIdx = self.currentHelperIdx + 1
@@ -100,6 +115,9 @@ function HelperProfiles:onCycleHelper(actionName, inputValue, callbackState, eve
     print("[FS25_HelperProfiles] Selected helper: " .. p.name)
     self.overlayText = "Active Helper: " .. p.name
     self.overlayTime = 2.5
+	
+    -- Print debug info after cycling
+    self:printHelperManagerState("After Cycling Helper")
 end
 
 function HelperProfiles:draw()

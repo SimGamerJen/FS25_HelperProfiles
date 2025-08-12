@@ -1,7 +1,3 @@
-Got it — here’s your updated **README.md** section with that clarification added:
-
----
-
 # FS25 Helper Profiles
 
 **Farming Simulator 25 mod** that lets you cycle between available AI helpers and automatically hire your preferred one when pressing `H`.

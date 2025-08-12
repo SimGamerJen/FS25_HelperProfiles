@@ -30,6 +30,43 @@ To use custom names, appearances, or more helpers than the basegame provides, yo
 
 ---
 
+## Example
+
+        <helper name="Riley" color="1 0 0">
+            <playerStyle filename="dataS/character/playerM/playerM.xml">
+				<bottom color="5" name="jeans"/>
+				<face color="1" name="head01"/>
+				<top color="5" name="denimJacket"/>
+				<footwear color="1" name="workBoots2"/>
+				<hairStyle color="6" name="hair12"/>
+				<beard color="5" name="stubble_head01"/>
+            </playerStyle>
+        </helper>
+        <helper name="Jed" color="1 0 0">
+            <playerStyle filename="dataS/character/playerM/playerM.xml">
+            <bottom color="5" name="jeans"/>
+            <face color="1" name="head02"/>
+            <top color="3" name="leather"/>
+            <headgear color="5" name="cowboy"/>
+            <footwear color="1" name="riding"/>
+            <hairStyle color="23" name="hair09"/>
+            <beard color="23" name="stubble_head02"/>
+            </playerStyle>
+        </helper>
+        <helper name="Rick" color="0 1 0">
+            <playerStyle filename="dataS/character/playerM/playerM.xml">
+            <bottom color="8" name="cargo"/>
+            <face color="1" name="head02"/>
+            <top color="24" name="topPlaidShirt"/>
+            <glasses color="1" name="classic"/>
+            <footwear color="1" name="workBoots2"/>
+            <hairStyle color="24" name="hair12"/>
+            <beard color="24" name="fullBeard_head02"/>
+            </playerStyle>
+        </helper>
+
+---
+
 ## 🎮 Controls
 
 | Action       | Keybinding (default) | Description                      |

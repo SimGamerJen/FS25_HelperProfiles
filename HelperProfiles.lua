@@ -1,123 +1,75 @@
--- HelperProfiles.lua
+-- HelperProfiles.lua (FS25_HelperProfiles) – safe hook version
+-- Semicolon cycles helpers (registered via RegisterPlayerActionEvents.lua).
+-- When you press H, we prefer your selected free helper. No table/appearance edits.
 
 HelperProfiles = {}
-HelperProfiles.profiles = {}
-HelperProfiles.currentHelperIdx = 1
-HelperProfiles.overlayText = ""
-HelperProfiles.overlayTime = 0
-HelperProfiles.xmlFile = nil
-HelperProfiles.actionEventId = nil
+HelperProfiles.selectedIdx   = 1
+HelperProfiles.overlayText   = ""
+HelperProfiles.overlayTime   = 0
+HelperProfiles._hooksDone    = false
 
-function HelperProfiles:loadProfiles()
-    local settingsDir = getUserProfileAppPath()
-    local path = Utils.getFilename("modSettings/HelperProfiles/maps_helpers.xml", settingsDir)
-    self.xmlFile = loadXMLFile("CustomHelpers", path)
-    self.profiles = {}
-    if not self.xmlFile then
-        print("[FS25_HelperProfiles] ERROR: Could not load custom helpers file at: " .. tostring(path))
-        return
-    end
+-- originals (filled when we hook)
+HelperProfiles._orig_getNext   = nil
+HelperProfiles._orig_getFree   = nil
+HelperProfiles._orig_getRandom = nil
+HelperProfiles._orig_hire      = nil
 
-    local i = 0
-    while true do
-        local base = string.format("map.helpers.helper(%d)", i)
-        local name = getXMLString(self.xmlFile, base.."#name")
-        if not name or name == "" then break end
-
-        -- Get helper color as a string
-        local colorStr = getXMLString(self.xmlFile, base.."#color")
-
-        -- Parse <playerStyle>
-        local stylePath = base..".playerStyle"
-        local playerStyle = { filename = getXMLString(self.xmlFile, stylePath.."#filename") or "" }
-
-        -- For each possible child element of <playerStyle>
-        local styleFields = {"bottom", "face", "top", "footwear", "hairStyle", "beard", "onepiece", "headgear"}
-        for _, field in ipairs(styleFields) do
-            local fieldPath = stylePath.."."..field.."(0)"
-            local valName = getXMLString(self.xmlFile, fieldPath.."#name")
-            local valColor = getXMLInt(self.xmlFile, fieldPath.."#color")
-            if valName and valName ~= "" then
-                playerStyle[field] = { name = valName }
-                if valColor then playerStyle[field].color = valColor end
-            end
+----------------------------------------------------------------------
+-- Helper list (read-only from engine; keeps avatars intact)
+----------------------------------------------------------------------
+function HelperProfiles:getProfiles()
+    local list = {}
+    if g_helperManager and g_helperManager.availableHelpers then
+        for _, h in ipairs(g_helperManager.availableHelpers) do
+            table.insert(list, h)
         end
-
-        table.insert(self.profiles, {
-            name = name,
-            color = colorStr,
-            playerStyle = playerStyle
-        })
-
-        i = i + 1
     end
-    self.currentHelperIdx = 1
-    print("[FS25_HelperProfiles] Loaded custom helpers: " .. table.concat(
-        (function() local t={} for _,v in ipairs(self.profiles) do t[#t+1]=v.name end return t end)(), ", "))
+    return list
 end
 
-function HelperProfiles:rebuildHelperList()
-    if not self.profiles or not g_helperManager then
-        print("[FS25_HelperProfiles] No profiles or helper manager found!")
-        return
-    end
-
-    g_helperManager.helpers = {}
-    g_helperManager.nameToIndex = {}
-    g_helperManager.indexToHelper = {}
-    g_helperManager.availableHelpers = {}
-    g_helperManager.numHelpers = 0
-
-    for i, profile in ipairs(self.profiles) do
-        local name = profile.name
-        g_helperManager.numHelpers = g_helperManager.numHelpers + 1
-        local entry = {
-            name = name,
-            title = name,
-            index = g_helperManager.numHelpers,
-            color = {1,1,1},
-            playerStyle = profile.playerStyle or {}
-        }
-        g_helperManager.helpers[name] = entry
-        g_helperManager.nameToIndex[name] = g_helperManager.numHelpers
-        g_helperManager.indexToHelper[g_helperManager.numHelpers] = entry
-        table.insert(g_helperManager.availableHelpers, entry)
-    end
-
-    -- Make sure the game knows the max number of helpers
-    if g_currentMission then
-        g_currentMission.maxNumHirables = g_helperManager.numHelpers
-    end
-
-    print(string.format("[FS25_HelperProfiles] Total helpers loaded: %d", g_helperManager.numHelpers))
+local function clamp(v, lo, hi)
+    if v < lo then return lo end
+    if v > hi then return hi end
+    return v
 end
 
--- Debug utility: print full g_helperManager state
-function HelperProfiles:printHelperManagerState(header)
-    print("\n========== "..(header or "Helper Manager State").." ==========")
-    if DebugUtil and DebugUtil.printTableRecursively then
-        print("g_helperManager:")
-        DebugUtil.printTableRecursively(g_helperManager, "--", 0, 0)
-        print("helpers:")
-        DebugUtil.printTableRecursively(g_helperManager.helpers, "--", 0, 1)
-        print("availableHelpers:")
-        DebugUtil.printTableRecursively(g_helperManager.availableHelpers, "--", 0, 1)
-    else
-        print("DebugUtil not found! Make sure it's loaded by FS25.")
-    end
+function HelperProfiles:ensureValidSelection()
+    local profiles = self:getProfiles()
+    if #profiles == 0 then self.selectedIdx = 1; return end
+    self.selectedIdx = clamp(self.selectedIdx or 1, 1, #profiles)
 end
 
-function HelperProfiles:onCycleHelper(actionName, inputValue, callbackState, eventUsed)
-    if #self.profiles == 0 then return end
-    self.currentHelperIdx = self.currentHelperIdx + 1
-    if self.currentHelperIdx > #self.profiles then self.currentHelperIdx = 1 end
-    local p = self.profiles[self.currentHelperIdx]
-    print("[FS25_HelperProfiles] Selected helper: " .. p.name)
-    self.overlayText = "Active Helper: " .. p.name
-    self.overlayTime = 2.5
-	
-    -- Print debug info after cycling
-    self:printHelperManagerState("After Cycling Helper")
+local function isFree(h)
+    return h ~= nil and h.inUse ~= true
+end
+
+-- pick our preferred helper (selected if free; else next free; else nil)
+function HelperProfiles:pickPreferredFreeHelper()
+    local profiles = self:getProfiles()
+    if #profiles == 0 then return nil, "none-available" end
+
+    self:ensureValidSelection()
+
+    local sel = profiles[self.selectedIdx]
+    if isFree(sel) then
+        return sel, "selected"
+    end
+    for i = 1, #profiles - 1 do
+        local idx = ((self.selectedIdx - 1 + i) % #profiles) + 1
+        local h = profiles[idx]
+        if isFree(h) then
+            return h, "fallback"
+        end
+    end
+    return nil, "none-free"
+end
+
+----------------------------------------------------------------------
+-- HUD overlay
+----------------------------------------------------------------------
+function HelperProfiles:_flash(text, secs)
+    self.overlayText = text or ""
+    self.overlayTime = secs or 2.0
 end
 
 function HelperProfiles:draw()
@@ -130,15 +82,112 @@ function HelperProfiles:draw()
     end
 end
 
-function HelperProfiles:loadMap(mapName)
-    self:loadProfiles()
-    self:rebuildHelperList()
+----------------------------------------------------------------------
+-- Action handler (semicolon), called from RegisterPlayerActionEvents.lua
+----------------------------------------------------------------------
+function HelperProfiles:onCycleAction(actionName, keyStatus)
+    if keyStatus ~= 1 then return end
+
+    local profiles = self:getProfiles()
+    if #profiles == 0 then
+        self:_flash("No helpers available", 1.2)
+        return
+    end
+
+    self:ensureValidSelection()
+    self.selectedIdx = (self.selectedIdx % #profiles) + 1
+    local sel = profiles[self.selectedIdx]
+    local label = sel and sel.name or "?"
+    self:_flash(("Helper: %s (%d/%d)"):format(label, self.selectedIdx, #profiles), 1.2)
+    print(("[FS25_HelperProfiles] Selected helper: %s"):format(label))
+end
+
+----------------------------------------------------------------------
+-- Safe hooking (no Utils.overwrittenFunction)
+----------------------------------------------------------------------
+local function hookOnce()
+    if HelperProfiles._hooksDone then return end
+    if not g_helperManager or not HelperManager then return end
+
+    -- getNextHelper
+    if HelperManager.getNextHelper and not HelperProfiles._orig_getNext then
+        HelperProfiles._orig_getNext = HelperManager.getNextHelper
+        HelperManager.getNextHelper = function(self, ...)
+            local h, why = HelperProfiles:pickPreferredFreeHelper()
+            if h then
+                print(("[FS25_HelperProfiles] getNextHelper -> '%s' (%s)"):format(tostring(h.name), why))
+                return h
+            end
+            return HelperProfiles._orig_getNext(self, ...)
+        end
+        print("[FS25_HelperProfiles] Hooked HelperManager.getNextHelper")
+    end
+
+    -- getFreeHelper
+    if HelperManager.getFreeHelper and not HelperProfiles._orig_getFree then
+        HelperProfiles._orig_getFree = HelperManager.getFreeHelper
+        HelperManager.getFreeHelper = function(self, ...)
+            local h, why = HelperProfiles:pickPreferredFreeHelper()
+            if h then
+                print(("[FS25_HelperProfiles] getFreeHelper -> '%s' (%s)"):format(tostring(h.name), why))
+                return h
+            end
+            return HelperProfiles._orig_getFree(self, ...)
+        end
+        print("[FS25_HelperProfiles] Hooked HelperManager.getFreeHelper")
+    end
+
+    -- getRandomHelper
+    if HelperManager.getRandomHelper and not HelperProfiles._orig_getRandom then
+        HelperProfiles._orig_getRandom = HelperManager.getRandomHelper
+        HelperManager.getRandomHelper = function(self, ...)
+            local h, why = HelperProfiles:pickPreferredFreeHelper()
+            if h then
+                print(("[FS25_HelperProfiles] getRandomHelper -> '%s' (%s)"):format(tostring(h.name), why))
+                return h
+            end
+            return HelperProfiles._orig_getRandom(self, ...)
+        end
+        print("[FS25_HelperProfiles] Hooked HelperManager.getRandomHelper")
+    end
+
+    -- hireHelper (for logging/visibility)
+    if HelperManager.hireHelper and not HelperProfiles._orig_hire then
+        HelperProfiles._orig_hire = HelperManager.hireHelper
+        HelperManager.hireHelper = function(self, vehicle, ...)
+            local res = HelperProfiles._orig_hire(self, vehicle, ...)
+            local idx = nil
+            if vehicle and vehicle.getAIHelperIndex then
+                idx = vehicle:getAIHelperIndex()
+            end
+            if idx and g_helperManager and g_helperManager.indexToHelper then
+                local h = g_helperManager.indexToHelper[idx]
+                if h then
+                    print(("[FS25_HelperProfiles] hireHelper -> vehicle got '%s' (idx %d)"):format(tostring(h.name), idx))
+                end
+            end
+            return res
+        end
+        print("[FS25_HelperProfiles] Hooked HelperManager.hireHelper")
+    end
+
+    HelperProfiles._hooksDone = (HelperProfiles._orig_getNext or HelperProfiles._orig_getFree or HelperProfiles._orig_getRandom) ~= nil
+end
+
+----------------------------------------------------------------------
+-- FS lifecycle
+----------------------------------------------------------------------
+function HelperProfiles:loadMap()
+    self.selectedIdx = 1
+    self:_flash("Press ; to cycle helper", 3.0)
+    -- Attempt to hook now; if too early, update() will retry
+    hookOnce()
 end
 
 function HelperProfiles:update(dt)
-    if g_currentMission and g_helperManager and g_currentMission.maxNumHirables ~= g_helperManager.numHelpers then
-        g_currentMission.maxNumHirables = g_helperManager.numHelpers
+    if not HelperProfiles._hooksDone then
+        hookOnce()
     end
 end
 
-addModEventListener(HelperProfiles)
+addModEventListener(HelperProfiles)  -- includes draw()

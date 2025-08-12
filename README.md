@@ -42,13 +42,11 @@ To use custom names, appearances, or more helpers than the basegame provides, yo
 
 ---
 
-📖 Usage
+## 📖 Usage
 
-    The Cycle Helper action will only present workers that are currently available (not already hired or busy).
-
-    If no helpers are free when you cycle, the HUD will show “No helpers available.”
-
-    When hiring a worker with H, the game will use the currently selected free helper, if one is available; otherwise, it will fall back to the game’s standard selection logic.
+1. The Cycle Helper action will only present workers that are currently available (not already hired or busy).
+2. If no helpers are free when you cycle, the HUD will show “No helpers available.”
+3. When hiring a worker with H, the game will use the currently selected free helper, if one is available; otherwise, it will fall back to the game’s standard selection logic.
 
 ---
 

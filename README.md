@@ -1,63 +1,76 @@
-# FS25_HelperProfiles
-
-**FS25 Helper Customization Mod**
-
-**Overview:**
-A mod for Farming Simulator 25 that enhances and expands the in-game helpers system, giving players deep customization over helper appearance, behavior, and task assignments.
+Got it — here’s your updated **README.md** section with that clarification added:
 
 ---
 
-## 1. Objectives
+# FS25 Helper Profiles
 
-* Enable persistent helper names loaded from XML profiles
-* (Later) support appearance and other profile settings
-* Integrate with Courseplay and AutoDrive for seamless profile-driven helper behavior
+**Farming Simulator 25 mod** that lets you cycle between available AI helpers and automatically hire your preferred one when pressing `H`.
 
-## 2. Target Audience
-
-* Farming Simulator players seeking more control over AI helpers
-* Modders wanting a flexible framework to extend
-* Server operators looking for enhanced multiplayer helper management
-
-## 3. MVP Features
-
-1. **Appearance Customization**
-
-   * Upload or select from preset skins
-   * Color picker for outfits and vehicles
-2. **Behavior Profiles**
-
-   * Predefined helper personality templates (e.g., "Efficient", "Careful", "Speedy")
-   * Adjustable settings: field plowing speed, pathing tolerance, resource usage
-3. **Task Scheduler UI**
-
-   * In-game menu to queue tasks by helper
-   * Calendar view for multi-day operations
-4. **Mod Configuration File**
-
-   * XML/JSON file for advanced per-helper settings outside UI
-
-## 4. Architecture & Tech Stack
-
-* **Language:** Lua (Giants Engine scripting)
-* **Assets:** XML definitions, DDS textures for skins
-* **UI:** In-game GUI via Farming Simulator's HUD API
-* **Build Tools:** Giants Editor, GIANTS Engine SDK
-* **Version Control:** GitHub repository
-
-## 5. Development Roadmap
-
-* **Phase 1 (2 weeks):** Core helper behavior hooks + basic UI stub
-* **Phase 2 (3 weeks):** Appearance customization flow + texture loader
-* **Phase 3 (2 weeks):** Task scheduler implementation & calendar UI
-* **Phase 4 (1 week):** Testing, compatibility checks, documentation
-
-## 6. Next Steps
-
-* Confirm core feature set and any additional requirements
-* Set up GitHub repo and project board
-* Allocate tasks and define coding standards
+![Mod Icon](helper_profiles.png)
 
 ---
 
-*Feel free to suggest edits or add more details!*
+## ✨ Features
+
+* **Cycle Helpers:** Press `;` (semicolon) to cycle through all available AI helpers, on foot or in a vehicle.
+* **Preferred Hiring:** When you hire a worker, the mod picks your currently selected free helper first.
+* **Basegame Compatibility:** Reads helper data directly from the game’s **`map_helpers.xml`** file — no custom helper definitions included.
+* **HUD Feedback:** Displays the selected helper’s name briefly at the top of the screen when cycling.
+
+---
+
+## 🧑‍🌾 Customising AI Workers
+
+This mod **does not** currently add new helpers itself.
+To use custom names, appearances, or more helpers than the basegame provides, you must edit the `maps_helpers.xml` file:
+
+1. Locate the XML file in your FS25 installation, i.e., "C:\Program Files (x86)\Farming Simulator 2025\data\maps".
+2. Make a copy of the base maps_helpers.xml
+3. Open `maps_helpers.xml` in a text editor.
+4. Add or modify `<helper>` entries as desired.
+5. Save the file and restart the game.
+
+> ⚠️ **Note:** Always back up the original `map_helpers.xml` before editing. Customisations will apply to all saves using that map.
+
+---
+
+## 🎮 Controls
+
+| Action       | Keybinding (default) | Description                      |
+| ------------ | -------------------- | -------------------------------- |
+| Cycle Helper | `;`                  | Cycle through available helpers. |
+
+---
+
+## ⚙️ Installation
+
+1. Download the latest release `.zip` from the [Releases](../../releases) page.
+2. Place the `.zip` file into your `Documents/My Games/FarmingSimulator2025/mods` folder.
+3. Enable **Helper Profiles** in the in-game Mod Manager.
+
+---
+
+## 🛠 Compatibility
+
+* Tested with **Farming Simulator 25** base game helpers.
+* Designed to be compatible with **AutoDrive** and **Courseplay** (preferred helper logic applies before those mods take over control).
+* Works in **single-player** and **multiplayer** sessions.
+
+---
+
+## 📜 Changelog
+
+**v1.0.0**
+
+* Initial release: Helper cycling, preferred helper hire, HUD feedback.
+
+---
+
+## 📄 License
+
+This mod is released under the [MIT License](LICENSE).
+You are free to use, modify, and distribute it, but attribution is appreciated.
+
+---
+
+Do you want me to also include a **sample `map_helpers.xml` snippet** in the README so users can see exactly how to add custom workers without breaking the game? That could prevent a lot of support questions.

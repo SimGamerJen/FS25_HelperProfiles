@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8" standalone="no"?>
 <modDesc descVersion="99">
-    <author>YourName</author>
+    <author>SimGamerJen</author>
     <version>1.0.0.0</version>
     <title>
         <en>Helper Profiles</en>
@@ -35,5 +35,6 @@
   <sourceFile filename="HelperProfiles.lua"/>
   <sourceFile filename="RegisterPlayerActionEvents.lua"/>
 </extraSourceFiles>
+
 
 </modDesc>

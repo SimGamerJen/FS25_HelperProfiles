@@ -1,32 +1,90 @@
-# FS25 Helper Profiles
+# Helper Profiles (FS25\_HelperProfiles)
 
-**Farming Simulator 25 mod** that lets you cycle between available AI helpers and automatically hire your preferred one when pressing `H`.
+**Version:** `1.0.0.1` · **Game:** Farming Simulator 25 · **Multiplayer:** Supported
 
-![Mod Icon](helper_profiles.png)
+A lightweight, safe-hook helper selector for FS25. It lets you **cycle which AI helper will be hired next** and gently overrides the base game so that when you hire a helper, the game **prefers your selected free helper**.
 
----
-
-## ✨ Features
-
-* **Cycle Helpers:** Press `;` (semicolon) to cycle through all available AI helpers, on foot or in a vehicle.
-* **Preferred Hiring:** When you hire a worker, the mod picks your currently selected free helper first.
-* **Basegame Compatibility:** Reads helper data directly from the game’s **`map_helpers.xml`** file — no custom helper definitions included.
-* **HUD Feedback:** Displays the selected helper’s name briefly at the top of the screen when cycling.
+> This build focuses on the *safe, minimal* workflow: cycle → hire. Persistent names/appearances and deeper profile features are planned but not enabled yet.
 
 ---
 
-## 🧑‍🌾 Customising AI Workers
+## ✨ What it does (today)
 
-This mod **does not** currently add new helpers itself.
-To use custom names, appearances, or more helpers than the basegame provides, you must edit the `maps_helpers.xml` file:
+* Adds a **Cycle Helper** action (default: **semicolon `;`**) that cycles through available AI helpers.
+* When you hire (**H** by default), the mod tries to assign **your selected free helper**. If they’re busy, it falls back to the **next free** one; if none are free, it lets the game pick.
+* Works **on foot and in vehicles**; registers the action in both contexts.
+* Shows a small HUD toast (top area) like `Helper: Alex (3/12)` while cycling.
+* Writes helpful log lines (see below) so you can verify it’s hooked correctly.
 
-1. Locate the XML file in your FS25 installation, i.e., "C:\Program Files (x86)\Farming Simulator 2025\data\maps".
-2. Make a copy of the base maps_helpers.xml
-3. Open `maps_helpers.xml` in a text editor.
-4. Add or modify `<helper>` entries as desired.
-5. Save the file and restart the game.
+> **Safety-first:** No edits to base XMLs, no hard overrides to helper tables, no appearance changes. Hooks are stored and original functions are called as fallbacks.
 
-> ⚠️ **Note:** Always back up the original `map_helpers.xml` before editing. Customisations will apply to all saves using that map.
+---
+
+## 🕹️ Controls
+
+| Action       | Default         | Rebind In-Game                                                  |
+| ------------ | --------------- | --------------------------------------------------------------- |
+| Cycle Helper | `semicolon (;)` | *Options → Controls* (look for **Cycle Helper** under this mod) |
+
+The underlying input is `OPEN_HELPER_MENU`; the on-screen label is **Cycle Helper**.
+
+---
+
+## 🔧 Installation
+
+1. Drop `FS25_HelperProfiles.zip` into your FS25 `mods` folder.
+2. Enable **Helper Profiles** on your savegame.
+3. Load your map. You should see a brief toast: *“Press ; to cycle helper”*.
+4. Press `;` to cycle; press `H` to hire. Watch the log to confirm the hook (optional).
+
+**Folder layout inside the ZIP:**
+
+```
+helperprofiles.dds
+helper_profiles.dds
+modDesc.xml
+Overview.txt
+Profile_Settings.md
+maps_helpers.xml
+scripts/
+scripts/HelperProfiles.lua
+scripts/RegisterPlayerActionEvents.lua
+```
+
+---
+
+## 🧠 How it works (under the hood)
+
+On first load, the mod safely wraps several `HelperManager` methods and remembers the originals:
+
+* `getNextHelper` → prefers your selected free helper
+* `getFreeHelper`
+* `getRandomHelper`
+* `hireHelper` → logs which helper the vehicle received
+
+If your selected helper is busy, it checks the rest of the list for the next free one. If none are free, it defers to the original function.
+
+The cycle key is registered in both player and vehicle contexts so the control always works.
+
+---
+
+## 🧾 Expected log lines (for troubleshooting)
+
+You’ll see lines like these in `log.txt` when the mod hooks correctly:
+
+```
+[FS25_HelperProfiles] ✅ Registered OPEN_HELPER_MENU in context _playerActionEventId
+[FS25_HelperProfiles] ✅ Registered OPEN_HELPER_MENU in context _vehicleActionEventId
+[FS25_HelperProfiles] Hooked HelperManager.getNextHelper
+[FS25_HelperProfiles] Hooked HelperManager.getFreeHelper
+[FS25_HelperProfiles] Hooked HelperManager.getRandomHelper
+[FS25_HelperProfiles] Hooked HelperManager.hireHelper
+[FS25_HelperProfiles] Selected helper: Alex
+[FS25_HelperProfiles] getNextHelper -> 'Alex' (selected)
+[FS25_HelperProfiles] hireHelper -> vehicle got 'Alex' (idx 5)
+```
+
+If you don’t see the “Hooked …” lines, ensure the mod is enabled, that you don’t have duplicate ZIPs/folders, and check for conflicts (see below).
 
 ---
 
@@ -67,51 +125,69 @@ To use custom names, appearances, or more helpers than the basegame provides, yo
 
 ---
 
-## 🎮 Controls
+## 🔄 Compatibility notes
 
-| Action       | Keybinding (default) | Description                      |
-| ------------ | -------------------- | -------------------------------- |
-| Cycle Helper | `;`                  | Cycle through available helpers. |
-
----
-
-## 📖 Usage
-
-1. The Cycle Helper action will only present workers that are currently available (not already hired or busy).
-2. If no helpers are free when you cycle, the HUD will show “No helpers available.”
-3. When hiring a worker with H, the game will use the currently selected free helper, if one is available; otherwise, it will fall back to the game’s standard selection logic.
+* Designed to be **non-destructive** and play nicely with other mods.
+* If another mod *directly replaces* `HelperManager` methods, the **last mod to hook** usually wins. In that case, helper preference logic may not run.
+* Should be fine alongside Courseplay/AutoDrive; there are no hard dependencies and this mod only biases which helper is chosen.
 
 ---
 
-## ⚙️ Installation
+## 🛣️ Roadmap
 
-1. Download the latest release `.zip` from the [Releases](../../releases) page.
-2. Place the `.zip` file into your `Documents/My Games/FarmingSimulator2025/mods` folder.
-3. Enable **Helper Profiles** in the in-game Mod Manager.
+* **Persistent Profiles**: names, avatars/appearances, and per-helper preferences.
+* **Config file** under `modSettings/FS25_HelperProfiles` (e.g., `helpers.xml`).
+* Optional integration points for **Courseplay** and **AutoDrive**.
+* Small in-game **picker UI** for faster selection.
 
----
-
-## 🛠 Compatibility
-
-* Tested with **Farming Simulator 25** base game helpers.
-* Designed to be compatible with **AutoDrive** and **Courseplay** (preferred helper logic applies before those mods take over control).
-* Works in **single-player** and **multiplayer** sessions.
+See `Profile_Settings.md` in this repository for the appearance options draft (not active in this build).
 
 ---
 
-## 📜 Changelog
+## ❓FAQ
 
-**v1.0.0**
+**Q: Can I change the hotkey?**
+Yes — *Options → Controls* and search for **Cycle Helper**.
 
-* Initial release: Helper cycling, preferred helper hire, HUD feedback.
+**Q: Does this change helper wages or behaviour?**
+No. It only influences **which** helper is chosen at hire time.
 
----
-
-## 📄 License
-
-This mod is released under the [MIT License](LICENSE).
-You are free to use, modify, and distribute it, but attribution is appreciated.
+**Q: Does it edit my savegame or the base game?**
+No. It’s runtime-only hooks and toasts; remove the mod and the behaviour reverts.
 
 ---
 
-Do you want me to also include a **sample `map_helpers.xml` snippet** in the README so users can see exactly how to add custom workers without breaking the game? That could prevent a lot of support questions.
+## 🧩 Contributing
+
+Issues and PRs welcome! If you’re reporting a bug, please include:
+
+* FS25 version, mod version (`1.0.0.1`)
+* A copy/paste of the relevant `log.txt` section (look for `[FS25_HelperProfiles]` lines)
+* A list of other helper/AI mods you’re using
+
+---
+
+## 📜 License & Credits
+
+* **Author:** SimGamerJen (HelperProfiles project)
+* **License:** See repository `LICENSE` (TBD). If omitted, assume all rights reserved.
+* Thanks to the FS modding community for input and testing.
+
+---
+
+## 🧱 Repository layout
+
+```
+/FS25_HelperProfiles
+├── modDesc.xml
+├── scripts/
+│   ├── HelperProfiles.lua
+│   └── RegisterPlayerActionEvents.lua
+├── helperprofiles.dds
+├── helper_profiles.dds
+├── Profile_Settings.md         ← appearance legend (draft; not yet active)
+|── Overview.txt                ← planning notes
+└── maps_helpers.xml			← example custom maps_helpers.xml file
+```
+
+---

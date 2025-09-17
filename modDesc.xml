@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" standalone="no"?>
 <modDesc descVersion="99">
-    <author>SimGamerJen</author>
-    <version>1.0.0.0</version>
+    <author>YourName</author>
+    <version>1.0.0.1</version>
     <title>
         <en>Helper Profiles</en>
     </title>
@@ -13,7 +13,7 @@
     </description>
     <multiplayer supported="true"/>
 
-	<iconFilename>helper_profiles.dds</iconFilename>
+	<iconFilename>helperprofiles.dds</iconFilename>
 
 <actions>
   <action name="OPEN_HELPER_MENU" category="SYSTEM"/>
@@ -32,9 +32,8 @@
 </l10n>
 
 <extraSourceFiles>
-  <sourceFile filename="HelperProfiles.lua"/>
-  <sourceFile filename="RegisterPlayerActionEvents.lua"/>
+  <sourceFile filename="scripts/HelperProfiles.lua"/>
+  <sourceFile filename="scripts/RegisterPlayerActionEvents.lua"/>
 </extraSourceFiles>
-
 
 </modDesc>

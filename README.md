@@ -2,6 +2,8 @@
 
 An FS25-styled on-screen overlay for HelperProfiles that shows **activated workers**, your **current selection**, and the **next helper** the game will hire. Includes a robust **console/debug** layer, a **keybind** for toggling, optional **HUD binding** (hides with base HUD / HideHUD mods), and a persistent **config.xml** in `modSettings/FS25_HelperProfiles`.
 
+![new_overlay1](https://github.com/user-attachments/assets/6d1c2285-44e2-4e3f-bc2e-218013ad2109)
+![new_overlay2](https://github.com/user-attachments/assets/11fa87b0-c210-47f1-92b3-1927a2c17e6c)
 
 
 ---

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" standalone="no"?>
 <modDesc descVersion="99">
     <author>YourName</author>
-    <version>1.0.0.1</version>
+    <version>1.1.0.0</version>
     <title>
         <en>Helper Profiles</en>
     </title>
@@ -17,6 +17,7 @@
 
 <actions>
   <action name="OPEN_HELPER_MENU" category="SYSTEM"/>
+  <action name="HP_TOGGLE_OVERLAY" category="MISC"/>
 </actions>
 
 <inputBinding>
@@ -29,9 +30,15 @@
   <text name="input_OPEN_HELPER_MENU">
     <en>Cycle Helper</en>
   </text>
+  <text name="input_HP_TOGGLE_OVERLAY">
+    <en>Toggle Overlay</en>
+  </text>
 </l10n>
 
 <extraSourceFiles>
+  <sourceFile filename="scripts/HP_Config.lua"/>
+  <sourceFile filename="scripts/HP_UI.lua"/>
+  <sourceFile filename="scripts/HP_Debug.lua"/>
   <sourceFile filename="scripts/HelperProfiles.lua"/>
   <sourceFile filename="scripts/RegisterPlayerActionEvents.lua"/>
 </extraSourceFiles>

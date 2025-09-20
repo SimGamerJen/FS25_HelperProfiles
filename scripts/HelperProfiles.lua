@@ -1,12 +1,13 @@
--- HelperProfiles.lua (FS25_HelperProfiles) – safe hook version
--- Semicolon cycles helpers (registered via RegisterPlayerActionEvents.lua).
--- When you press H, we prefer your selected free helper. No table/appearance edits.
+-- HelperProfiles.lua (FS25_HelperProfiles) – debounced cycle + UI bridge
+-- Semicolon/H binding cycles helpers; PN-style overlay handled by HP_UI.
 
 HelperProfiles = {}
-HelperProfiles.selectedIdx   = 1
-HelperProfiles.overlayText   = ""
-HelperProfiles.overlayTime   = 0
-HelperProfiles._hooksDone    = false
+
+-- Selection & runtime
+HelperProfiles.selectedIdx       = 1
+HelperProfiles._hooksDone        = false
+HelperProfiles._lastCycleTs      = 0
+HelperProfiles._cycleDebounceMs  = 180   -- tweak via: hpOverlay debounce <ms>
 
 -- originals (filled when we hook)
 HelperProfiles._orig_getNext   = nil
@@ -39,6 +40,10 @@ function HelperProfiles:ensureValidSelection()
     self.selectedIdx = clamp(self.selectedIdx or 1, 1, #profiles)
 end
 
+function HelperProfiles:getSelectionIndex()
+    return self.selectedIdx or 1
+end
+
 local function isFree(h)
     return h ~= nil and h.inUse ~= true
 end
@@ -64,42 +69,56 @@ function HelperProfiles:pickPreferredFreeHelper()
     return nil, "none-free"
 end
 
-----------------------------------------------------------------------
--- HUD overlay
-----------------------------------------------------------------------
 function HelperProfiles:_flash(text, secs)
-    self.overlayText = text or ""
-    self.overlayTime = secs or 2.0
-end
-
-function HelperProfiles:draw()
-    if self.overlayTime and self.overlayTime > 0 then
-        setTextBold(true)
-        setTextColor(1, 1, 1, 1)
-        renderText(0.45, 0.92, 0.03, self.overlayText)
-        setTextBold(false)
-        self.overlayTime = self.overlayTime - (g_currentDt or 16) / 1000
+    -- UI bridge (HP_UI owns all rendering)
+    if HP_UI and HP_UI.flash then
+        HP_UI:flash(text, secs)
     end
 end
 
-----------------------------------------------------------------------
--- Action handler (semicolon), called from RegisterPlayerActionEvents.lua
-----------------------------------------------------------------------
-function HelperProfiles:onCycleAction(actionName, keyStatus)
-    if keyStatus ~= 1 then return end
-
+function HelperProfiles:setSelection(idx)
     local profiles = self:getProfiles()
-    if #profiles == 0 then
-        self:_flash("No helpers available", 1.2)
-        return
-    end
+    if #profiles == 0 then return end
+    idx = math.floor(math.max(1, math.min(idx or 1, #profiles)))
+    self.selectedIdx = idx
 
-    self:ensureValidSelection()
-    self.selectedIdx = (self.selectedIdx % #profiles) + 1
     local sel = profiles[self.selectedIdx]
-    local label = sel and sel.name or "?"
+    local label = sel and sel.name or ("Helper "..self.selectedIdx)
     self:_flash(("Helper: %s (%d/%d)"):format(label, self.selectedIdx, #profiles), 1.2)
     print(("[FS25_HelperProfiles] Selected helper: %s"):format(label))
+end
+
+function HelperProfiles:cycleSelection(delta)
+    delta = delta or 1
+    local profiles = self:getProfiles()
+    if #profiles == 0 then return end
+    self:ensureValidSelection()
+    local newIdx = ((self.selectedIdx - 1 + delta) % #profiles) + 1
+    self:setSelection(newIdx)
+end
+
+local function _nowMs()
+    -- FS provides g_time (ms since game start)
+    return (g_time or 0)
+end
+
+function HelperProfiles:cycleSelectionDebounced(delta)
+    local now = _nowMs()
+    local last = self._lastCycleTs or 0
+    if (now - last) < (self._cycleDebounceMs or 150) then
+        return
+    end
+    self._lastCycleTs = now
+    self:cycleSelection(delta or 1)
+end
+
+----------------------------------------------------------------------
+-- Action handler (semicolon/H), called from RegisterPlayerActionEvents.lua
+----------------------------------------------------------------------
+-- Expecting FS25 style callback with key status (1 on press).
+function HelperProfiles:onCycleAction(actionName, keyStatus)
+    if keyStatus ~= 1 then return end  -- press only
+    self:cycleSelectionDebounced(1)
 end
 
 ----------------------------------------------------------------------
@@ -177,17 +196,10 @@ end
 ----------------------------------------------------------------------
 -- FS lifecycle
 ----------------------------------------------------------------------
-function HelperProfiles:loadMap()
-    self.selectedIdx = 1
-    self:_flash("Press ; to cycle helper", 3.0)
-    -- Attempt to hook now; if too early, update() will retry
-    hookOnce()
-end
-
 function HelperProfiles:update(dt)
     if not HelperProfiles._hooksDone then
         hookOnce()
     end
 end
 
-addModEventListener(HelperProfiles)  -- includes draw()
+addModEventListener(HelperProfiles)

@@ -1,193 +1,134 @@
-# Helper Profiles (FS25\_HelperProfiles)
+# FS25 HelperProfiles — Overlay & Debug
 
-**Version:** `1.0.0.1` · **Game:** Farming Simulator 25 · **Multiplayer:** Supported
+An FS25-styled on-screen overlay for HelperProfiles that shows **activated workers**, your **current selection**, and the **next helper** the game will hire. Includes a robust **console/debug** layer, a **keybind** for toggling, optional **HUD binding** (hides with base HUD / HideHUD mods), and a persistent **config.xml** in `modSettings/FS25_HelperProfiles`.
 
-A lightweight, safe-hook helper selector for FS25. It lets you **cycle which AI helper will be hired next** and gently overrides the base game so that when you hire a helper, the game **prefers your selected free helper**.
 
-> This build focuses on the *safe, minimal* workflow: cycle → hire. Persistent names/appearances and deeper profile features are planned but not enabled yet.
 
 ---
 
-## ✨ What it does (today)
+## Installation
 
-* Adds a **Cycle Helper** action (default: **semicolon `;`**) that cycles through available AI helpers.
-* When you hire (**H** by default), the mod tries to assign **your selected free helper**. If they’re busy, it falls back to the **next free** one; if none are free, it lets the game pick.
-* Works **on foot and in vehicles**; registers the action in both contexts.
-* Shows a small HUD toast (top area) like `Helper: Alex (3/12)` while cycling.
-* Writes helpful log lines (see below) so you can verify it’s hooked correctly.
-
-> **Safety-first:** No edits to base XMLs, no hard overrides to helper tables, no appearance changes. Hooks are stored and original functions are called as fallbacks.
-
----
-
-## 🕹️ Controls
-
-| Action       | Default         | Rebind In-Game                                                  |
-| ------------ | --------------- | --------------------------------------------------------------- |
-| Cycle Helper | `semicolon (;)` | *Options → Controls* (look for **Cycle Helper** under this mod) |
-
-The underlying input is `OPEN_HELPER_MENU`; the on-screen label is **Cycle Helper**.
-
----
-
-## 🔧 Installation
-
-1. Drop `FS25_HelperProfiles.zip` into your FS25 `mods` folder.
-2. Enable **Helper Profiles** on your savegame.
-3. Load your map. You should see a brief toast: *“Press ; to cycle helper”*.
-4. Press `;` to cycle; press `H` to hire. Watch the log to confirm the hook (optional).
-
-**Folder layout inside the ZIP:**
+1. Download `FS25_HelperProfiles.zip`.
+2. Drop it into your FS25 mods folder (no unpacking):
 
 ```
-helperprofiles.dds
-helper_profiles.dds
-modDesc.xml
-Overview.txt
-Profile_Settings.md
-maps_helpers.xml
-scripts/
-scripts/HelperProfiles.lua
-scripts/RegisterPlayerActionEvents.lua
+Documents/My Games/FarmingSimulator2025/mods
 ```
 
----
+3. Launch the game → **ModHub → Installed** → enable **FS25 HelperProfiles**.
 
-## 🧠 How it works (under the hood)
-
-On first load, the mod safely wraps several `HelperManager` methods and remembers the originals:
-
-* `getNextHelper` → prefers your selected free helper
-* `getFreeHelper`
-* `getRandomHelper`
-* `hireHelper` → logs which helper the vehicle received
-
-If your selected helper is busy, it checks the rest of the list for the next free one. If none are free, it defers to the original function.
-
-The cycle key is registered in both player and vehicle contexts so the control always works.
-
----
-
-## 🧾 Expected log lines (for troubleshooting)
-
-You’ll see lines like these in `log.txt` when the mod hooks correctly:
+That’s it. The mod will auto-create:
 
 ```
-[FS25_HelperProfiles] ✅ Registered OPEN_HELPER_MENU in context _playerActionEventId
-[FS25_HelperProfiles] ✅ Registered OPEN_HELPER_MENU in context _vehicleActionEventId
-[FS25_HelperProfiles] Hooked HelperManager.getNextHelper
-[FS25_HelperProfiles] Hooked HelperManager.getFreeHelper
-[FS25_HelperProfiles] Hooked HelperManager.getRandomHelper
-[FS25_HelperProfiles] Hooked HelperManager.hireHelper
-[FS25_HelperProfiles] Selected helper: Alex
-[FS25_HelperProfiles] getNextHelper -> 'Alex' (selected)
-[FS25_HelperProfiles] hireHelper -> vehicle got 'Alex' (idx 5)
+Documents/My Games/FarmingSimulator2025/modSettings/FS25_HelperProfiles/config.xml
 ```
 
-If you don’t see the “Hooked …” lines, ensure the mod is enabled, that you don’t have duplicate ZIPs/folders, and check for conflicts (see below).
+…after first run (when you use `save` or on initial defaults).
 
 ---
 
-## Example
+## Features
 
-        <helper name="Riley" color="1 0 0">
-            <playerStyle filename="dataS/character/playerM/playerM.xml">
-				<bottom color="5" name="jeans"/>
-				<face color="1" name="head01"/>
-				<top color="5" name="denimJacket"/>
-				<footwear color="1" name="workBoots2"/>
-				<hairStyle color="6" name="hair12"/>
-				<beard color="5" name="stubble_head01"/>
-            </playerStyle>
-        </helper>
-        <helper name="Jed" color="1 0 0">
-            <playerStyle filename="dataS/character/playerM/playerM.xml">
-            <bottom color="5" name="jeans"/>
-            <face color="1" name="head02"/>
-            <top color="3" name="leather"/>
-            <headgear color="5" name="cowboy"/>
-            <footwear color="1" name="riding"/>
-            <hairStyle color="23" name="hair09"/>
-            <beard color="23" name="stubble_head02"/>
-            </playerStyle>
-        </helper>
-        <helper name="Rick" color="0 1 0">
-            <playerStyle filename="dataS/character/playerM/playerM.xml">
-            <bottom color="8" name="cargo"/>
-            <face color="1" name="head02"/>
-            <top color="24" name="topPlaidShirt"/>
-            <glasses color="1" name="classic"/>
-            <footwear color="1" name="workBoots2"/>
-            <hairStyle color="24" name="hair12"/>
-            <beard color="24" name="fullBeard_head02"/>
-            </playerStyle>
-        </helper>
+* FS25-style overlay panel (position/size/spacing/opacity configurable).
+* Shows:
+
+  * **Selected** helper (`» sel`)
+  * **Next** helper the system would hire (`← next`)
+  * `FREE / IN USE` status per worker
+* Debounced cycling so selection advances cleanly.
+* Toggle overlay via **console** or **keybind**.
+* **Bind to base HUD** (optional) so it hides with HUD/HideHUD.
+* **External config** in `modSettings/FS25_HelperProfiles/config.xml` with `save`, `load`, and `reset`.
 
 ---
 
-## 🔄 Compatibility notes
+## Keybinds
 
-* Designed to be **non-destructive** and play nicely with other mods.
-* If another mod *directly replaces* `HelperManager` methods, the **last mod to hook** usually wins. In that case, helper preference logic may not run.
-* Should be fine alongside Courseplay/AutoDrive; there are no hard dependencies and this mod only biases which helper is chosen.
+* **HP: Toggle overlay** → bind under **Options → Controls → MISC** (e.g., `CTRL+;`).
+  Works with modifiers; handler supports analog action values.
 
----
-
-## 🛣️ Roadmap
-
-* **Persistent Profiles**: names, avatars/appearances, and per-helper preferences.
-* **Config file** under `modSettings/FS25_HelperProfiles` (e.g., `helpers.xml`).
-* Optional integration points for **Courseplay** and **AutoDrive**.
-* Small in-game **picker UI** for faster selection.
-
-See `Profile_Settings.md` in this repository for the appearance options draft (not active in this build).
+> Helper selection cycling still hooks game action **OPEN\_HELPER\_MENU** (same behavior as base), with internal debounce.
 
 ---
 
-## ❓FAQ
+## Console / Debug Commands
 
-**Q: Can I change the hotkey?**
-Yes — *Options → Controls* and search for **Cycle Helper**.
+Open the in-game console and use:
 
-**Q: Does this change helper wages or behaviour?**
-No. It only influences **which** helper is chosen at hire time.
+> All commands start with `hpOverlay`. Args in `<>` are required; `[]` optional.
 
-**Q: Does it edit my savegame or the base game?**
-No. It’s runtime-only hooks and toasts; remove the mod and the behaviour reverts.
+### Visibility & Placement
+
+* `hpOverlay on` / `off` / `toggle`
+* `hpOverlay pos <x 0..1> <y 0..1>`
+* `hpOverlay anchor TL|TR|BL|BR`
+
+### Sizing & Style
+
+* `hpOverlay scale <0.5..2.0>`
+* `hpOverlay width <0.15..0.90>`
+* `hpOverlay font <0.010..0.030>`
+* `hpOverlay rowgap <0.001..0.03>`
+* `hpOverlay maxrows <3..30>`
+* `hpOverlay pad <0..0.05>`
+* `hpOverlay opacity <0..1>`
+* `hpOverlay bg on|off`
+* `hpOverlay outline on|off`
+* `hpOverlay markers on|off`
+* `hpOverlay bindhud on|off`  *(follow base HUD visibility)*
+
+### Input Behavior
+
+* `hpOverlay debounce <ms>`  *(raise if you ever see double-advance)*
+
+### Config (stored in `modSettings/FS25_HelperProfiles`)
+
+* `hpOverlay save [filename]`  → saves to `config.xml` (or `filename.xml`)
+* `hpOverlay load [filename]`  → loads `config.xml` (or `filename.xml`)
+* `hpOverlay reset`            → resets to defaults and saves
+
+### Helper Selection Shortcuts
+
+* `hpSelect <index>`
+* `hpCycle [delta]`      *(default 1; negative to go backwards)*
+* `hpNext`
+* `hpDump`
 
 ---
 
-## 🧩 Contributing
+## Config File
 
-Issues and PRs welcome! If you’re reporting a bug, please include:
-
-* FS25 version, mod version (`1.0.0.1`)
-* A copy/paste of the relevant `log.txt` section (look for `[FS25_HelperProfiles]` lines)
-* A list of other helper/AI mods you’re using
-
----
-
-## 📜 License & Credits
-
-* **Author:** SimGamerJen (HelperProfiles project)
-* **License:** See repository `LICENSE` (TBD). If omitted, assume all rights reserved.
-* Thanks to the FS modding community for input and testing.
-
----
-
-## 🧱 Repository layout
+Default path:
 
 ```
-/FS25_HelperProfiles
-├── modDesc.xml
-├── scripts/
-│   ├── HelperProfiles.lua
-│   └── RegisterPlayerActionEvents.lua
-├── helperprofiles.dds
-├── helper_profiles.dds
-├── Profile_Settings.md         ← appearance legend (draft; not yet active)
-|── Overview.txt                ← planning notes
-└── maps_helpers.xml			← example custom maps_helpers.xml file
+Documents/My Games/FarmingSimulator2025/modSettings/FS25_HelperProfiles/config.xml
 ```
 
+Example:
+
+```xml
+<hp version="1">
+  <ui anchor="TR" x="0.985" y="0.900" scale="1.0" width="0.19"
+      opacity="0.85" pad="0.006" rowGap="0.006" font="0.014" maxRows="10"
+      bg="true" outline="false" shadow="false" markers="true" bindHud="true" />
+</hp>
+```
+
+You can edit by hand or use the `save`, `load`, and `reset` commands.
+
 ---
+
+## Tips & Troubleshooting
+
+* **Overlay not visible?**
+  If `bindhud` is **on**, the overlay only shows when the base HUD is visible; toggle the HUD back on, or run `hpOverlay bindhud off`.
+* **Keybind not firing?**
+  Make sure **HP: Toggle overlay** is bound under **MISC**. The handler works with modifiers like CTRL/SHIFT.
+* **Skip on cycle?**
+  Increase debounce: `hpOverlay debounce 220`.
+
+---
+
+## Contributing
+
+* PRs welcome—if you add or change commands/config keys, please update the README accordingly.

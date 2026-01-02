@@ -1,6 +1,6 @@
 # FS25 HelperProfiles — Overlay & Debug
 
-An FS25-styled on-screen overlay for HelperProfiles that shows **activated workers**, your **current selection**, and the **next helper** the game will hire. Includes a robust **console/debug** layer, a **keybind** for toggling, optional **HUD binding** (hides with base HUD / HideHUD mods), and a persistent **config.xml** in `modSettings/FS25_HelperProfiles`.
+An FS25-styled on-screen overlay for HelperProfiles that shows **activated workers**, your **current selection**, the **next helper** the game will hire, and the current hiring **mode**. Includes a robust **console/debug** layer, a **keybind** for toggling, optional **HUD binding** (hides with base HUD / HideHUD mods), and a persistent **config.xml** in `modSettings/FS25_HelperProfiles`.
 
 ![new_overlay1](https://github.com/user-attachments/assets/6d1c2285-44e2-4e3f-bc2e-218013ad2109)
 ![new_overlay2](https://github.com/user-attachments/assets/11fa87b0-c210-47f1-92b3-1927a2c17e6c)
@@ -41,6 +41,11 @@ Documents/My Games/FarmingSimulator2025/modSettings/FS25_HelperProfiles/config.x
 * Toggle overlay via **console** or **keybind**.
 * **Bind to base HUD** (optional) so it hides with HUD/HideHUD.
 * **External config** in `modSettings/FS25_HelperProfiles/config.xml` with `save`, `load`, and `reset`.
+
+* Helper hiring **modes** (runtime switch):
+  * **preferSelected** *(default)* — hire your selected helper if free; otherwise fall back to the next available helper.
+  * **firstFree** — always hire the **first available** helper in list order (immediately reverts to earlier helpers as they become free).
+* Overlay header shows the current hiring **Mode**.
 
 ---
 
@@ -95,6 +100,20 @@ Open the in-game console and use:
 * `hpCycle [delta]`      *(default 1; negative to go backwards)*
 * `hpNext`
 * `hpDump`
+
+### Helper Hiring Mode
+
+* `hpMode status`  *(show current mode)*
+* `hpMode firstFree`  *(always hire the first available helper in list order)*
+* `hpMode preferSelected`  *(prefer selected helper; otherwise use next free)*
+
+> Notes:
+> * Default is **preferSelected** unless you change it.
+> * Mode is a runtime setting; if you want it to persist between sessions, you must re-apply it (until a config key is added).
+
+### Version Info
+
+* `hpVersion`  *(print mod/script version details to the log/console — useful for support)*
 
 ---
 

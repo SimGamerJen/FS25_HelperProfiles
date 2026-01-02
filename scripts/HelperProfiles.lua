@@ -1,13 +1,70 @@
 -- HelperProfiles.lua (FS25_HelperProfiles) – debounced cycle + UI bridge
 -- Semicolon/H binding cycles helpers; PN-style overlay handled by HP_UI.
 
-HelperProfiles = {}
+-- ============================================================================
+-- FS25_HelperProfiles
+-- ModVersion: 1.1.0.1
+-- Script:     HelperProfiles.lua
+-- BuildTag:     20260102-4
+-- ============================================================================
 
+do
+    local MOD_VERSION   = "1.1.0.1"
+    local SCRIPT_NAME   = "HelperProfiles.lua"
+    local BUILD_TAG     = "20260102-4"
+    local SCRIPT_VER    = string.format("%s-%s+%s", MOD_VERSION, SCRIPT_NAME, BUILD_TAG)
+
+    local vi = rawget(_G, "FS25_HelperProfiles_VersionInfo")
+    if vi == nil then
+        vi = { modVersion = MOD_VERSION, scripts = {} }
+        _G.FS25_HelperProfiles_VersionInfo = vi
+    end
+
+    vi.modVersion = vi.modVersion or MOD_VERSION
+    vi.scripts = vi.scripts or {}
+    vi.scripts[SCRIPT_NAME] = SCRIPT_VER
+end
+
+HelperProfiles = HelperProfiles or {}
 -- Selection & runtime
 HelperProfiles.selectedIdx       = 1
+HelperProfiles.selectedHelperRef = nil   -- keeps selection stable across reorder
 HelperProfiles._hooksDone        = false
 HelperProfiles._lastCycleTs      = 0
 HelperProfiles._cycleDebounceMs  = 180   -- tweak via: hpOverlay debounce <ms>
+
+-- Helper selection mode
+HelperProfiles._pickMode = "preferSelected" -- "preferSelected" | "firstFree"
+
+function HelperProfiles:getPickMode()
+    return self._pickMode or "preferSelected"
+end
+
+function HelperProfiles:setPickMode(mode, silent)
+    local m = tostring(mode or ""):lower()
+    if m == "firstfree" or m == "first_free" or m == "first" then
+        m = "firstFree"
+    elseif m == "preferselected" or m == "prefer_selected" or m == "selected" or m == "prefer" then
+        m = "preferSelected"
+    else
+        return false, "invalid-mode"
+    end
+
+    self._pickMode = m
+    if not silent then
+        if self._flash then
+            self:_flash(("Mode: %s"):format(m), 1.2)
+        end
+        print(("[FS25_HelperProfiles] Helper mode set to: %s"):format(m))
+    end
+    return true, nil
+end
+
+-- Default-order caching / reset-on-idle behaviour
+HelperProfiles._defaultOrderRefs = nil   -- array of helper refs in default order
+HelperProfiles._defaultPosByRef  = nil   -- map: helperRef -> position
+HelperProfiles._hadInUse         = nil   -- tracks transition to "all idle"
+HelperProfiles._resetOrderWhenIdle = true -- feature flag
 
 -- originals (filled when we hook)
 HelperProfiles._orig_getNext   = nil
@@ -18,13 +75,64 @@ HelperProfiles._orig_hire      = nil
 ----------------------------------------------------------------------
 -- Helper list (read-only from engine; keeps avatars intact)
 ----------------------------------------------------------------------
-function HelperProfiles:getProfiles()
+
+local function _getHelpersRaw()
     local list = {}
     if g_helperManager and g_helperManager.availableHelpers then
         for _, h in ipairs(g_helperManager.availableHelpers) do
             table.insert(list, h)
         end
     end
+    return list
+end
+
+local function _anyInUse(list)
+    for _, h in ipairs(list) do
+        if h ~= nil and h.inUse == true then
+            return true
+        end
+    end
+    return false
+end
+
+function HelperProfiles:_cacheDefaultOrderIfReady(list)
+    if self._defaultPosByRef ~= nil then return end
+    if list == nil or #list == 0 then return end
+    if _anyInUse(list) then return end
+
+    self._defaultOrderRefs = {}
+    self._defaultPosByRef  = {}
+    for i, h in ipairs(list) do
+        self._defaultOrderRefs[i] = h
+        self._defaultPosByRef[h]  = i
+    end
+
+    print(("[FS25_HelperProfiles] Cached default helper order (%d helpers)"):format(#list))
+end
+
+function HelperProfiles:_sortToDefault(list)
+    if self._defaultPosByRef == nil then return end
+    table.sort(list, function(a, b)
+        local pa = self._defaultPosByRef[a] or 1000000
+        local pb = self._defaultPosByRef[b] or 1000000
+        if pa == pb then
+            return tostring(a) < tostring(b)
+        end
+        return pa < pb
+    end)
+end
+
+-- Public list accessor used by UI + selection logic
+function HelperProfiles:getProfiles()
+    local list = _getHelpersRaw()
+
+    -- only establish "default" order when everything is idle
+    self:_cacheDefaultOrderIfReady(list)
+
+    if self._resetOrderWhenIdle and not _anyInUse(list) and self._defaultPosByRef ~= nil then
+        self:_sortToDefault(list)
+    end
+
     return list
 end
 
@@ -36,8 +144,24 @@ end
 
 function HelperProfiles:ensureValidSelection()
     local profiles = self:getProfiles()
-    if #profiles == 0 then self.selectedIdx = 1; return end
+    if #profiles == 0 then
+        self.selectedIdx = 1
+        self.selectedHelperRef = nil
+        return
+    end
+
+    -- Prefer keeping the same helper selected (by reference), even if list order changes
+    if self.selectedHelperRef ~= nil then
+        for i, h in ipairs(profiles) do
+            if h == self.selectedHelperRef then
+                self.selectedIdx = i
+                return
+            end
+        end
+    end
+
     self.selectedIdx = clamp(self.selectedIdx or 1, 1, #profiles)
+    self.selectedHelperRef = profiles[self.selectedIdx]
 end
 
 function HelperProfiles:getSelectionIndex()
@@ -53,12 +177,29 @@ function HelperProfiles:pickPreferredFreeHelper()
     local profiles = self:getProfiles()
     if #profiles == 0 then return nil, "none-available" end
 
+    local mode = (self.getPickMode and self:getPickMode()) or (self._pickMode or "preferSelected")
+
+    -- Mode: firstFree -> always pick first free helper in list order
+    if mode == "firstFree" then
+        for i, h in ipairs(profiles) do
+            if isFree(h) then
+                -- align selection without flashing
+                self.selectedIdx = i
+                self.selectedHelperRef = h
+                return h, "firstFree"
+            end
+        end
+        return nil, "none-free"
+    end
+
+    -- Mode: preferSelected (legacy)
     self:ensureValidSelection()
 
     local sel = profiles[self.selectedIdx]
     if isFree(sel) then
         return sel, "selected"
     end
+
     for i = 1, #profiles - 1 do
         local idx = ((self.selectedIdx - 1 + i) % #profiles) + 1
         local h = profiles[idx]
@@ -66,6 +207,7 @@ function HelperProfiles:pickPreferredFreeHelper()
             return h, "fallback"
         end
     end
+
     return nil, "none-free"
 end
 
@@ -79,8 +221,10 @@ end
 function HelperProfiles:setSelection(idx)
     local profiles = self:getProfiles()
     if #profiles == 0 then return end
+
     idx = math.floor(math.max(1, math.min(idx or 1, #profiles)))
     self.selectedIdx = idx
+    self.selectedHelperRef = profiles[idx]
 
     local sel = profiles[self.selectedIdx]
     local label = sel and sel.name or ("Helper "..self.selectedIdx)
@@ -110,6 +254,24 @@ function HelperProfiles:cycleSelectionDebounced(delta)
     end
     self._lastCycleTs = now
     self:cycleSelection(delta or 1)
+end
+
+-- Optional manual reset (support/testing)
+function HelperProfiles:resetOrderToDefault()
+    local list = _getHelpersRaw()
+    if _anyInUse(list) then
+        self:_flash("Cannot reset helper order: helpers active", 1.5)
+        return false, "helpers-active"
+    end
+    self:_cacheDefaultOrderIfReady(list)
+    if self._defaultPosByRef == nil then
+        self:_flash("Cannot reset helper order: no default cached yet", 1.5)
+        return false, "no-default"
+    end
+    -- No engine mutation required: when idle, getProfiles() will render default order.
+    self:ensureValidSelection()
+    self:_flash("Helper order reset to default", 1.2)
+    return true, nil
 end
 
 ----------------------------------------------------------------------
@@ -199,6 +361,24 @@ end
 function HelperProfiles:update(dt)
     if not HelperProfiles._hooksDone then
         hookOnce()
+    end
+
+    -- Track "helpers active -> all idle" transition and inform the user once.
+    local list = _getHelpersRaw()
+    if list ~= nil and #list > 0 then
+        self:_cacheDefaultOrderIfReady(list)
+
+        local any = _anyInUse(list)
+        if self._hadInUse == nil then
+            self._hadInUse = any
+        else
+            if self._hadInUse and not any and self._resetOrderWhenIdle and self._defaultPosByRef ~= nil then
+                -- When all idle again, the overlay list returns to default order automatically.
+                self:ensureValidSelection()
+                self:_flash("Helpers idle: list reset to default order", 1.25)
+            end
+            self._hadInUse = any
+        end
     end
 end
 

@@ -1,6 +1,30 @@
 -- HP_UI.lua (FS25_HelperProfiles) — FS25-styled overlay (guarded APIs)
 -- Now also auto-loads config from modSettings/FS25_HelperProfiles/config.xml (if HP_Config is present)
 
+-- ============================================================================
+-- FS25_HelperProfiles
+-- ModVersion: 1.1.0.1
+-- Script:     HP_UI.lua
+-- BuildTag:   20260102-4
+-- ============================================================================
+
+do
+    local MOD_VERSION   = "1.1.0.1"
+    local SCRIPT_NAME   = "HP_UI.lua"
+    local BUILD_TAG     = "20260102-4"
+    local SCRIPT_VER    = string.format("%s-%s+%s", MOD_VERSION, SCRIPT_NAME, BUILD_TAG)
+
+    local vi = rawget(_G, "FS25_HelperProfiles_VersionInfo")
+    if vi == nil then
+        vi = { modVersion = MOD_VERSION, scripts = {} }
+        _G.FS25_HelperProfiles_VersionInfo = vi
+    end
+
+    vi.modVersion = vi.modVersion or MOD_VERSION
+    vi.scripts = vi.scripts or {}
+    vi.scripts[SCRIPT_NAME] = SCRIPT_VER
+end
+
 ---@class HP_UI
 HP_UI = {
     bindHud     = true,  -- when true, overlay hides if base HUD is hidden (HideHUD etc.)
@@ -14,7 +38,7 @@ HP_UI = {
     rowGap      = 0.006,  -- vertical gap between rows
     fontSize    = 0.014,  -- base font size
     maxRows     = 10,
-    width       = 0.19,   -- panel width in screen units (0..1)
+    width       = 0.22,   -- panel width in screen units (0..1)
     bgEnabled   = true,
     outline     = false,  -- thin outline around panel
     shadow      = false,  -- soft text shadow
@@ -174,7 +198,17 @@ local function collectRows()
         })
     end
 
-    local header = string.format("Helpers active: %d | Selected: %s | Next: %s", #profiles, selName, nextName)
+    local mode = "-"
+    if HelperProfiles ~= nil then
+        if HelperProfiles.getPickMode ~= nil then
+            local ok, res = pcall(function() return HelperProfiles:getPickMode() end)
+            if ok and res ~= nil and res ~= "" then mode = tostring(res) end
+        elseif HelperProfiles._pickMode ~= nil then
+            mode = tostring(HelperProfiles._pickMode)
+        end
+    end
+
+    local header = string.format("Mode: %s | Helpers active: %d | Selected: %s | Next: %s", mode, #profiles, selName, nextName)
     return header, rows
 end
 

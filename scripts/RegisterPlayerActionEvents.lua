@@ -3,6 +3,32 @@
 -- Fixes: "❌ Failed to register ... in context _vehicleActionEventId" spam
 -- by registering vehicle actions via vehicle:addActionEvent on a per-vehicle table.
 
+-- ============================================================================
+-- FS25_HelperProfiles
+-- ModVersion: 1.1.0.1
+-- Script:     RegisterPlayerActionEvents.lua
+-- BuildTag:     20260102-4
+-- ============================================================================
+
+do
+    local MOD_VERSION   = "1.1.0.1"
+    local SCRIPT_NAME   = "RegisterPlayerActionEvents.lua"
+    local BUILD_TAG     = "20260102-4"
+    local SCRIPT_VER    = string.format("%s-%s+%s", MOD_VERSION, SCRIPT_NAME, BUILD_TAG)
+
+    local vi = rawget(_G, "FS25_HelperProfiles_VersionInfo")
+    if vi == nil then
+        vi = { modVersion = MOD_VERSION, scripts = {} }
+        _G.FS25_HelperProfiles_VersionInfo = vi
+    end
+
+    vi.modVersion = vi.modVersion or MOD_VERSION
+    vi.scripts = vi.scripts or {}
+    vi.scripts[SCRIPT_NAME] = SCRIPT_VER
+end
+
+HelperProfiles = HelperProfiles or {}
+
 local LOG = "[FS25_HelperProfiles] "
 
 -- --- Utility: treat callback args as "press only" -----------------------------

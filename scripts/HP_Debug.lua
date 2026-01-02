@@ -1,6 +1,30 @@
 -- HP_Debug.lua (FS25_HelperProfiles) — robust console parsing + debounce + external config cmds
 
-HP_Debug = {}
+-- ============================================================================
+-- FS25_HelperProfiles
+-- ModVersion: 1.1.0.1
+-- Script:     HP_Debug.lua
+-- BuildTag:     20260102-4
+-- ============================================================================
+
+do
+    local MOD_VERSION   = "1.1.0.1"
+    local SCRIPT_NAME   = "HP_Debug.lua"
+    local BUILD_TAG     = "20260102-4"
+    local SCRIPT_VER    = string.format("%s-%s+%s", MOD_VERSION, SCRIPT_NAME, BUILD_TAG)
+
+    local vi = rawget(_G, "FS25_HelperProfiles_VersionInfo")
+    if vi == nil then
+        vi = { modVersion = MOD_VERSION, scripts = {} }
+        _G.FS25_HelperProfiles_VersionInfo = vi
+    end
+
+    vi.modVersion = vi.modVersion or MOD_VERSION
+    vi.scripts = vi.scripts or {}
+    vi.scripts[SCRIPT_NAME] = SCRIPT_VER
+end
+
+HP_Debug = HP_Debug or {}
 local Debug = HP_Debug
 
 local function _printf(fmt, ...)
@@ -15,16 +39,13 @@ local function _boolArg(s)
     return nil
 end
 
--- Normalize args across GIANTS console call patterns.
--- Some builds pass (cmdName, subcmd, a1, a2...), others pass (subcmd, a1, a2...),
--- and sometimes there are leading nils. We also ignore a literal command echo.
 local function normalizeArgs(...)
     local args = {...}
     local sub, p1, p2, p3, p4
     for i = 1, #args do
         local v = args[i]
         if v ~= nil and v ~= "" then
-            if v == "hpOverlay" or v == "hpSelect" or v == "hpCycle" or v == "hpNext" or v == "hpDump" then
+            if v == "hpOverlay" or v == "hpSelect" or v == "hpCycle" or v == "hpNext" or v == "hpDump" or v == "hpResetOrder" or v == "hpMode" then
                 -- skip command name echoes
             elseif not sub then
                 sub = v
@@ -188,6 +209,52 @@ function Debug:hpNext(...)
     end
 end
 
+
+function Debug:hpMode(...)
+    if HelperProfiles == nil then
+        _printf("HelperProfiles not loaded")
+        return
+    end
+
+    local a = normalizeArgs(...)
+    a = (a or ""):lower()
+
+    if a == "" or a == "help" then
+        _printf("hpMode commands:")
+        _printf("  hpMode status")
+        _printf("  hpMode firstFree")
+        _printf("  hpMode preferSelected")
+        return
+    end
+
+    if a == "status" then
+        local m = (HelperProfiles.getPickMode and HelperProfiles:getPickMode()) or HelperProfiles._pickMode or "preferSelected"
+        _printf("Mode=%s", tostring(m))
+        return
+    end
+
+    if a == "firstfree" then a = "firstFree" end
+    if a == "preferselected" then a = "preferSelected" end
+
+    if HelperProfiles.setPickMode then
+        local ok, err = HelperProfiles:setPickMode(a, false)
+        if ok then
+            _printf("Mode set to %s", tostring(a))
+        else
+            _printf("Failed to set mode: %s", tostring(err or "unknown"))
+        end
+        return
+    end
+
+    -- Fallback for older cores
+    if a == "firstFree" or a == "preferSelected" then
+        HelperProfiles._pickMode = a
+        _printf("Mode set to %s (fallback)", tostring(a))
+    else
+        _printf("Invalid mode '%s' (try: hpMode help)", tostring(a))
+    end
+end
+
 function Debug:hpDump(...)
     if HelperProfiles and HelperProfiles.getProfiles then
         local list = HelperProfiles:getProfiles()
@@ -197,6 +264,16 @@ function Debug:hpDump(...)
         end
     else
         _printf("HelperProfiles.getProfiles() not available")
+    end
+end
+
+function Debug:hpResetOrder(...)
+    if HelperProfiles and HelperProfiles.resetOrderToDefault then
+        local ok, err = HelperProfiles:resetOrderToDefault()
+        if ok then _printf("Helper order reset to default")
+        else _printf("Reset failed: %s", tostring(err or "unknown")) end
+    else
+        _printf("Core does not expose resetOrderToDefault()")
     end
 end
 
@@ -210,7 +287,6 @@ local function registerCommandDual(name, desc, methodName)
     if not ok and addConsoleCommand ~= nil then
         addConsoleCommand(name, desc, methodName, Debug); ok = true
     end
-    -- Safety-net: global wrapper that forwards ALL args untouched
     _G[name] = function(...)
         local fn = Debug[methodName]
         if fn then return fn(Debug, ...) end
@@ -218,11 +294,13 @@ local function registerCommandDual(name, desc, methodName)
 end
 
 function Debug:loadMap()
-    registerCommandDual("hpOverlay", "Configure HelperProfiles overlay", "hpOverlay")
-    registerCommandDual("hpSelect",  "Select helper index",             "hpSelect")
-    registerCommandDual("hpCycle",   "Cycle selection by delta",        "hpCycle")
-    registerCommandDual("hpNext",    "Print next helper to be hired",   "hpNext")
-    registerCommandDual("hpDump",    "Dump active helpers to the log",  "hpDump")
+    registerCommandDual("hpOverlay",    "Configure HelperProfiles overlay", "hpOverlay")
+    registerCommandDual("hpSelect",     "Select helper index",             "hpSelect")
+    registerCommandDual("hpCycle",      "Cycle selection by delta",        "hpCycle")
+    registerCommandDual("hpNext",       "Print next helper to be hired",   "hpNext")
+    registerCommandDual("hpDump",       "Dump active helpers to the log",  "hpDump")
+    registerCommandDual("hpResetOrder", "Reset helper list to default order (when idle)", "hpResetOrder")
+    registerCommandDual("hpMode",       "Set or show helper selection mode", "hpMode")
 end
 
 addModEventListener(HP_Debug)

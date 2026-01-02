@@ -5,13 +5,13 @@
 
 -- ============================================================================
 -- FS25_HelperProfiles
--- ModVersion: 1.1.0.1
+-- ModVersion: 1.1.0.2
 -- Script:     RegisterPlayerActionEvents.lua
 -- BuildTag:     20260102-4
 -- ============================================================================
 
 do
-    local MOD_VERSION   = "1.1.0.1"
+    local MOD_VERSION   = "1.1.0.2"
     local SCRIPT_NAME   = "RegisterPlayerActionEvents.lua"
     local BUILD_TAG     = "20260102-4"
     local SCRIPT_VER    = string.format("%s-%s+%s", MOD_VERSION, SCRIPT_NAME, BUILD_TAG)

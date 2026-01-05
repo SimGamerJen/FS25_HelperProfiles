@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8" standalone="no"?>
 <modDesc descVersion="99">
-    <author>SimGamerJen</author>
+    <author>YourName</author>
     <version>1.1.0.2</version>
     <title>
         <en>Helper Profiles</en>
@@ -18,11 +18,17 @@
 <actions>
   <action name="OPEN_HELPER_MENU" category="SYSTEM"/>
   <action name="HP_TOGGLE_OVERLAY" category="MISC"/>
+  <action name="HP_TOGGLE_MODE" category="MISC"/>
 </actions>
 
 <inputBinding>
   <actionBinding action="OPEN_HELPER_MENU">
     <binding device="KB_MOUSE_DEFAULT" input="KEY_semicolon"/>
+  </actionBinding>
+  <actionBinding action="HP_TOGGLE_MODE">
+    <binding device="KB_MOUSE_DEFAULT" input="KEY_lshift KEY_semicolon" />
+      <!-- Optional: also allow right-shift -->
+    <binding device="KB_MOUSE_DEFAULT" input="KEY_rshift KEY_semicolon" />
   </actionBinding>
 </inputBinding>
 
@@ -32,6 +38,9 @@
   </text>
   <text name="input_HP_TOGGLE_OVERLAY">
     <en>Toggle Overlay</en>
+  </text>
+  <text name="input_HP_TOGGLE_MODE">
+	<en>Toggle Helper Mode</en>
   </text>
 </l10n>
 

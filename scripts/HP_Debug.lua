@@ -4,13 +4,13 @@
 -- FS25_HelperProfiles
 -- ModVersion: 1.1.0.2
 -- Script:     HP_Debug.lua
--- BuildTag:     20260102-4
+-- BuildTag:   20260105-1
 -- ============================================================================
 
 do
-    local MOD_VERSION   = "1.1.0.2"
+    local MOD_VERSION   = "1.1.0.1"
     local SCRIPT_NAME   = "HP_Debug.lua"
-    local BUILD_TAG     = "20260102-4"
+    local BUILD_TAG     = "20260102-5"
     local SCRIPT_VER    = string.format("%s-%s+%s", MOD_VERSION, SCRIPT_NAME, BUILD_TAG)
 
     local vi = rawget(_G, "FS25_HelperProfiles_VersionInfo")
@@ -24,7 +24,7 @@ do
     vi.scripts[SCRIPT_NAME] = SCRIPT_VER
 end
 
-HP_Debug = HP_Debug or {}
+HP_Debug = {}
 local Debug = HP_Debug
 
 local function _printf(fmt, ...)
@@ -209,52 +209,6 @@ function Debug:hpNext(...)
     end
 end
 
-
-function Debug:hpMode(...)
-    if HelperProfiles == nil then
-        _printf("HelperProfiles not loaded")
-        return
-    end
-
-    local a = normalizeArgs(...)
-    a = (a or ""):lower()
-
-    if a == "" or a == "help" then
-        _printf("hpMode commands:")
-        _printf("  hpMode status")
-        _printf("  hpMode firstFree")
-        _printf("  hpMode preferSelected")
-        return
-    end
-
-    if a == "status" then
-        local m = (HelperProfiles.getPickMode and HelperProfiles:getPickMode()) or HelperProfiles._pickMode or "preferSelected"
-        _printf("Mode=%s", tostring(m))
-        return
-    end
-
-    if a == "firstfree" then a = "firstFree" end
-    if a == "preferselected" then a = "preferSelected" end
-
-    if HelperProfiles.setPickMode then
-        local ok, err = HelperProfiles:setPickMode(a, false)
-        if ok then
-            _printf("Mode set to %s", tostring(a))
-        else
-            _printf("Failed to set mode: %s", tostring(err or "unknown"))
-        end
-        return
-    end
-
-    -- Fallback for older cores
-    if a == "firstFree" or a == "preferSelected" then
-        HelperProfiles._pickMode = a
-        _printf("Mode set to %s (fallback)", tostring(a))
-    else
-        _printf("Invalid mode '%s' (try: hpMode help)", tostring(a))
-    end
-end
-
 function Debug:hpDump(...)
     if HelperProfiles and HelperProfiles.getProfiles then
         local list = HelperProfiles:getProfiles()
@@ -293,14 +247,45 @@ local function registerCommandDual(name, desc, methodName)
     end
 end
 
+
+function Debug:hpMode(...)
+    local sub = normalizeArgs(...)
+    if sub == nil or sub == "" or sub == "help" then
+        print("[HP] hpMode status | firstFree | preferSelected")
+        return
+    end
+    if sub == "status" then
+        if HelperProfiles and HelperProfiles.getPickMode then
+            print(("[HP] Mode=%s"):format(tostring(HelperProfiles:getPickMode())))
+        elseif HelperProfiles and HelperProfiles._pickMode then
+            print(("[HP] Mode=%s"):format(tostring(HelperProfiles._pickMode)))
+        else
+            print("[HP] HelperProfiles does not expose mode controls")
+        end
+        return
+    end
+
+    if not HelperProfiles or not HelperProfiles.setPickMode then
+        print("[HP] HelperProfiles does not expose mode controls (setPickMode/getPickMode missing)")
+        return
+    end
+
+    local ok, why = HelperProfiles:setPickMode(sub, false)
+    if ok then
+        print(("[HP] Mode set to %s"):format(tostring(sub)))
+    else
+        print(("[HP] Invalid mode '%s' (%s)"):format(tostring(sub), tostring(why)))
+    end
+end
+
 function Debug:loadMap()
     registerCommandDual("hpOverlay",    "Configure HelperProfiles overlay", "hpOverlay")
     registerCommandDual("hpSelect",     "Select helper index",             "hpSelect")
     registerCommandDual("hpCycle",      "Cycle selection by delta",        "hpCycle")
     registerCommandDual("hpNext",       "Print next helper to be hired",   "hpNext")
     registerCommandDual("hpDump",       "Dump active helpers to the log",  "hpDump")
+    registerCommandDual("hpMode",       "Set helper selection mode (firstFree/preferSelected)", "hpMode")
     registerCommandDual("hpResetOrder", "Reset helper list to default order (when idle)", "hpResetOrder")
-    registerCommandDual("hpMode",       "Set or show helper selection mode", "hpMode")
 end
 
 addModEventListener(HP_Debug)

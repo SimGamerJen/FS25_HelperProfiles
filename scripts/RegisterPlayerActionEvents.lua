@@ -5,15 +5,15 @@
 
 -- ============================================================================
 -- FS25_HelperProfiles
--- ModVersion: 1.1.0.2
+-- ModVersion: 1.1.0.1
 -- Script:     RegisterPlayerActionEvents.lua
--- BuildTag:     20260102-4
+-- BuildTag:   20260105-2
 -- ============================================================================
 
 do
-    local MOD_VERSION   = "1.1.0.2"
+    local MOD_VERSION   = "1.1.0.1"
     local SCRIPT_NAME   = "RegisterPlayerActionEvents.lua"
-    local BUILD_TAG     = "20260102-4"
+    local BUILD_TAG     = "20260105-2"
     local SCRIPT_VER    = string.format("%s-%s+%s", MOD_VERSION, SCRIPT_NAME, BUILD_TAG)
 
     local vi = rawget(_G, "FS25_HelperProfiles_VersionInfo")
@@ -29,7 +29,13 @@ end
 
 HelperProfiles = HelperProfiles or {}
 
+
 local LOG = "[FS25_HelperProfiles] "
+
+-- avoid log spam: only print vehicle registration once globally (vehicles can be many)
+local _loggedVehicleCycle = false
+local _loggedVehicleToggle = false
+local _loggedVehicleMode = false
 
 -- --- Utility: treat callback args as "press only" -----------------------------
 local function _isPress(inputValue, callbackState)
@@ -59,6 +65,15 @@ local function _onToggle(_, actionName, inputValue, callbackState, isAnalog)
         HP_UI:onToggleAction(actionName, inputValue, callbackState, isAnalog)
     end
 end
+
+-- Mode toggle handler (SHIFT+; by default)
+local function _onMode(_, actionName, inputValue, callbackState, isAnalog)
+    if not _isPress(inputValue, callbackState) then return end
+    if HelperProfiles and HelperProfiles.togglePickMode then
+        HelperProfiles:togglePickMode()
+    end
+end
+
 
 -- --- Player (on-foot) context -------------------------------------------------
 -- We keep ids on HelperProfiles and unregister properly to avoid duplicates.
@@ -128,12 +143,45 @@ local function _unregisterPlayerToggle()
     end
 end
 
+local function _registerPlayerMode()
+    if HelperProfiles._playerModeId ~= nil then return end
+    local ok, id = g_inputBinding:registerActionEvent(
+        InputAction.HP_TOGGLE_MODE,
+        HelperProfiles,
+        _onMode,
+        false, true, false, true
+    )
+    if ok and id then
+        HelperProfiles._playerModeId = id
+        if g_inputBinding.setActionEventTextPriority then
+            g_inputBinding:setActionEventTextPriority(id, GS_PRIO_VERY_LOW)
+        end
+        if g_inputBinding.setActionEventTextVisibility then
+            g_inputBinding:setActionEventTextVisibility(id, true)
+        end
+        print(LOG.."✅ Registered HP_TOGGLE_MODE (player)")
+    else
+        print(LOG.."❌ Failed to register HP_TOGGLE_MODE (player)")
+    end
+end
+
+local function _unregisterPlayerMode()
+    local id = HelperProfiles._playerModeId
+    if id ~= nil then
+        g_inputBinding:removeActionEvent(id)
+        HelperProfiles._playerModeId = nil
+        print(LOG.."Unregistered HP_TOGGLE_MODE (player)")
+    end
+end
+
+
 -- Hook into PlayerInputComponent “global” events (covers on-foot)
 PlayerInputComponent.registerGlobalPlayerActionEvents = Utils.appendedFunction(
     PlayerInputComponent.registerGlobalPlayerActionEvents,
     function(self, controlling)
         _registerPlayerCycle()
         _registerPlayerToggle()
+        _registerPlayerMode()
     end
 )
 
@@ -142,6 +190,7 @@ PlayerInputComponent.removeGlobalPlayerActionEvents = Utils.appendedFunction(
     function(self)
         _unregisterPlayerCycle()
         _unregisterPlayerToggle()
+        _unregisterPlayerMode()
     end
 )
 
@@ -182,9 +231,9 @@ local function _registerVehicleActions(vehicle, isActiveForInput)
         if g_inputBinding.setActionEventTextVisibility then
             g_inputBinding:setActionEventTextVisibility(id1, true)
         end
-        if not spec._loggedCycle then
+        if not _loggedVehicleCycle then
             print(LOG.."✅ Registered OPEN_HELPER_MENU (vehicle)")
-            spec._loggedCycle = true
+            _loggedVehicleCycle = true
         end
     else
         print(LOG.."❌ Failed to register OPEN_HELPER_MENU (vehicle)")
@@ -205,13 +254,37 @@ local function _registerVehicleActions(vehicle, isActiveForInput)
         if g_inputBinding.setActionEventTextVisibility then
             g_inputBinding:setActionEventTextVisibility(id2, true)
         end
-        if not spec._loggedToggle then
+        if not _loggedVehicleToggle then
             print(LOG.."✅ Registered HP_TOGGLE_OVERLAY (vehicle)")
-            spec._loggedToggle = true
+            _loggedVehicleToggle = true
         end
     else
         print(LOG.."❌ Failed to register HP_TOGGLE_OVERLAY (vehicle)")
     end
+
+
+-- Mode (HP_TOGGLE_MODE)
+local _, id3 = vehicle:addActionEvent(
+    spec.actionEvents,
+    InputAction.HP_TOGGLE_MODE,
+    HelperProfiles,
+    _onMode,
+    false, true, false, true
+)
+if id3 ~= nil then
+    if g_inputBinding.setActionEventTextPriority then
+        g_inputBinding:setActionEventTextPriority(id3, GS_PRIO_VERY_LOW)
+    end
+    if g_inputBinding.setActionEventTextVisibility then
+        g_inputBinding:setActionEventTextVisibility(id3, true)
+    end
+    if not _loggedVehicleMode then
+        print(LOG.."✅ Registered HP_TOGGLE_MODE (vehicle)")
+        _loggedVehicleMode = true
+    end
+else
+    print(LOG.."❌ Failed to register HP_TOGGLE_MODE (vehicle)")
+end
 end
 
 local function _unregisterVehicleActions(vehicle)

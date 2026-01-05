@@ -5,13 +5,13 @@
 -- FS25_HelperProfiles
 -- ModVersion: 1.1.0.2
 -- Script:     HelperProfiles.lua
--- BuildTag:     20260102-4
+-- BuildTag:   20260105-1
 -- ============================================================================
 
 do
-    local MOD_VERSION   = "1.1.0.2"
+    local MOD_VERSION   = "1.1.0.1"
     local SCRIPT_NAME   = "HelperProfiles.lua"
-    local BUILD_TAG     = "20260102-4"
+    local BUILD_TAG     = "20260102-5"
     local SCRIPT_VER    = string.format("%s-%s+%s", MOD_VERSION, SCRIPT_NAME, BUILD_TAG)
 
     local vi = rawget(_G, "FS25_HelperProfiles_VersionInfo")
@@ -33,38 +33,12 @@ HelperProfiles._hooksDone        = false
 HelperProfiles._lastCycleTs      = 0
 HelperProfiles._cycleDebounceMs  = 180   -- tweak via: hpOverlay debounce <ms>
 
--- Helper selection mode
-HelperProfiles._pickMode = "preferSelected" -- "preferSelected" | "firstFree"
-
-function HelperProfiles:getPickMode()
-    return self._pickMode or "preferSelected"
-end
-
-function HelperProfiles:setPickMode(mode, silent)
-    local m = tostring(mode or ""):lower()
-    if m == "firstfree" or m == "first_free" or m == "first" then
-        m = "firstFree"
-    elseif m == "preferselected" or m == "prefer_selected" or m == "selected" or m == "prefer" then
-        m = "preferSelected"
-    else
-        return false, "invalid-mode"
-    end
-
-    self._pickMode = m
-    if not silent then
-        if self._flash then
-            self:_flash(("Mode: %s"):format(m), 1.2)
-        end
-        print(("[FS25_HelperProfiles] Helper mode set to: %s"):format(m))
-    end
-    return true, nil
-end
-
 -- Default-order caching / reset-on-idle behaviour
 HelperProfiles._defaultOrderRefs = nil   -- array of helper refs in default order
 HelperProfiles._defaultPosByRef  = nil   -- map: helperRef -> position
 HelperProfiles._hadInUse         = nil   -- tracks transition to "all idle"
 HelperProfiles._resetOrderWhenIdle = true -- feature flag
+HelperProfiles._pickMode = HelperProfiles._pickMode or "preferSelected"  -- preferSelected | firstFree
 
 -- originals (filled when we hook)
 HelperProfiles._orig_getNext   = nil
@@ -173,33 +147,60 @@ local function isFree(h)
 end
 
 -- pick our preferred helper (selected if free; else next free; else nil)
+
+-- ----------------------------------------------------------------------------
+-- Helper selection mode (runtime switchable)
+--   preferSelected: current behaviour (selected helper if free, else fallback)
+--   firstFree:      always use the first available helper in list order
+-- ----------------------------------------------------------------------------
+function HelperProfiles:getPickMode()
+    return self._pickMode or "preferSelected"
+end
+
+function HelperProfiles:setPickMode(mode, silent)
+    if mode ~= "preferSelected" and mode ~= "firstFree" then
+        return false, "invalid-mode"
+    end
+    self._pickMode = mode
+    if not silent then
+        self:_flash(("Mode: %s"):format(mode), 1.25)
+    end
+    return true
+end
+
+function HelperProfiles:togglePickMode(silent)
+    local cur = self:getPickMode()
+    local nxt = (cur == "firstFree") and "preferSelected" or "firstFree"
+    return self:setPickMode(nxt, silent)
+end
+
 function HelperProfiles:pickPreferredFreeHelper()
     local profiles = self:getProfiles()
     if #profiles == 0 then return nil, "none-available" end
 
-    local mode = (self.getPickMode and self:getPickMode()) or (self._pickMode or "preferSelected")
+    local mode = self:getPickMode()
 
-    -- Mode: firstFree -> always pick first free helper in list order
+    -- Mode: firstFree (always first free helper in list order)
     if mode == "firstFree" then
-        for i, h in ipairs(profiles) do
+        for i = 1, #profiles do
+            local h = profiles[i]
             if isFree(h) then
-                -- align selection without flashing
+                -- keep UI selection aligned with actual pick
                 self.selectedIdx = i
-                self.selectedHelperRef = h
+                self.selectedRef = h.ref
                 return h, "firstFree"
             end
         end
         return nil, "none-free"
     end
 
-    -- Mode: preferSelected (legacy)
+    -- Mode: preferSelected (legacy behaviour)
     self:ensureValidSelection()
 
     local sel = profiles[self.selectedIdx]
     if isFree(sel) then
         return sel, "selected"
     end
-
     for i = 1, #profiles - 1 do
         local idx = ((self.selectedIdx - 1 + i) % #profiles) + 1
         local h = profiles[idx]
@@ -207,7 +208,6 @@ function HelperProfiles:pickPreferredFreeHelper()
             return h, "fallback"
         end
     end
-
     return nil, "none-free"
 end
 

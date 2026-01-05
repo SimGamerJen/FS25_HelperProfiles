@@ -51,7 +51,10 @@ Documents/My Games/FarmingSimulator2025/modSettings/FS25_HelperProfiles/config.x
 
 ## Keybinds
 
-* **HP: Toggle overlay** → bind under **Options → Controls → MISC** (e.g., `CTRL+;`).
+* **HP: Toggle overlay** → bind under **Options → Controls → Helper Profiles** (e.g., `CTRL+;`).
+  Works with modifiers; handler supports analog action values.
+
+* **HP: Toggle mode** → bind under **Options → Controls → Helper Profiles** (e.g., `SHIFT+;`).
   Works with modifiers; handler supports analog action values.
 
 > Helper selection cycling still hooks game action **OPEN\_HELPER\_MENU** (same behavior as base), with internal debounce.

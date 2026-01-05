@@ -5,7 +5,7 @@
 -- FS25_HelperProfiles
 -- ModVersion: 1.1.0.2
 -- Script:     HP_UI.lua
--- BuildTag:   20260102-4
+-- BuildTag:   20260105-1
 -- ============================================================================
 
 do
@@ -38,7 +38,7 @@ HP_UI = {
     rowGap      = 0.006,  -- vertical gap between rows
     fontSize    = 0.014,  -- base font size
     maxRows     = 10,
-    width       = 0.22,   -- panel width in screen units (0..1)
+    width       = 0.25,   -- panel width in screen units (0..1)
     bgEnabled   = true,
     outline     = false,  -- thin outline around panel
     shadow      = false,  -- soft text shadow

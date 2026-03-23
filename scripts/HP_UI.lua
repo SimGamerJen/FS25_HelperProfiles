@@ -33,12 +33,12 @@ HP_UI = {
     x           = 0.985,  -- screen-space (0..1) anchor offset
     y           = 0.900,
     scale       = 1.0,
-    opacity     = 0.4,   -- background opacity
+    opacity     = 0.25,   -- background opacity
     pad         = 0.006,  -- panel padding
     rowGap      = 0.006,  -- vertical gap between rows
     fontSize    = 0.014,  -- base font size
     maxRows     = 10,
-    width       = 0.25,   -- panel width in screen units (0..1)
+    width       = 0.4,   -- panel width in screen units (0..1)
     bgEnabled   = true,
     outline     = false,  -- thin outline around panel
     shadow      = false,  -- soft text shadow
@@ -155,6 +155,14 @@ function HP_UI:flash(text, secs) self.flashText = text or ""; self.flashTime = t
 
 -- ===== Data collection ========================================================
 
+local function isGuiHiddenProfile(name)
+    if name == nil then
+        return false
+    end
+
+    return string.find(string.upper(tostring(name)), "SPARE", 1, true) ~= nil
+end
+
 local function collectRows()
     if HelperProfiles == nil or HelperProfiles.getProfiles == nil then
         return "Helpers active: 0 | Selected: - | Next: -", {}
@@ -180,22 +188,30 @@ local function collectRows()
     local nextName = nextHelper and (nextHelper.name or ("Helper " .. tostring(nextHelper.index or "?"))) or ("(" .. tostring(reason) .. ")")
 
     local rows = {}
-    for idx, h in ipairs(profiles) do
-        local state = (h.inUse and "IN USE") or "FREE"
-        local marks = {}
-        if HP_UI.showMarkers then
-            if idx == selectedIdx then table.insert(marks, "» sel") end
-            if nextHelper == h   then table.insert(marks, "← next") end
-        end
-        local suffix = (#marks > 0) and ("  " .. table.concat(marks, "  ")) or ""
-        local line = string.format("%02d  %s  [%s]%s", idx, h.name or ("Helper " .. idx), state, suffix)
+    local visibleCount = 0
 
-        table.insert(rows, {
-            text = line,
-            inUse = (h.inUse == true),
-            isSelected = (idx == selectedIdx),
-            isNext = (nextHelper == h)
-        })
+    for idx, h in ipairs(profiles) do
+        local helperName = h.name or ("Helper " .. idx)
+
+        if not isGuiHiddenProfile(helperName) then
+            visibleCount = visibleCount + 1
+
+            local state = (h.inUse and "IN USE") or "FREE"
+            local marks = {}
+            if HP_UI.showMarkers then
+                if idx == selectedIdx then table.insert(marks, "» sel") end
+                if nextHelper == h   then table.insert(marks, "← next") end
+            end
+            local suffix = (#marks > 0) and ("  " .. table.concat(marks, "  ")) or ""
+            local line = string.format("%02d  %s  [%s]%s", idx, helperName, state, suffix)
+
+            table.insert(rows, {
+                text = line,
+                inUse = (h.inUse == true),
+                isSelected = (idx == selectedIdx),
+                isNext = (nextHelper == h)
+            })
+        end
     end
 
     local mode = "-"
@@ -208,7 +224,7 @@ local function collectRows()
         end
     end
 
-    local header = string.format("Mode: %s | Helpers active: %d | Selected: %s | Next: %s", mode, #profiles, selName, nextName)
+    local header = string.format("Mode: %s | Helpers shown: %d | Selected: %s | Next: %s", mode, visibleCount, selName, nextName)
     return header, rows
 end
 

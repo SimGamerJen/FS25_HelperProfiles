@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8" standalone="no"?>
 <modDesc descVersion="99">
     <author>YourName</author>
-    <version>1.1.0.3</version>
+    <version>2.0.10.0</version>
     <title>
         <en>Helper Profiles</en>
     </title>
     <description>
-        <en>Create persistent helper names and appearances for any number of helpers up to the maximum permitted within the game. Support for AutoDrive and Courseplay integration  under development.</en>
+        <en>Helper profile selector with optional AvatarSwitcher appearance binding for AI worker vehicle characters. v2.0.10-alpha fixes the appearance binding UI dropdowns so they draw as opaque modal panels and no longer leak mouse clicks to controls behind them.</en>
 		<de>Erstelle dauerhafte Namen und Erscheinungsbilder für beliebig viele Helfer, bis zum maximal im Spiel erlaubten Limit. Unterstützung für AutoDrive und Courseplay wird derzeit entwickelt.</de>
 		<fr>Créez des noms et des apparences persistants pour n'importe quel nombre d'aides jusqu'au maximum autorisé dans le jeu. La prise en charge de l'intégration d'AutoDrive et de Courseplay est en cours de développement.</fr>
 
@@ -19,6 +19,7 @@
   <action name="OPEN_HELPER_MENU" category="SYSTEM"/>
   <action name="HP_TOGGLE_OVERLAY" category="MISC"/>
   <action name="HP_TOGGLE_MODE" category="MISC"/>
+  <action name="HP_OPEN_APPEARANCE_MENU" category="MISC"/>
 </actions>
 
 <inputBinding>
@@ -29,6 +30,10 @@
     <binding device="KB_MOUSE_DEFAULT" input="KEY_lshift KEY_semicolon" />
       <!-- Optional: also allow right-shift -->
     <binding device="KB_MOUSE_DEFAULT" input="KEY_rshift KEY_semicolon" />
+  </actionBinding>
+  <actionBinding action="HP_OPEN_APPEARANCE_MENU">
+    <binding device="KB_MOUSE_DEFAULT" input="KEY_lctrl KEY_semicolon" />
+    <binding device="KB_MOUSE_DEFAULT" input="KEY_rctrl KEY_semicolon" />
   </actionBinding>
 </inputBinding>
 
@@ -42,12 +47,18 @@
   <text name="input_HP_TOGGLE_MODE">
 	<en>Toggle Helper Mode</en>
   </text>
+  <text name="input_HP_OPEN_APPEARANCE_MENU">
+    <en>Open Helper Appearance Bindings</en>
+  </text>
 </l10n>
 
 <extraSourceFiles>
   <sourceFile filename="scripts/HP_Config.lua"/>
   <sourceFile filename="scripts/HP_UI.lua"/>
   <sourceFile filename="scripts/HP_Debug.lua"/>
+  <sourceFile filename="scripts/HP_ASBridge.lua"/>
+  <sourceFile filename="scripts/HP_WorkerAppearance.lua"/>
+  <sourceFile filename="scripts/HP_AppearanceMenu.lua"/>
   <sourceFile filename="scripts/HelperProfiles.lua"/>
   <sourceFile filename="scripts/RegisterPlayerActionEvents.lua"/>
 </extraSourceFiles>

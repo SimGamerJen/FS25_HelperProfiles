@@ -9,9 +9,9 @@
 -- ============================================================================
 
 do
-    local MOD_VERSION   = "1.1.0.2"
+    local MOD_VERSION   = "2.0.9-alpha"
     local SCRIPT_NAME   = "HP_UI.lua"
-    local BUILD_TAG     = "20260102-4"
+    local BUILD_TAG     = "20260513-2"
     local SCRIPT_VER    = string.format("%s-%s+%s", MOD_VERSION, SCRIPT_NAME, BUILD_TAG)
 
     local vi = rawget(_G, "FS25_HelperProfiles_VersionInfo")
@@ -33,7 +33,7 @@ HP_UI = {
     x           = 0.985,  -- screen-space (0..1) anchor offset
     y           = 0.900,
     scale       = 1.0,
-    opacity     = 0.25,   -- background opacity
+    opacity     = 0.4,   -- background opacity
     pad         = 0.006,  -- panel padding
     rowGap      = 0.006,  -- vertical gap between rows
     fontSize    = 0.014,  -- base font size
@@ -163,6 +163,18 @@ local function isGuiHiddenProfile(name)
     return string.find(string.upper(tostring(name)), "SPARE", 1, true) ~= nil
 end
 
+local function getDisplayName(helper, idx)
+    if HelperProfiles ~= nil and HelperProfiles.getDisplayNameForHelper ~= nil then
+        local ok, displayName = pcall(HelperProfiles.getDisplayNameForHelper, HelperProfiles, helper, idx)
+        if ok and displayName ~= nil and tostring(displayName) ~= "" then return tostring(displayName) end
+    end
+    return tostring((helper ~= nil and helper.name) or ("Helper " .. tostring(idx or "?")))
+end
+
+local function getBaseName(helper, idx)
+    return tostring((helper ~= nil and helper.name) or ("Helper " .. tostring(idx or "?")))
+end
+
 local function collectRows()
     if HelperProfiles == nil or HelperProfiles.getProfiles == nil then
         return "Helpers active: 0 | Selected: - | Next: -", {}
@@ -184,14 +196,19 @@ local function collectRows()
         nextHelper, reason = HelperProfiles:pickPreferredFreeHelper()
     end
 
-    local selName = (#profiles > 0 and profiles[selectedIdx] and (profiles[selectedIdx].name or ("Helper " .. tostring(selectedIdx)))) or "-"
-    local nextName = nextHelper and (nextHelper.name or ("Helper " .. tostring(nextHelper.index or "?"))) or ("(" .. tostring(reason) .. ")")
+    local selName = (#profiles > 0 and profiles[selectedIdx] and getDisplayName(profiles[selectedIdx], selectedIdx)) or "-"
+    local nextIdx = nil
+    if nextHelper ~= nil then
+        for i, candidate in ipairs(profiles) do if candidate == nextHelper then nextIdx = i; break end end
+    end
+    local nextName = nextHelper and getDisplayName(nextHelper, nextIdx or "?") or ("(" .. tostring(reason) .. ")")
 
     local rows = {}
     local visibleCount = 0
 
     for idx, h in ipairs(profiles) do
         local helperName = h.name or ("Helper " .. idx)
+        local displayName = getDisplayName(h, idx)
 
         if not isGuiHiddenProfile(helperName) then
             visibleCount = visibleCount + 1
@@ -203,7 +220,14 @@ local function collectRows()
                 if nextHelper == h   then table.insert(marks, "← next") end
             end
             local suffix = (#marks > 0) and ("  " .. table.concat(marks, "  ")) or ""
-            local line = string.format("%02d  %s  [%s]%s", idx, helperName, state, suffix)
+            local appearance = nil
+            if HelperProfiles ~= nil and HelperProfiles.getAppearanceLabelForHelper ~= nil then
+                local ok, label = pcall(HelperProfiles.getAppearanceLabelForHelper, HelperProfiles, h, idx)
+                if ok and label ~= nil and label ~= "" then appearance = label end
+            end
+            local appearanceText = appearance and ("  — " .. tostring(appearance)) or ""
+            local baseHint = (displayName ~= helperName) and (" (" .. tostring(helperName) .. ")") or ""
+            local line = string.format("%02d  %s%s  [%s]%s%s", idx, displayName, baseHint, state, appearanceText, suffix)
 
             table.insert(rows, {
                 text = line,

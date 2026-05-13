@@ -2,15 +2,15 @@
 
 -- ============================================================================
 -- FS25_HelperProfiles
--- ModVersion: 1.1.0.2
+-- ModVersion: 2.0.1-alpha
 -- Script:     HP_Debug.lua
 -- BuildTag:   20260105-1
 -- ============================================================================
 
 do
-    local MOD_VERSION   = "1.1.0.1"
+    local MOD_VERSION   = "2.0.0-alpha"
     local SCRIPT_NAME   = "HP_Debug.lua"
-    local BUILD_TAG     = "20260102-5"
+    local BUILD_TAG     = "20260512-2"
     local SCRIPT_VER    = string.format("%s-%s+%s", MOD_VERSION, SCRIPT_NAME, BUILD_TAG)
 
     local vi = rawget(_G, "FS25_HelperProfiles_VersionInfo")
@@ -45,7 +45,7 @@ local function normalizeArgs(...)
     for i = 1, #args do
         local v = args[i]
         if v ~= nil and v ~= "" then
-            if v == "hpOverlay" or v == "hpSelect" or v == "hpCycle" or v == "hpNext" or v == "hpDump" or v == "hpResetOrder" or v == "hpMode" then
+            if v == "hpOverlay" or v == "hpSelect" or v == "hpCycle" or v == "hpNext" or v == "hpDump" or v == "hpResetOrder" or v == "hpMode" or v == "hpAppearance" then
                 -- skip command name echoes
             elseif not sub then
                 sub = v
@@ -231,6 +231,199 @@ function Debug:hpResetOrder(...)
     end
 end
 
+
+function Debug:hpAppearance(...)
+    local a, b, c, d = normalizeArgs(...)
+    if a == nil or a == "" or a == "help" then
+        print("[HP] hpAppearance status | menu | reload | refresh | debug | cycle [delta] | bind <helperIndex> <presetId> | unbind <helperIndex> | clear | bindLegacy <helperIndex> <category> [presetId]")
+        return
+    end
+
+    if a == "status" then
+        local available = HP_ASBridge ~= nil and HP_ASBridge.isAvailable ~= nil and HP_ASBridge:isAvailable() == true
+        local source = "none"
+        if HP_ASBridge ~= nil then
+            if HP_ASBridge.isApiAvailable ~= nil and HP_ASBridge:isApiAvailable() then source = "api"
+            elseif HP_ASBridge.isDirectAvailable ~= nil and HP_ASBridge:isDirectAvailable() then source = "direct" end
+        end
+        print("[HP] Appearance provider available=" .. tostring(available) .. " | source=" .. tostring(source))
+        local api = (_G ~= nil and (_G.AvatarSwitcherAPI or _G.FS25_AvatarSwitcherAPI)) or AvatarSwitcherAPI
+        print("[HP] AvatarSwitcherAPI table=" .. tostring(api ~= nil) .. " | global=" .. tostring(_G ~= nil and _G.AvatarSwitcherAPI ~= nil))
+        if HP_ASBridge ~= nil then
+            local linksFile = HP_ASBridge.getLinksFile ~= nil and HP_ASBridge:getLinksFile() or HP_ASBridge.linksFile
+            local savegameName = HP_ASBridge.getSavegameName ~= nil and HP_ASBridge:getSavegameName() or HP_ASBridge.savegameName
+            print("[HP] Appearance links savegame=" .. tostring(savegameName or "?") .. " | file=" .. tostring(linksFile or "?"))
+        end
+        if api ~= nil and type(api.getDiagnostics) == "function" then
+            local ok, d = pcall(api.getDiagnostics)
+            if ok and type(d) == "table" then
+                print(("[HP] AS diagnostics: hasAS=%s init=%s loadPresets=%s presets=%s presetCount=%s presetsById=%s builder=%s version=%s"):format(
+                    tostring(d.hasAvatarSwitcher), tostring(d.initialized), tostring(d.hasLoadPresets), tostring(d.hasPresets),
+                    tostring(d.presetCount), tostring(d.hasPresetsById), tostring(d.hasRuntimeBuilder), tostring(d.version)))
+            else
+                print("[HP] AS diagnostics unavailable: " .. tostring(d))
+            end
+        end
+        if HelperProfiles and HelperProfiles.getProfiles then
+            local list = HelperProfiles:getProfiles()
+            for i, h in ipairs(list) do
+                local label, presetId, category = nil, nil, nil
+                if HelperProfiles.getAppearanceLabelForHelper then
+                    label, presetId, category = HelperProfiles:getAppearanceLabelForHelper(h, i)
+                end
+                local displayName = h.name or "?"
+                if HelperProfiles.getDisplayNameForHelper then
+                    local okName, dn = pcall(HelperProfiles.getDisplayNameForHelper, HelperProfiles, h, i)
+                    if okName and dn ~= nil and tostring(dn) ~= "" then displayName = tostring(dn) end
+                end
+                local slotName = tostring(h.name or "?")
+                local slotSuffix = (displayName ~= slotName) and (" | slot=" .. slotName) or ""
+                print(("[HP] %02d %s%s | preset=%s | category=%s | label=%s"):format(i, tostring(displayName), slotSuffix, tostring(presetId or "?"), tostring(category or "?"), tostring(label or "?")))
+            end
+        end
+        return
+    end
+
+    if a == "reload" then
+        if HP_ASBridge and HP_ASBridge.reload then HP_ASBridge:reload() end
+        print("[HP] Appearance links reloaded")
+        return
+    end
+
+    if a == "refresh" then
+        if HP_WorkerAppearance and HP_WorkerAppearance.refreshActiveWorkers then
+            local count = HP_WorkerAppearance:refreshActiveWorkers()
+            print("[HP] Refreshed active worker appearances: " .. tostring(count))
+        else
+            print("[HP] Worker appearance bridge unavailable")
+        end
+        return
+    end
+
+    if a == "debug" then
+        if HP_ASBridge then HP_ASBridge.debugEnabled = not HP_ASBridge.debugEnabled end
+        if HP_WorkerAppearance then HP_WorkerAppearance.debugEnabled = not HP_WorkerAppearance.debugEnabled end
+        print("[HP] Appearance debug=" .. tostring(HP_WorkerAppearance and HP_WorkerAppearance.debugEnabled or false))
+        return
+    end
+
+
+    if a == "menu" then
+        if HP_AppearanceMenu ~= nil and HP_AppearanceMenu.open ~= nil then
+            HP_AppearanceMenu:open()
+            print("[HP] Appearance binding menu opened")
+        else
+            print("[HP] Appearance binding menu unavailable")
+        end
+        return
+    end
+
+    if a == "cycle" then
+        local delta = tonumber(b) or 1
+        if HelperProfiles and HelperProfiles.cycleSelectedAppearance then
+            local ok, res = HelperProfiles:cycleSelectedAppearance(delta)
+            print("[HP] cycleSelectedAppearance ok=" .. tostring(ok) .. " result=" .. tostring(type(res) == "table" and (res.name or res.id) or res))
+        else
+            print("[HP] HelperProfiles does not expose cycleSelectedAppearance()")
+        end
+        return
+    end
+
+    if a == "bind" then
+        local idx = tonumber(b)
+        local presetId = c
+        if not idx or presetId == nil or presetId == "" then
+            print("[HP] Usage: hpAppearance bind <helperIndex> <presetId>")
+            return
+        end
+
+        local list = HelperProfiles and HelperProfiles.getProfiles and HelperProfiles:getProfiles() or {}
+        local helper = list[idx]
+        if helper == nil then
+            print("[HP] Helper index not found: " .. tostring(idx))
+            return
+        end
+        if HP_ASBridge and HP_ASBridge.setLinkByPresetId then
+            local ok, res = HP_ASBridge:setLinkByPresetId(helper, idx, presetId)
+            if ok then
+                local displayName = helper.name or idx
+                if HelperProfiles.getDisplayNameForHelper then
+                    local okName, dn = pcall(HelperProfiles.getDisplayNameForHelper, HelperProfiles, helper, idx)
+                    if okName and dn ~= nil and tostring(dn) ~= "" then displayName = tostring(dn) end
+                end
+                print(("[HP] Bound %s (%s) -> AS preset '%s' | category=%s | label=%s"):format(tostring(displayName), tostring(helper.name or idx), tostring(res.id or presetId), tostring(res.category or "?"), tostring(res.name or res.id or presetId)))
+            else
+                print(("[HP] Bind failed for %s -> preset '%s': %s"):format(tostring(helper.name or idx), tostring(presetId), tostring(res)))
+            end
+        else
+            print("[HP] AS bridge unavailable")
+        end
+        return
+    end
+
+    if a == "unbind" then
+        local idx = tonumber(b)
+        if not idx then
+            print("[HP] Usage: hpAppearance unbind <helperIndex>")
+            return
+        end
+
+        local list = HelperProfiles and HelperProfiles.getProfiles and HelperProfiles:getProfiles() or {}
+        local helper = list[idx]
+        if helper == nil then
+            print("[HP] Helper index not found: " .. tostring(idx))
+            return
+        end
+        if HP_ASBridge and HP_ASBridge.unbindLink then
+            local ok, helperNameOrErr = HP_ASBridge:unbindLink(helper, idx)
+            if ok then
+                print("[HP] Unbound " .. tostring(helperNameOrErr or helper.name or idx) .. " from AS preset")
+            else
+                print("[HP] Unbind failed: " .. tostring(helperNameOrErr))
+            end
+        else
+            print("[HP] AS bridge unavailable")
+        end
+        return
+    end
+
+    if a == "clear" then
+        if HP_ASBridge and HP_ASBridge.clearLinks then
+            HP_ASBridge:clearLinks()
+            print("[HP] Cleared all appearance bindings for current save")
+        else
+            print("[HP] AS bridge unavailable")
+        end
+        return
+    end
+
+    if a == "bindLegacy" then
+        local idx = tonumber(b)
+        local category = c
+        local presetId = d
+        if not idx or category == nil or category == "" then
+            print("[HP] Usage: hpAppearance bindLegacy <helperIndex> <AS category> [presetId]")
+            return
+        end
+
+        local list = HelperProfiles and HelperProfiles.getProfiles and HelperProfiles:getProfiles() or {}
+        local helper = list[idx]
+        if helper == nil then
+            print("[HP] Helper index not found: " .. tostring(idx))
+            return
+        end
+        if HP_ASBridge and HP_ASBridge.setLink then
+            HP_ASBridge:setLink(helper, idx, category, presetId)
+            print(("[HP] Legacy-bound %s -> AS category '%s'%s"):format(tostring(helper.name or idx), tostring(category), presetId and (" preset=" .. tostring(presetId)) or ""))
+        else
+            print("[HP] AS bridge unavailable")
+        end
+        return
+    end
+
+    print("[HP] Unknown hpAppearance subcommand '" .. tostring(a) .. "'")
+end
+
 -- ===== Registration for both console APIs ====================================
 
 local function registerCommandDual(name, desc, methodName)
@@ -286,6 +479,7 @@ function Debug:loadMap()
     registerCommandDual("hpDump",       "Dump active helpers to the log",  "hpDump")
     registerCommandDual("hpMode",       "Set helper selection mode (firstFree/preferSelected)", "hpMode")
     registerCommandDual("hpResetOrder", "Reset helper list to default order (when idle)", "hpResetOrder")
+    registerCommandDual("hpAppearance", "Bind/cycle AvatarSwitcher appearances for helpers", "hpAppearance")
 end
 
 addModEventListener(HP_Debug)

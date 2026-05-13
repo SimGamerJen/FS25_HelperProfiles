@@ -3,15 +3,15 @@
 
 -- ============================================================================
 -- FS25_HelperProfiles
--- ModVersion: 1.1.0.2
+-- ModVersion: 2.0.0-alpha
 -- Script:     HelperProfiles.lua
 -- BuildTag:   20260105-1
 -- ============================================================================
 
 do
-    local MOD_VERSION   = "1.1.0.1"
+    local MOD_VERSION   = "2.0.9-alpha"
     local SCRIPT_NAME   = "HelperProfiles.lua"
-    local BUILD_TAG     = "20260102-5"
+    local BUILD_TAG     = "20260513-2"
     local SCRIPT_VER    = string.format("%s-%s+%s", MOD_VERSION, SCRIPT_NAME, BUILD_TAG)
 
     local vi = rawget(_G, "FS25_HelperProfiles_VersionInfo")
@@ -140,6 +140,59 @@ end
 
 function HelperProfiles:getSelectionIndex()
     return self.selectedIdx or 1
+end
+
+function HelperProfiles:getSelectedHelper()
+    self:ensureValidSelection()
+    local profiles = self:getProfiles()
+    return profiles[self.selectedIdx], self.selectedIdx
+end
+
+function HelperProfiles:getDisplayNameForHelper(helper, idx)
+    if HP_ASBridge ~= nil and HP_ASBridge.getDisplayNameForHelper ~= nil then
+        local ok, displayName, baseName = pcall(HP_ASBridge.getDisplayNameForHelper, HP_ASBridge, helper, idx)
+        if ok and displayName ~= nil and tostring(displayName) ~= "" then
+            return tostring(displayName), tostring(baseName or (helper and helper.name) or idx or "?")
+        end
+    end
+    local baseName = helper ~= nil and helper.name or ("Helper " .. tostring(idx or "?"))
+    return tostring(baseName), tostring(baseName)
+end
+
+function HelperProfiles:getAppearanceLabelForHelper(helper, idx)
+    if HP_ASBridge ~= nil and HP_ASBridge.getAppearanceLabelForHelper ~= nil then
+        local ok, label, presetId, category = pcall(HP_ASBridge.getAppearanceLabelForHelper, HP_ASBridge, helper, idx)
+        if ok then
+            return label, presetId, category
+        end
+    end
+    return nil, nil, nil
+end
+
+function HelperProfiles:cycleSelectedAppearance(delta)
+    local helper, idx = self:getSelectedHelper()
+    if helper == nil then
+        self:_flash("No helper selected", 1.2)
+        return false, "no-helper"
+    end
+    if HP_ASBridge == nil or HP_ASBridge.cycleAppearance == nil then
+        self:_flash("AvatarSwitcher bridge unavailable", 1.5)
+        return false, "bridge-unavailable"
+    end
+
+    local ok, result = HP_ASBridge:cycleAppearance(helper, idx, delta or 1)
+    if ok then
+        local label = tostring(result.name or result.id or "appearance")
+        local displayName = self.getDisplayNameForHelper ~= nil and self:getDisplayNameForHelper(helper, idx) or tostring(helper.name or "Helper")
+        self:_flash(("%s appearance: %s"):format(tostring(displayName or helper.name or "Helper"), label), 1.5)
+        if HP_WorkerAppearance ~= nil and HP_WorkerAppearance.refreshActiveWorkers ~= nil then
+            HP_WorkerAppearance:refreshActiveWorkers()
+        end
+        return true, result
+    end
+
+    self:_flash("Appearance cycle failed: " .. tostring(result), 1.5)
+    return false, result
 end
 
 local function isFree(h)
@@ -345,6 +398,9 @@ local function hookOnce()
                 local h = g_helperManager.indexToHelper[idx]
                 if h then
                     print(("[FS25_HelperProfiles] hireHelper -> vehicle got '%s' (idx %d)"):format(tostring(h.name), idx))
+                    if HP_WorkerAppearance ~= nil and HP_WorkerAppearance.onHelperHired ~= nil then
+                        HP_WorkerAppearance:onHelperHired(vehicle, h, idx)
+                    end
                 end
             end
             return res

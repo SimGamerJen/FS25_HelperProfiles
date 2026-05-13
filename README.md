@@ -197,6 +197,7 @@ Recommended examples:
 |---|---:|---|
 | HP: Toggle overlay | `CTRL + ;` | Shows or hides the HelperProfiles overlay. |
 | HP: Toggle mode | `SHIFT + ;` | Switches between helper hiring modes. |
+| HP: Toggle binding | `unset` | Opens the binding interface to bind AvatarSwitcher appearances to AI Worker slots. |
 
 Helper selection cycling still hooks the game action used by the base helper menu and includes internal debounce handling.
 

@@ -4,9 +4,6 @@
 
 This release is intended as a **beta pre-release**.
 
-> Recommended GitHub tag: `v0.2.0-beta`  
-> Recommended FS25 internal version: `0.2.0.0`
-
 ---
 
 ## What It Does

@@ -30,11 +30,11 @@ Suggested screenshots to add here:
 
 1. **Main HelperProfiles overlay**  
 
-<img width="2077" height="1115" alt="hp_hud" src="https://github.com/user-attachments/assets/f0b58897-cb28-48c3-8fb0-2fc8e832ba93" />
+<img width="988" height="537" alt="hp_hud" src="https://github.com/user-attachments/assets/73d56658-a5b4-4cfd-8c73-c0652cdde6d5" />
 
 2. **Helper binding interface**  
 
-<img width="2936" height="1483" alt="hp_binding_interface" src="https://github.com/user-attachments/assets/e4c6228a-4b0e-4049-b7a4-deb8b0b62cd6" />
+<img width="2413" height="1265" alt="hp_binding_interface" src="https://github.com/user-attachments/assets/46d54b98-bc59-4c4b-a565-04478139c082" />
 
 3. **Two active helpers with different appearances**  
 

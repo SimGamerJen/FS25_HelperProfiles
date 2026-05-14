@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8" standalone="no" ?>
+<GUI onOpen="onOpen" onClose="onClose" onCreate="onCreate">
+    <Bitmap profile="dialogFullscreenBg" id="dialogBg" />
+    <GuiElement profile="fs25_dialogBg" id="dialogElement" size="1220px 650px">
+        <ThreePartBitmap profile="fs25_dialogBgMiddle" />
+        <ThreePartBitmap profile="fs25_dialogBgTop" />
+        <ThreePartBitmap profile="fs25_dialogBgBottom" />
+
+        <GuiElement profile="fs25_dialogContentContainer">
+            <Text profile="dialogTitle" text="Helper Profile Appearance Bindings" id="dialogTitleElement" position="0px -30px" />
+
+            <Bitmap profile="hpHeaderBox" id="helperHeaderBox" position="45px -90px" size="300px 50px">
+                <Text profile="hpHeaderLeft" position="10px 0px" size="250px 40.77px" text="Helper / Binding State" />
+                <ThreePartBitmap profile="fs25_lineSeparatorBottom" position="0px 2px" />
+            </Bitmap>
+
+            <SmoothList profile="hpList" id="helperTable" position="50px -145px" size="290px 315px" focusInit="onOpen" focusChangeTop="nil" focusChangeBottom="nil">
+                <ListItem profile="hpListItem" name="helperRowTemplate" size="290px 40.77px">
+                    <Text profile="hpRowCellLeft" position="12px 0px" size="260px 40.77px" name="HelperName" textLayoutMode="scrolling" />
+                </ListItem>
+            </SmoothList>
+
+            <ThreePartBitmap profile="fs25_listSliderBox" position="348px -145px" size="12px 315px">
+                <Slider profile="fs25_listSlider" size="6px 307px" dataElementId="helperTable" id="helperSlider" />
+            </ThreePartBitmap>
+
+            <Bitmap profile="hpHeaderBox" id="categoryHeaderBox" position="385px -90px" size="265px 50px">
+                <Text profile="hpHeaderLeft" position="10px 0px" size="235px 40.77px" text="Category" />
+                <ThreePartBitmap profile="fs25_lineSeparatorBottom" position="0px 2px" />
+            </Bitmap>
+
+            <SmoothList profile="hpList" id="categoryTable" position="390px -145px" size="255px 315px" focusChangeTop="nil" focusChangeBottom="nil">
+                <ListItem profile="hpListItem" name="categoryRowTemplate" size="255px 40.77px">
+                    <Text profile="hpRowCellLeft" position="12px 0px" size="225px 40.77px" name="CategoryName" textLayoutMode="scrolling" />
+                </ListItem>
+            </SmoothList>
+
+            <ThreePartBitmap profile="fs25_listSliderBox" position="658px -145px" size="12px 315px">
+                <Slider profile="fs25_listSlider" size="6px 307px" dataElementId="categoryTable" id="categorySlider" />
+            </ThreePartBitmap>
+
+            <Bitmap profile="hpHeaderBox" id="presetHeaderBox" position="695px -90px" size="455px 50px">
+                <Text profile="hpHeaderLeft" position="10px 0px" size="265px 40.77px" text="Appearance" />
+                <Text profile="hpHeaderRight" position="285px 0px" size="155px 40.77px" text="Preset ID" />
+                <ThreePartBitmap profile="fs25_lineSeparatorBottom" position="0px 2px" />
+            </Bitmap>
+
+            <SmoothList profile="hpList" id="presetTable" handleFocus="true" selectedWithoutFocus="false" position="700px -145px" size="445px 315px" focusChangeTop="nil" focusChangeBottom="nil">
+                <ListItem profile="hpListItem" name="presetRowTemplate" size="445px 40.77px">
+                    <Text profile="hpRowCellLeft" position="12px 0px" size="260px 40.77px" name="PresetName" textLayoutMode="scrolling" />
+                    <Text profile="hpRowCellRight" position="280px 0px" size="150px 40.77px" name="PresetId" textLayoutMode="scrolling" />
+                </ListItem>
+            </SmoothList>
+
+            <ThreePartBitmap profile="fs25_listSliderBox" position="1155px -145px" size="12px 315px">
+                <Slider profile="fs25_listSlider" size="6px 307px" dataElementId="presetTable" id="presetSlider" />
+            </ThreePartBitmap>
+
+            <Bitmap profile="hpDetailBox" id="detailBox" position="45px -485px" size="1105px 95px">
+                <Text profile="hpMetaText" id="detailText" position="10px 8px" size="1085px 35px" text="Select a helper slot, category, and appearance." textLayoutMode="scrolling" />
+                <Text profile="hpMetaText" id="statusText" position="10px -38px" size="1085px 35px" text="Ready" textLayoutMode="scrolling" />
+                <ThreePartBitmap profile="fs25_lineSeparatorBottom" position="0px 2px" />
+            </Bitmap>
+
+        </GuiElement>
+
+        <BoxLayout profile="fs25_dialogButtonBox" size="1170px 60px">
+            <Button profile="buttonBack" text="Close" onClick="onClickBack" />
+            <Button profile="buttonExtra1" text="Bind" onClick="onClickBindAppearance" />
+            <Button profile="buttonExtra1" text="Clear" onClick="onClickClearBinding" />
+            <Button profile="buttonExtra1" text="Clear All" onClick="onClickClearAllBindings" />
+            <Button profile="buttonExtra1" text="Save" onClick="onClickSave" />
+        </BoxLayout>
+    </GuiElement>
+</GUI>

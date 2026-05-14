@@ -1,5 +1,5 @@
 -- HP_WorkerAppearance.lua (FS25_HelperProfiles)
--- ModVersion: 2.0.5-alpha
+-- ModVersion: 2.0.19-beta
 -- BuildTag: 20260513.4
 -- PlayerWorkers-inspired runtime vehicle-character appearance bridge.
 -- v2.0.5: reverts to the working 2.0.3 injection path; adds minimal success logging only.

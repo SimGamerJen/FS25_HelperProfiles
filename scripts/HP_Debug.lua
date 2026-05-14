@@ -2,13 +2,13 @@
 
 -- ============================================================================
 -- FS25_HelperProfiles
--- ModVersion: 2.0.1-alpha
+-- ModVersion: 2.0.19-beta
 -- Script:     HP_Debug.lua
 -- BuildTag:   20260105-1
 -- ============================================================================
 
 do
-    local MOD_VERSION   = "2.0.0-alpha"
+    local MOD_VERSION   = "2.0.19-beta"
     local SCRIPT_NAME   = "HP_Debug.lua"
     local BUILD_TAG     = "20260512-2"
     local SCRIPT_VER    = string.format("%s-%s+%s", MOD_VERSION, SCRIPT_NAME, BUILD_TAG)
@@ -309,9 +309,12 @@ function Debug:hpAppearance(...)
 
 
     if a == "menu" then
-        if HP_AppearanceMenu ~= nil and HP_AppearanceMenu.open ~= nil then
+        if HP_AppearanceBindingsGui ~= nil and HP_AppearanceBindingsGui.open ~= nil then
+            HP_AppearanceBindingsGui:open()
+            print("[HP] Appearance binding XML GUI opened")
+        elseif HP_AppearanceMenu ~= nil and HP_AppearanceMenu.open ~= nil then
             HP_AppearanceMenu:open()
-            print("[HP] Appearance binding menu opened")
+            print("[HP] Appearance binding legacy menu opened")
         else
             print("[HP] Appearance binding menu unavailable")
         end

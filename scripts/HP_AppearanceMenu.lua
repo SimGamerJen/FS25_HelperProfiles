@@ -1,9 +1,10 @@
 -- HP_AppearanceMenu.lua (FS25_HelperProfiles)
--- ModVersion: 2.0.10-alpha
+-- ModVersion: 2.0.19-beta
 -- BuildTag: 20260513.3
 -- Mouse-driven per-save helper appearance binding interface.
 -- Uses HP_ASBridge direct AvatarSwitcher preset data and stores preset IDs behind the scenes.
 -- v2.0.9: shows derived helper display names in the slot list and saves them with bindings.
+-- v2.0.16: unbound draft rows use the real helper slot name, not stale derived names.
 -- v2.0.10: dropdowns are opaque modal layers and own mouse hit-testing while open.
 
 HP_AppearanceMenu = HP_AppearanceMenu or {
@@ -100,11 +101,14 @@ local function getDerivedDisplayNameForPreset(preset, fallback)
 end
 
 local function getHelperDisplayName(helper, idx)
+    local fallback = tostring((helper ~= nil and helper.name) or ("Helper " .. tostring(idx or "?")))
     if HelperProfiles ~= nil and HelperProfiles.getDisplayNameForHelper ~= nil then
-        local ok, displayName = pcall(HelperProfiles.getDisplayNameForHelper, HelperProfiles, helper, idx)
-        if ok and displayName ~= nil and tostring(displayName) ~= "" then return tostring(displayName) end
+        local ok, displayName, baseName = pcall(HelperProfiles.getDisplayNameForHelper, HelperProfiles, helper, idx)
+        if ok and displayName ~= nil and tostring(displayName) ~= "" then
+            return tostring(displayName), tostring(baseName or fallback)
+        end
     end
-    return tostring((helper ~= nil and helper.name) or ("Helper " .. tostring(idx or "?")))
+    return fallback, fallback
 end
 
 local function getCategoryForPreset(presetId)
@@ -250,9 +254,14 @@ function HP_AppearanceMenu:save()
         self.dirty = false
         self:flash("Bindings saved", 2.0)
         hpPrint("Saved appearance bindings")
+        if HP_ASBridge ~= nil and HP_ASBridge.reload ~= nil then
+            HP_ASBridge:reload()
+        end
         if HP_WorkerAppearance ~= nil and HP_WorkerAppearance.refreshActiveWorkers ~= nil then
             HP_WorkerAppearance:refreshActiveWorkers()
         end
+        self:buildDraftFromBridge()
+        self:syncSelectionFromDraft()
         return true
     end
     self:flash("Save failed: " .. tostring(err), 3.0)
@@ -394,8 +403,15 @@ function HP_AppearanceMenu:draw()
         local selected = i == self.selectedHelperIndex
         local link = row ~= nil and self:getDraftLinkForHelperName(row.name) or nil
         drawRect(leftX, rowY, leftW, rowH - 0.003, selected and 0.21 or 0.08, selected and 0.26 or 0.08, selected and 0.34 or 0.08, 0.96)
-        local displayName = (link ~= nil and link.displayName ~= nil and tostring(link.displayName) ~= "") and tostring(link.displayName) or getHelperDisplayName(row.helper, row.index)
-        local baseHint = (displayName ~= row.name) and (" (" .. tostring(row.name) .. ")") or ""
+        local displayName = nil
+        if link ~= nil and link.displayName ~= nil and tostring(link.displayName) ~= "" then
+            displayName = tostring(link.displayName)
+        elseif link ~= nil and link.presetId ~= nil and tostring(link.presetId) ~= "" then
+            displayName = getHelperDisplayName(row.helper, row.index)
+        else
+            displayName = tostring(row.name or ("Helper " .. tostring(row.index or "?")))
+        end
+        local baseHint = (displayName ~= row.name and link ~= nil and link.presetId ~= nil) and (" (" .. tostring(row.name) .. ")") or ""
         local label = string.format("%02d  %s%s", row.index, displayName, baseHint)
         drawText(leftX + 0.006, rowY + 0.010, 0.0125, ellipsize(label, 31), 1, 1, 1, 1)
         local bindText = link ~= nil and link.presetId ~= nil and "bound" or "vanilla"

@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8" standalone="no"?>
 <modDesc descVersion="99">
-    <author>YourName</author>
-    <version>2.0.10.0</version>
+    <author>SimGamerJen</author>
+    <version>2.0.19.0</version>
     <title>
         <en>Helper Profiles</en>
     </title>
     <description>
-        <en>Helper profile selector with optional AvatarSwitcher appearance binding for AI worker vehicle characters. v2.0.10-alpha fixes the appearance binding UI dropdowns so they draw as opaque modal panels and no longer leak mouse clicks to controls behind them.</en>
+        <en>Helper profile selector with optional AvatarSwitcher appearance binding for AI worker vehicle characters. v2.0.19-beta adds the XML appearance binding interface, immediate bind/unbind list updates, corrected unbound slot labels, and finalised default keybinds: semicolon cycles workers, Shift+semicolon toggles hpMode, Right Ctrl+semicolon opens appearance bindings, and Right Alt+semicolon toggles the overlay.</en>
 		<de>Erstelle dauerhafte Namen und Erscheinungsbilder für beliebig viele Helfer, bis zum maximal im Spiel erlaubten Limit. Unterstützung für AutoDrive und Courseplay wird derzeit entwickelt.</de>
 		<fr>Créez des noms et des apparences persistants pour n'importe quel nombre d'aides jusqu'au maximum autorisé dans le jeu. La prise en charge de l'intégration d'AutoDrive et de Courseplay est en cours de développement.</fr>
 
@@ -28,12 +28,13 @@
   </actionBinding>
   <actionBinding action="HP_TOGGLE_MODE">
     <binding device="KB_MOUSE_DEFAULT" input="KEY_lshift KEY_semicolon" />
-      <!-- Optional: also allow right-shift -->
     <binding device="KB_MOUSE_DEFAULT" input="KEY_rshift KEY_semicolon" />
   </actionBinding>
   <actionBinding action="HP_OPEN_APPEARANCE_MENU">
-    <binding device="KB_MOUSE_DEFAULT" input="KEY_lctrl KEY_semicolon" />
     <binding device="KB_MOUSE_DEFAULT" input="KEY_rctrl KEY_semicolon" />
+  </actionBinding>
+  <actionBinding action="HP_TOGGLE_OVERLAY">
+    <binding device="KB_MOUSE_DEFAULT" input="KEY_ralt KEY_semicolon" />
   </actionBinding>
 </inputBinding>
 
@@ -59,6 +60,7 @@
   <sourceFile filename="scripts/HP_ASBridge.lua"/>
   <sourceFile filename="scripts/HP_WorkerAppearance.lua"/>
   <sourceFile filename="scripts/HP_AppearanceMenu.lua"/>
+  <sourceFile filename="scripts/gui/HP_AppearanceBindingsScreen.lua"/>
   <sourceFile filename="scripts/HelperProfiles.lua"/>
   <sourceFile filename="scripts/RegisterPlayerActionEvents.lua"/>
 </extraSourceFiles>

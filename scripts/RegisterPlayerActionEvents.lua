@@ -1,6 +1,6 @@
 -- RegisterPlayerActionEvents.lua
 -- Clean, duplicate-safe input setup for both Player and Vehicle contexts.
--- v2.0.8-alpha adds HP_OPEN_APPEARANCE_MENU for the mouse-driven binding UI.
+-- v2.0.19-beta suppresses the plain semicolon cycle action while Shift/Ctrl/Alt modifier chords are held.
 
 HelperProfiles = HelperProfiles or {}
 
@@ -21,8 +21,40 @@ local function _isPress(inputValue, callbackState)
     return v ~= nil and v > 0
 end
 
+local function _isPhysicalKeyPressed(keyName)
+    if Input == nil or Input.isKeyPressed == nil then
+        return false
+    end
+
+    local key = Input[keyName]
+    if key == nil then
+        return false
+    end
+
+    local ok, result = pcall(Input.isKeyPressed, key)
+    return ok and result == true
+end
+
+local function _isHpModifierDown()
+    return _isPhysicalKeyPressed("KEY_lshift")
+        or _isPhysicalKeyPressed("KEY_rshift")
+        or _isPhysicalKeyPressed("KEY_lctrl")
+        or _isPhysicalKeyPressed("KEY_rctrl")
+        or _isPhysicalKeyPressed("KEY_lalt")
+        or _isPhysicalKeyPressed("KEY_ralt")
+end
+
 local function _onCycle(_, actionName, inputValue, callbackState, isAnalog)
     if not _isPress(inputValue, callbackState) then return end
+
+    -- GIANTS action bindings are not exclusive: KEY_semicolon can still fire
+    -- when KEY_shift/KEY_ctrl/KEY_alt + KEY_semicolon is pressed.
+    -- Suppress the plain cycle action while HP modifier chords are held so
+    -- HP_TOGGLE_MODE, HP_OPEN_APPEARANCE_MENU, and HP_TOGGLE_OVERLAY do not also cycle workers.
+    if _isHpModifierDown() then
+        return
+    end
+
     if HelperProfiles and HelperProfiles.cycleSelectionDebounced then
         HelperProfiles:cycleSelectionDebounced(1)
     elseif HelperProfiles and HelperProfiles.cycleSelection then
@@ -45,7 +77,9 @@ end
 
 local function _onAppearanceMenu(_, actionName, inputValue, callbackState, isAnalog)
     if not _isPress(inputValue, callbackState) then return end
-    if HP_AppearanceMenu ~= nil and HP_AppearanceMenu.toggle ~= nil then
+    if HP_AppearanceBindingsGui ~= nil and HP_AppearanceBindingsGui.open ~= nil then
+        HP_AppearanceBindingsGui:open()
+    elseif HP_AppearanceMenu ~= nil and HP_AppearanceMenu.toggle ~= nil then
         HP_AppearanceMenu:toggle()
     end
 end

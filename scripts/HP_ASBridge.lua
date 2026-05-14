@@ -1,5 +1,5 @@
 -- HP_ASBridge.lua (FS25_HelperProfiles)
--- ModVersion: 2.0.7-alpha
+-- ModVersion: 2.0.19-beta
 -- BuildTag: 20260513.4
 -- Optional bridge to FS25_AvatarSwitcher presets.
 -- v2.0.3: adds direct preset-file fallback because FS25/Luau can isolate mod globals.
@@ -330,7 +330,7 @@ function HP_ASBridge:writeLinks()
         return false
     end
 
-    setXMLString(xmlFile, "helperProfilesAppearance#version", "2.0.9-alpha")
+    setXMLString(xmlFile, "helperProfilesAppearance#version", "2.0.19-beta")
     setXMLString(xmlFile, "helperProfilesAppearance#savegame", tostring(self.savegameName or "unknownSavegame"))
     setXMLString(xmlFile, "helperProfilesAppearance#note", "Per-save helper appearance links. Bind helper names to AvatarSwitcher preset IDs. Use the HP appearance menu or hpAppearance bind <helperIndex> <presetId>. Category is stored as metadata/legacy fallback. displayName is derived from the bound AvatarSwitcher preset and used by the HP overlay/menu.")
 

@@ -2,10 +2,7 @@
 
 **FS25 HelperProfiles** is a Farming Simulator 25 helper-management mod that adds a game-styled helper overlay, configurable helper selection behaviour, console/debug tools, and an optional **AvatarSwitcher binding interface** for assigning saved appearances to helper profile slots on a per-savegame basis.
 
-This release is intended as a **beta pre-release**.
-
-> Recommended GitHub tag: `v0.2.0-beta`  
-> Recommended FS25 internal version: `0.2.0.0`
+This release is intended as a **beta pre-release**. You MUST HAVE the FS25_AvatarSwitcher (https://github.com/SimGamerJen/FS25_AvatarSwitcher) mod installed and enabled for this version of Helper Profiles.
 
 ---
 
@@ -32,29 +29,16 @@ The AvatarSwitcher binding system is designed to avoid direct runtime AI avatar 
 Suggested screenshots to add here:
 
 1. **Main HelperProfiles overlay**  
-   Show the selected helper, next helper, helper status, and current mode.
+
+<img width="2077" height="1115" alt="hp_hud" src="https://github.com/user-attachments/assets/f0b58897-cb28-48c3-8fb0-2fc8e832ba93" />
 
 2. **Helper binding interface**  
-   Show the binding slot selector, category selector, and appearance selector.
 
-3. **Category dropdown open**  
-   Useful for demonstrating the fixed dropdown opacity and click-capture behaviour.
+<img width="2936" height="1483" alt="hp_binding_interface" src="https://github.com/user-attachments/assets/e4c6228a-4b0e-4049-b7a4-deb8b0b62cd6" />
 
-4. **Appearance dropdown filtered by category**  
-   Show that selecting a category filters available AvatarSwitcher appearances.
+3. **Two active helpers with different appearances**  
 
-5. **Two active helpers with different appearances**  
-   Best headline screenshot for the new beta.
-
-Example Markdown placeholders:
-
-```markdown
-![HelperProfiles overlay](docs/screenshots/helperprofiles-overlay.png)
-![Binding interface](docs/screenshots/helperprofiles-binding-ui.png)
-![Category dropdown](docs/screenshots/helperprofiles-category-dropdown.png)
-![Filtered appearances](docs/screenshots/helperprofiles-appearance-filter.png)
-![Two helpers with different appearances](docs/screenshots/helperprofiles-two-workers.png)
-```
+<img width="2338" height="1608" alt="multiple_workers_support" src="https://github.com/user-attachments/assets/758b8d47-536b-4c86-ae40-213ea8985dcd" />
 
 ---
 
@@ -213,6 +197,7 @@ Recommended examples:
 |---|---:|---|
 | HP: Toggle overlay | `CTRL + ;` | Shows or hides the HelperProfiles overlay. |
 | HP: Toggle mode | `SHIFT + ;` | Switches between helper hiring modes. |
+| HP: Toggle binding | `unset` | Opens the binding interface to bind AvatarSwitcher appearances to AI Worker slots. |
 
 Helper selection cycling still hooks the game action used by the base helper menu and includes internal debounce handling.
 

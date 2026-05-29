@@ -34,7 +34,7 @@ Suggested screenshots to add here:
 
 2. **Helper binding interface**  
 
-<img width="2936" height="1483" alt="hp_binding_interface" src="https://github.com/user-attachments/assets/e4c6228a-4b0e-4049-b7a4-deb8b0b62cd6" />
+<img width="2413" height="1265" alt="hp_binding_interface" src="https://github.com/user-attachments/assets/9ee84de0-e522-40de-9861-ee335eecc454" />
 
 3. **Two active helpers with different appearances**  
 

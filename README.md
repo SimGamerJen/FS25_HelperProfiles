@@ -30,11 +30,11 @@ Suggested screenshots to add here:
 
 1. **Main HelperProfiles overlay**  
 
-<img width="988" height="537" alt="hp_hud" src="https://github.com/user-attachments/assets/73d56658-a5b4-4cfd-8c73-c0652cdde6d5" />
+<img width="2077" height="1115" alt="hp_hud" src="https://github.com/user-attachments/assets/f0b58897-cb28-48c3-8fb0-2fc8e832ba93" />
 
 2. **Helper binding interface**  
 
-<img width="2413" height="1265" alt="hp_binding_interface" src="https://github.com/user-attachments/assets/46d54b98-bc59-4c4b-a565-04478139c082" />
+<img width="2936" height="1483" alt="hp_binding_interface" src="https://github.com/user-attachments/assets/e4c6228a-4b0e-4049-b7a4-deb8b0b62cd6" />
 
 3. **Two active helpers with different appearances**  
 
@@ -105,18 +105,77 @@ Bindings are intended to be savegame-specific. Always test beta builds on a copi
 
 ## Migration Notes
 
-### Upgrading from older HelperProfiles builds
+### Important: legacy `maps_helpers.xml` edits
 
-Older HelperProfiles builds may have stored appearance bindings globally at:
+Very early HelperProfiles/custom-helper workflows required editing the basegame `maps_helpers.xml` file in the Farming Simulator 25 install directory.
+
+That workflow is now deprecated.
+
+The current HelperProfiles + AvatarSwitcher workflow does **not** use edited basegame helper XML files. Custom helper appearances should now be created as AvatarSwitcher presets and then bound to HelperProfiles slots through the in-game binding interface.
+
+If you previously edited the basegame file, restore the original version before using this release.
+
+Common legacy file location:
 
 ```text
-modSettings/FS25_HelperProfiles/appearanceLinks.xml
+<Farming Simulator 25 install folder>/data/maps/maps_helpers.xml
+```
+
+Depending on where the game is installed, this may be under a Steam, GIANTS/eShop, Epic, or custom install path.
+
+### Migrating from the old `maps_helpers.xml` workflow
+
+HelperProfiles does **not** currently auto-import helper definitions from an edited `maps_helpers.xml` file.
+
+Recommended migration path:
+
+1. Back up your edited `maps_helpers.xml` file somewhere safe.
+2. Restore the original basegame `maps_helpers.xml` file.
+   - If you kept a clean backup, copy that back into the game install folder.
+   - If you do not have a clean backup, use your game launcher’s file verification/repair option to restore the original game files.
+3. Install and enable `FS25_AvatarSwitcher`.
+4. Recreate your custom helper appearances as AvatarSwitcher presets.
+5. Install and enable `FS25_HelperProfiles`.
+6. Open the HelperProfiles appearance binding interface with:
+
+```text
+RCTRL + ;
+```
+
+or with the console command:
+
+```text
+hpAppearance menu
+```
+
+7. Bind each HelperProfiles slot to the appropriate AvatarSwitcher preset.
+8. Press **Bind** to stage the slot binding.
+9. Press **Save** to persist the bindings for the active savegame.
+
+The new per-savegame binding file is stored at:
+
+```text
+Documents/My Games/FarmingSimulator2025/modSettings/FS25_HelperProfiles/saves/savegameX/appearanceLinks.xml
+```
+
+AvatarSwitcher presets are stored at:
+
+```text
+Documents/My Games/FarmingSimulator2025/modSettings/FS25_AvatarSwitcher/avatarPresets.xml
+```
+
+### Upgrading from older HelperProfiles beta builds
+
+Some earlier HelperProfiles beta builds may have stored appearance bindings globally at:
+
+```text
+Documents/My Games/FarmingSimulator2025/modSettings/FS25_HelperProfiles/appearanceLinks.xml
 ```
 
 Current beta builds store bindings per savegame:
 
 ```text
-modSettings/FS25_HelperProfiles/saves/savegameX/appearanceLinks.xml
+Documents/My Games/FarmingSimulator2025/modSettings/FS25_HelperProfiles/saves/savegameX/appearanceLinks.xml
 ```
 
 HelperProfiles includes migration support for the older global `appearanceLinks.xml` file. When a savegame is loaded, the mod should migrate the old binding file into the active savegame-specific folder.
@@ -135,29 +194,6 @@ hpAppearance menu
 5. Confirm your bindings are present.
 6. Press **Save** in the binding interface.
 
----
-
-### Migrating from the original basegame XML editing workflow
-
-Very early custom helper workflows may have required editing or replacing basegame helper XML files.
-
-That workflow is now deprecated.
-
-Before using the current HelperProfiles + AvatarSwitcher workflow, restore the original basegame helper XML files. Direct basegame XML editing is no longer required or recommended.
-
-The current workflow is:
-
-1. Install `FS25_AvatarSwitcher`.
-2. Recreate your custom worker appearances as AvatarSwitcher presets.
-3. Install `FS25_HelperProfiles`.
-4. Open the HelperProfiles appearance binding interface.
-5. Bind each helper slot to the appropriate AvatarSwitcher preset.
-6. Save the bindings.
-
-HelperProfiles does **not** currently auto-import custom helper definitions from edited basegame XML files.
-
----
-
 ### AvatarSwitcher dependency
 
 HelperProfiles does not have a hard dependency on AvatarSwitcher for its core features.
@@ -167,20 +203,19 @@ These features work without AvatarSwitcher:
 - Worker cycling.
 - HelperProfiles mode switching.
 - Overlay toggle.
+- Console/debug tools.
 
 AvatarSwitcher is required for custom appearance bindings, because HelperProfiles reads AvatarSwitcher presets from:
 
 ```text
-modSettings/FS25_AvatarSwitcher/avatarPresets.xml
+Documents/My Games/FarmingSimulator2025/modSettings/FS25_AvatarSwitcher/avatarPresets.xml
 ```
 
 and stores per-savegame bindings in:
 
 ```text
-modSettings/FS25_HelperProfiles/saves/savegameX/appearanceLinks.xml
+Documents/My Games/FarmingSimulator2025/modSettings/FS25_HelperProfiles/saves/savegameX/appearanceLinks.xml
 ```
-
----
 
 ### Default keybinds
 

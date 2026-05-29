@@ -2,7 +2,7 @@
 
 **FS25 HelperProfiles** is a Farming Simulator 25 helper-management mod that adds a game-styled helper overlay, configurable helper selection behaviour, console/debug tools, and an optional **AvatarSwitcher binding interface** for assigning saved appearances to helper profile slots on a per-savegame basis.
 
-This release is intended as a **beta pre-release**. **FS25_AvatarSwitcher** is optional for the core HelperProfiles overlay, worker cycling, and helper mode features. Install and enable [FS25_AvatarSwitcher](https://github.com/SimGamerJen/FS25_AvatarSwitcher) if you want to use custom appearance bindings.
+This release is intended as a **beta pre-release**. You MUST HAVE the FS25_AvatarSwitcher (https://github.com/SimGamerJen/FS25_AvatarSwitcher) mod installed and enabled for this version of Helper Profiles.
 
 ---
 
@@ -67,11 +67,7 @@ The overlay config is stored at:
 Documents/My Games/FarmingSimulator2025/modSettings/FS25_HelperProfiles/config.xml
 ```
 
-Savegame-specific binding data is stored under the HelperProfiles modSettings structure:
-
-```text
-Documents/My Games/FarmingSimulator2025/modSettings/FS25_HelperProfiles/saves/savegameX/appearanceLinks.xml
-```
+Savegame-specific binding data is stored under the HelperProfiles modSettings structure.
 
 ---
 
@@ -84,15 +80,6 @@ Documents/My Games/FarmingSimulator2025/modSettings/FS25_HelperProfiles/saves/sa
 
 ### AvatarSwitcher
 
-AvatarSwitcher is not a hard dependency for the core HelperProfiles features.
-
-These features work without AvatarSwitcher:
-
-- Worker cycling.
-- HelperProfiles mode switching.
-- Overlay toggle and overlay configuration.
-- Console/debug tools.
-
 The helper appearance binding interface requires **FS25_AvatarSwitcher** and its `avatarPresets.xml` data.
 
 HelperProfiles reads AvatarSwitcher preset data so the UI can display readable categories and appearance descriptions while using preset IDs internally.
@@ -100,98 +87,6 @@ HelperProfiles reads AvatarSwitcher preset data so the UI can display readable c
 ### Savegames
 
 Bindings are intended to be savegame-specific. Always test beta builds on a copied savegame before using them in an important save.
-
----
-
-## Migration Notes
-
-### Upgrading from older HelperProfiles builds
-
-Older HelperProfiles builds may have stored appearance bindings globally at:
-
-```text
-modSettings/FS25_HelperProfiles/appearanceLinks.xml
-```
-
-Current beta builds store bindings per savegame:
-
-```text
-modSettings/FS25_HelperProfiles/saves/savegameX/appearanceLinks.xml
-```
-
-HelperProfiles includes migration support for the older global `appearanceLinks.xml` file. When a savegame is loaded, the mod should migrate the old binding file into the active savegame-specific folder.
-
-Recommended steps:
-
-1. Back up your existing `modSettings/FS25_HelperProfiles` folder.
-2. Install the current HelperProfiles beta.
-3. Load your savegame.
-4. Open the appearance binding interface with `RCTRL + ;` or:
-
-```text
-hpAppearance menu
-```
-
-5. Confirm your bindings are present.
-6. Press **Save** in the binding interface.
-
----
-
-### Migrating from the original basegame XML editing workflow
-
-Very early custom helper workflows may have required editing or replacing basegame helper XML files.
-
-That workflow is now deprecated.
-
-Before using the current HelperProfiles + AvatarSwitcher workflow, restore the original basegame helper XML files. Direct basegame XML editing is no longer required or recommended.
-
-The current workflow is:
-
-1. Install `FS25_AvatarSwitcher`.
-2. Recreate your custom worker appearances as AvatarSwitcher presets.
-3. Install `FS25_HelperProfiles`.
-4. Open the HelperProfiles appearance binding interface.
-5. Bind each helper slot to the appropriate AvatarSwitcher preset.
-6. Save the bindings.
-
-HelperProfiles does **not** currently auto-import custom helper definitions from edited basegame XML files.
-
----
-
-### AvatarSwitcher dependency
-
-HelperProfiles does not have a hard dependency on AvatarSwitcher for its core features.
-
-These features work without AvatarSwitcher:
-
-- Worker cycling.
-- HelperProfiles mode switching.
-- Overlay toggle.
-
-AvatarSwitcher is required for custom appearance bindings, because HelperProfiles reads AvatarSwitcher presets from:
-
-```text
-modSettings/FS25_AvatarSwitcher/avatarPresets.xml
-```
-
-and stores per-savegame bindings in:
-
-```text
-modSettings/FS25_HelperProfiles/saves/savegameX/appearanceLinks.xml
-```
-
----
-
-### Default keybinds
-
-```text
-;           Cycle workers
-SHIFT + ;   Toggle HelperProfiles mode
-RCTRL + ;   Open appearance binding interface
-RALT + ;    Toggle overlay
-```
-
-If the defaults do not appear after upgrading, Farming Simulator may be preserving older local keybind overrides. Reset or manually reassign the HelperProfiles controls in the game controls menu.
 
 ---
 
@@ -248,11 +143,10 @@ From the interface, you can:
 - Select a binding slot.
 - Select an AvatarSwitcher category.
 - Select an appearance from that category.
-- Bind the selected appearance to the selected slot.
 - Save the binding.
 - Clear the selected binding.
 - Clear all bindings.
-- Close the interface when finished.
+- Confirm changes with OK.
 
 The UI displays readable preset names/descriptions. The underlying preset ID is used internally when applying the appearance.
 
@@ -262,18 +156,15 @@ The UI displays readable preset names/descriptions. The underlying preset ID is 
 2. Select the helper binding slot you want to configure.
 3. Choose an AvatarSwitcher category.
 4. Choose an appearance from the filtered appearance dropdown.
-5. Click **Bind** to stage the binding.
-6. Confirm the slot shows as `[BOUND]`.
-7. Click **Save** to persist the binding for the current savegame.
+5. Click **Save**.
+6. Click **OK** when finished.
 
 ### Clearing Bindings
 
 Use:
 
-- **Clear** to remove the selected slot binding.
-- **Clear All** to remove every binding for the current savegame.
-
-After clearing, click **Save** to persist the unbound state for the current savegame.
+- **Clear Binding** to remove the selected slot binding.
+- **Clear All Bindings** to remove every binding for the current savegame.
 
 ### Tested Binding Behaviour
 
@@ -300,16 +191,15 @@ Keybinds can be assigned under:
 Options → Controls → Helper Profiles
 ```
 
-Default bindings:
+Recommended examples:
 
-| Action | Default Binding | Description |
+| Action | Suggested Binding | Description |
 |---|---:|---|
-| HP: Cycle workers | `;` | Cycles the selected HelperProfiles worker slot. |
+| HP: Toggle overlay | `CTRL + ;` | Shows or hides the HelperProfiles overlay. |
 | HP: Toggle mode | `SHIFT + ;` | Switches between helper hiring modes. |
-| HP: Open appearance bindings | `RCTRL + ;` | Opens the binding interface to bind AvatarSwitcher appearances to AI worker slots. |
-| HP: Toggle overlay | `RALT + ;` | Shows or hides the HelperProfiles overlay. |
+| HP: Toggle binding | `unset` | Opens the binding interface to bind AvatarSwitcher appearances to AI Worker slots. |
 
-Helper selection cycling hooks the game action used by the base helper menu and includes internal debounce handling. Plain `;` cycling is suppressed when Shift, Ctrl, or Alt is held so the modifier bindings can work separately.
+Helper selection cycling still hooks the game action used by the base helper menu and includes internal debounce handling.
 
 If another mod already uses the same keybind, assign a different key in the FS25 controls menu.
 
@@ -404,16 +294,6 @@ preferSelected
 
 ---
 
-### Appearance Binding Commands
-
-| Command | Description |
-|---|---|
-| `hpAppearance menu` | Open the appearance binding interface. |
-| `hpAppearance status` | Print appearance binding status to the log/console. |
-| `hpAppearance refresh` | Refresh active worker appearances from saved bindings. |
-
----
-
 ### Version Command
 
 | Command | Description |
@@ -485,9 +365,8 @@ hpOverlay debounce 300
 
 Check that:
 
-- FS25_AvatarSwitcher is installed and enabled for the savegame.
+- FS25_AvatarSwitcher is installed and enabled.
 - AvatarSwitcher has generated or loaded `avatarPresets.xml`.
-- At least one AvatarSwitcher preset has been saved.
 - The preset entries have valid IDs, categories, and descriptions/names.
 - The savegame has both mods enabled.
 
@@ -550,13 +429,13 @@ Before publishing a release ZIP:
 ### Tag
 
 ```text
-v2.0.19-beta
+v0.2.0-beta
 ```
 
 ### Release Title
 
 ```text
-FS25_HelperProfiles v2.0.19-beta – AvatarSwitcher Binding GUI
+FS25_HelperProfiles v0.2.0-beta – AvatarSwitcher Binding GUI
 ```
 
 ### Short Release Summary

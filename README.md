@@ -34,7 +34,7 @@ Suggested screenshots to add here:
 
 2. **Helper binding interface**  
 
-<img width="2413" height="1265" alt="hp_binding_interface" src="https://github.com/user-attachments/assets/9ee84de0-e522-40de-9861-ee335eecc454" />
+<img width="2936" height="1483" alt="hp_binding_interface" src="https://github.com/user-attachments/assets/e4c6228a-4b0e-4049-b7a4-deb8b0b62cd6" />
 
 3. **Two active helpers with different appearances**  
 
@@ -546,9 +546,9 @@ For support, include:
 
 ---
 
-## Beta Notes
+## Release Notes
 
-This release should be treated as a beta.
+This release has been promoted from beta to a stable release.
 
 Known risk areas:
 
@@ -576,7 +576,7 @@ Before publishing a release ZIP:
 - Confirm there are no temporary logs, backups, or test files in the ZIP.
 - Confirm `icon.dds` is present and referenced correctly in `modDesc.xml`.
 - Confirm screenshots are added to the GitHub release or README.
-- Mark the GitHub release as **Pre-release** for beta builds.
+- Do not mark stable releases as pre-release. Use pre-release only for alpha or beta builds.
 
 ---
 
@@ -585,19 +585,19 @@ Before publishing a release ZIP:
 ### Tag
 
 ```text
-v2.0.19-beta
+v2.0.20
 ```
 
 ### Release Title
 
 ```text
-FS25_HelperProfiles v2.0.19-beta – AvatarSwitcher Binding GUI
+FS25_HelperProfiles v2.0.20 – XML Appearance Binding Interface
 ```
 
 ### Short Release Summary
 
 ```text
-This beta adds the new HelperProfiles binding interface for assigning AvatarSwitcher appearances to helper slots, along with the existing helper overlay, hiring mode controls, and console/debug tools.
+This release adds the new HelperProfiles binding interface for assigning AvatarSwitcher appearances to helper slots, along with the existing helper overlay, hiring mode controls, and console/debug tools.
 ```
 
 ---

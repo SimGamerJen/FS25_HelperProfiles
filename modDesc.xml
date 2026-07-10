@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8" standalone="no"?>
 <modDesc descVersion="99">
-    <author>SimGamerJen</author>
-    <version>2.0.19.0</version>
+    <author>YourName</author>
+    <version>2.0.20.0</version>
     <title>
         <en>Helper Profiles</en>
     </title>
     <description>
-        <en>Helper profile selector with optional AvatarSwitcher appearance binding for AI worker vehicle characters. v2.0.19-beta adds the XML appearance binding interface, immediate bind/unbind list updates, corrected unbound slot labels, and finalised default keybinds: semicolon cycles workers, Shift+semicolon toggles hpMode, Right Ctrl+semicolon opens appearance bindings, and Right Alt+semicolon toggles the overlay.</en>
+        <en>Helper profile selector with optional AvatarSwitcher appearance binding for AI worker vehicle characters. v2.0.20 is the first stable release of the XML appearance binding interface, with immediate bind/unbind list updates, corrected unbound slot labels, and finalised default keybinds: semicolon cycles workers, Shift+semicolon toggles hpMode, Right Ctrl+semicolon opens appearance bindings, and Right Alt+semicolon toggles the overlay.</en>
 		<de>Erstelle dauerhafte Namen und Erscheinungsbilder für beliebig viele Helfer, bis zum maximal im Spiel erlaubten Limit. Unterstützung für AutoDrive und Courseplay wird derzeit entwickelt.</de>
 		<fr>Créez des noms et des apparences persistants pour n'importe quel nombre d'aides jusqu'au maximum autorisé dans le jeu. La prise en charge de l'intégration d'AutoDrive et de Courseplay est en cours de développement.</fr>
 

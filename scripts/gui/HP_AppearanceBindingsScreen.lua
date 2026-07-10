@@ -1,5 +1,5 @@
 -- HP_AppearanceBindingsScreen.lua (FS25_HelperProfiles)
--- ModVersion: 2.0.19-beta
+-- ModVersion: 2.0.20
 -- BuildTag: 20260514.4
 -- XML dialog for per-save AvatarSwitcher appearance bindings.
 -- Reworked to follow the known-working AvatarSwitcher XML dialog pattern:

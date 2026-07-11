@@ -2,7 +2,7 @@
 
 **FS25 HelperProfiles** is a Farming Simulator 25 helper-management mod that adds a game-styled helper overlay, configurable helper selection behaviour, console/debug tools, and an optional **AvatarSwitcher binding interface** for assigning saved appearances to helper profile slots on a per-savegame basis.
 
-This release is intended as a **beta pre-release**. **FS25_AvatarSwitcher** is optional for the core HelperProfiles overlay, worker cycling, and helper mode features. Install and enable [FS25_AvatarSwitcher](https://github.com/SimGamerJen/FS25_AvatarSwitcher) if you want to use custom appearance bindings.
+This is a stable release. **FS25_AvatarSwitcher** is optional for the core HelperProfiles overlay, worker cycling, and helper mode features. Install and enable [FS25_AvatarSwitcher](https://github.com/SimGamerJen/FS25_AvatarSwitcher) if you want to use custom appearance bindings.
 
 ---
 
@@ -99,7 +99,7 @@ HelperProfiles reads AvatarSwitcher preset data so the UI can display readable c
 
 ### Savegames
 
-Bindings are intended to be savegame-specific. Always test beta builds on a copied savegame before using them in an important save.
+Bindings are intended to be savegame-specific. As with any gameplay mod update, test on a copied savegame before using it in an important save.
 
 ---
 
@@ -164,15 +164,15 @@ AvatarSwitcher presets are stored at:
 Documents/My Games/FarmingSimulator2025/modSettings/FS25_AvatarSwitcher/avatarPresets.xml
 ```
 
-### Upgrading from older HelperProfiles beta builds
+### Upgrading from older HelperProfiles builds
 
-Some earlier HelperProfiles beta builds may have stored appearance bindings globally at:
+Some earlier HelperProfiles builds may have stored appearance bindings globally at:
 
 ```text
 Documents/My Games/FarmingSimulator2025/modSettings/FS25_HelperProfiles/appearanceLinks.xml
 ```
 
-Current beta builds store bindings per savegame:
+Current builds store bindings per savegame:
 
 ```text
 Documents/My Games/FarmingSimulator2025/modSettings/FS25_HelperProfiles/saves/savegameX/appearanceLinks.xml
@@ -183,7 +183,7 @@ HelperProfiles includes migration support for the older global `appearanceLinks.
 Recommended steps:
 
 1. Back up your existing `modSettings/FS25_HelperProfiles` folder.
-2. Install the current HelperProfiles beta.
+2. Install the current HelperProfiles release.
 3. Load your savegame.
 4. Open the appearance binding interface with `RCTRL + ;` or:
 
@@ -324,6 +324,39 @@ The following behaviour has been tested successfully:
 - Dropdowns no longer allowing click-through to controls behind them.
 - Modal dialogs no longer allowing mouse clicks to pass through.
 - HelperProfiles UI text input no longer affecting the wardrobe screen behind it.
+
+---
+
+## Multi-language Support
+
+HelperProfiles supports GIANTS-style external localization files. The modDesc references:
+
+```xml
+<l10n filenamePrefix="l10n/l10n">
+```
+
+The English localization file is included at:
+
+```text
+l10n/l10n_en.xml
+```
+
+To add another language, copy `l10n_en.xml`, rename it using the appropriate language suffix, and translate the text values. For example:
+
+```text
+l10n/l10n_de.xml
+l10n/l10n_fr.xml
+l10n/l10n_es.xml
+```
+
+Do not add untranslated duplicate language files for ModHub-style validation, as identical translations can be flagged as obsolete localization.
+
+Currently localized areas include:
+
+- Input binding names.
+- XML appearance binding interface labels.
+- XML appearance binding interface buttons.
+- XML appearance binding interface status messages.
 
 ---
 
@@ -548,7 +581,7 @@ For support, include:
 
 ## Release Notes
 
-This release has been promoted from beta to a stable release.
+This is a stable release.
 
 Known risk areas:
 
@@ -585,13 +618,13 @@ Before publishing a release ZIP:
 ### Tag
 
 ```text
-v2.0.20
+v2.0.21
 ```
 
 ### Release Title
 
 ```text
-FS25_HelperProfiles v2.0.20 – XML Appearance Binding Interface
+FS25_HelperProfiles v2.0.21 – XML Appearance Binding Interface
 ```
 
 ### Short Release Summary

@@ -1,6 +1,6 @@
 -- RegisterPlayerActionEvents.lua
 -- Clean, duplicate-safe input setup for both Player and Vehicle contexts.
--- v2.0.20 suppresses the plain semicolon cycle action while Shift/Ctrl/Alt modifier chords are held.
+-- v2.0.21 suppresses the plain semicolon cycle action while Shift/Ctrl/Alt modifier chords are held.
 
 HelperProfiles = HelperProfiles or {}
 

@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<l10n>
+  <texts>
+    <text name="input_OPEN_HELPER_MENU">Cycle Helper</text>
+    <text name="input_HP_TOGGLE_OVERLAY">Toggle Overlay</text>
+    <text name="input_HP_TOGGLE_MODE">Toggle Helper Mode</text>
+    <text name="input_HP_OPEN_APPEARANCE_MENU">Open Helper Appearance Bindings</text>
+    <text name="hp_gui_title">Helper Profile Appearance Bindings</text>
+    <text name="hp_gui_helper_binding_state">Helper / Binding State</text>
+    <text name="hp_gui_category">Category</text>
+    <text name="hp_gui_appearance">Appearance</text>
+    <text name="hp_gui_preset_id">Preset ID</text>
+    <text name="hp_gui_select_prompt">Select a helper slot, category, and appearance.</text>
+    <text name="hp_gui_ready">Ready</text>
+    <text name="hp_gui_close">Close</text>
+    <text name="hp_gui_bind">Bind</text>
+    <text name="hp_gui_clear">Clear</text>
+    <text name="hp_gui_clear_all">Clear All</text>
+    <text name="hp_gui_save">Save</text>
+    <text name="hp_gui_bound">BOUND</text>
+    <text name="hp_gui_unbound">UNBOUND</text>
+    <text name="hp_gui_slot_label">slot: %s</text>
+    <text name="hp_gui_helper_fallback">Helper %s</text>
+    <text name="hp_gui_no_helpers">No helpers available</text>
+    <text name="hp_gui_no_categories">No AvatarSwitcher categories found</text>
+    <text name="hp_gui_no_presets">No appearances found</text>
+    <text name="hp_gui_selected_status">Selected: %s  |  %s  |  %s [%s]</text>
+    <text name="hp_gui_unsaved_changes">Unsaved changes</text>
+    <text name="hp_gui_current_binding">Current binding: %s → %s</text>
+    <text name="hp_gui_current_binding_unbound">Current binding: %s → Unbound</text>
+    <text name="hp_gui_cannot_bind_no_helper">Cannot bind: no helper selected</text>
+    <text name="hp_gui_cannot_bind_no_appearance">Cannot bind: no appearance selected</text>
+    <text name="hp_gui_draft_bind">Draft bind: %s → %s [%s]. Press Save to persist.</text>
+    <text name="hp_gui_draft_cleared">Draft binding cleared for %s. Press Save to persist.</text>
+    <text name="hp_gui_all_draft_cleared">All draft bindings cleared. Press Save to persist.</text>
+    <text name="hp_gui_save_failed_bridge">Save failed: AS bridge unavailable</text>
+    <text name="hp_gui_bindings_saved">Bindings saved. Active workers refreshed.</text>
+    <text name="hp_gui_save_failed">Save failed: %s</text>
+  </texts>
+</l10n>

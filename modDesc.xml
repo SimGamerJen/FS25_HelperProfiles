@@ -1,68 +1,50 @@
 <?xml version="1.0" encoding="utf-8" standalone="no"?>
 <modDesc descVersion="99">
-    <author>YourName</author>
-    <version>2.0.20.0</version>
+    <author>SimGamerJen</author>
+    <version>2.0.21.0</version>
     <title>
         <en>Helper Profiles</en>
+        <de>Helferprofile</de>
+        <fr>Profils d'aides</fr>
     </title>
     <description>
-        <en>Helper profile selector with optional AvatarSwitcher appearance binding for AI worker vehicle characters. v2.0.20 is the first stable release of the XML appearance binding interface, with immediate bind/unbind list updates, corrected unbound slot labels, and finalised default keybinds: semicolon cycles workers, Shift+semicolon toggles hpMode, Right Ctrl+semicolon opens appearance bindings, and Right Alt+semicolon toggles the overlay.</en>
-		<de>Erstelle dauerhafte Namen und Erscheinungsbilder für beliebig viele Helfer, bis zum maximal im Spiel erlaubten Limit. Unterstützung für AutoDrive und Courseplay wird derzeit entwickelt.</de>
-		<fr>Créez des noms et des apparences persistants pour n'importe quel nombre d'aides jusqu'au maximum autorisé dans le jeu. La prise en charge de l'intégration d'AutoDrive et de Courseplay est en cours de développement.</fr>
-
+        <en>HelperProfiles adds a game-styled helper overlay, configurable AI worker selection modes, and an optional AvatarSwitcher binding interface for assigning saved appearances to helper slots on a per-savegame basis. Core helper cycling, mode switching, overlay control, and console tools work without AvatarSwitcher. AvatarSwitcher is only required for custom appearance bindings.</en>
+        <de>HelperProfiles ergänzt eine spielähnliche Helferanzeige, konfigurierbare Auswahlmodi für KI-Helfer und eine optionale AvatarSwitcher-Anbindung, mit der gespeicherte Erscheinungsbilder pro Spielstand Helferplätzen zugewiesen werden können. Helferwechsel, Modusumschaltung, Overlay-Steuerung und Konsolenwerkzeuge funktionieren auch ohne AvatarSwitcher. AvatarSwitcher wird nur für benutzerdefinierte Erscheinungsbindungen benötigt.</de>
+        <fr>HelperProfiles ajoute une interface de type jeu pour les aides, des modes configurables de sélection des ouvriers IA et une intégration optionnelle avec AvatarSwitcher permettant d'assigner des apparences enregistrées aux emplacements d'aides pour chaque sauvegarde. Le changement d’aide, le changement de mode, le contrôle de l'overlay et les outils de console fonctionnent sans AvatarSwitcher. AvatarSwitcher n'est requis que pour les liaisons d’apparence personnalisées.</fr>
     </description>
-    <multiplayer supported="true"/>
-
-	<iconFilename>helperprofiles.dds</iconFilename>
-
-<actions>
-  <action name="OPEN_HELPER_MENU" category="SYSTEM"/>
-  <action name="HP_TOGGLE_OVERLAY" category="MISC"/>
-  <action name="HP_TOGGLE_MODE" category="MISC"/>
-  <action name="HP_OPEN_APPEARANCE_MENU" category="MISC"/>
-</actions>
-
-<inputBinding>
-  <actionBinding action="OPEN_HELPER_MENU">
-    <binding device="KB_MOUSE_DEFAULT" input="KEY_semicolon"/>
-  </actionBinding>
-  <actionBinding action="HP_TOGGLE_MODE">
-    <binding device="KB_MOUSE_DEFAULT" input="KEY_lshift KEY_semicolon" />
-    <binding device="KB_MOUSE_DEFAULT" input="KEY_rshift KEY_semicolon" />
-  </actionBinding>
-  <actionBinding action="HP_OPEN_APPEARANCE_MENU">
-    <binding device="KB_MOUSE_DEFAULT" input="KEY_rctrl KEY_semicolon" />
-  </actionBinding>
-  <actionBinding action="HP_TOGGLE_OVERLAY">
-    <binding device="KB_MOUSE_DEFAULT" input="KEY_ralt KEY_semicolon" />
-  </actionBinding>
-</inputBinding>
-
-<l10n>
-  <text name="input_OPEN_HELPER_MENU">
-    <en>Cycle Helper</en>
-  </text>
-  <text name="input_HP_TOGGLE_OVERLAY">
-    <en>Toggle Overlay</en>
-  </text>
-  <text name="input_HP_TOGGLE_MODE">
-	<en>Toggle Helper Mode</en>
-  </text>
-  <text name="input_HP_OPEN_APPEARANCE_MENU">
-    <en>Open Helper Appearance Bindings</en>
-  </text>
-</l10n>
-
-<extraSourceFiles>
-  <sourceFile filename="scripts/HP_Config.lua"/>
-  <sourceFile filename="scripts/HP_UI.lua"/>
-  <sourceFile filename="scripts/HP_Debug.lua"/>
-  <sourceFile filename="scripts/HP_ASBridge.lua"/>
-  <sourceFile filename="scripts/HP_WorkerAppearance.lua"/>
-  <sourceFile filename="scripts/HP_AppearanceMenu.lua"/>
-  <sourceFile filename="scripts/gui/HP_AppearanceBindingsScreen.lua"/>
-  <sourceFile filename="scripts/HelperProfiles.lua"/>
-  <sourceFile filename="scripts/RegisterPlayerActionEvents.lua"/>
-</extraSourceFiles>
-
+    <multiplayer supported="true" />
+    <iconFilename>helperprofiles.dds</iconFilename>
+    <actions>
+        <action name="OPEN_HELPER_MENU" category="SYSTEM" />
+        <action name="HP_TOGGLE_OVERLAY" category="MISC" />
+        <action name="HP_TOGGLE_MODE" category="MISC" />
+        <action name="HP_OPEN_APPEARANCE_MENU" category="MISC" />
+    </actions>
+    <inputBinding>
+        <actionBinding action="OPEN_HELPER_MENU">
+            <binding device="KB_MOUSE_DEFAULT" input="KEY_semicolon" />
+        </actionBinding>
+        <actionBinding action="HP_TOGGLE_MODE">
+            <binding device="KB_MOUSE_DEFAULT" input="KEY_lshift KEY_semicolon" />
+            <binding device="KB_MOUSE_DEFAULT" input="KEY_rshift KEY_semicolon" />
+        </actionBinding>
+        <actionBinding action="HP_OPEN_APPEARANCE_MENU">
+            <binding device="KB_MOUSE_DEFAULT" input="KEY_rctrl KEY_semicolon" />
+        </actionBinding>
+        <actionBinding action="HP_TOGGLE_OVERLAY">
+            <binding device="KB_MOUSE_DEFAULT" input="KEY_ralt KEY_semicolon" />
+        </actionBinding>
+    </inputBinding>
+    <l10n filenamePrefix="l10n/l10n" />
+    <extraSourceFiles>
+        <sourceFile filename="scripts/HP_Config.lua" />
+        <sourceFile filename="scripts/HP_UI.lua" />
+        <sourceFile filename="scripts/HP_Debug.lua" />
+        <sourceFile filename="scripts/HP_ASBridge.lua" />
+        <sourceFile filename="scripts/HP_WorkerAppearance.lua" />
+        <sourceFile filename="scripts/HP_AppearanceMenu.lua" />
+        <sourceFile filename="scripts/gui/HP_AppearanceBindingsScreen.lua" />
+        <sourceFile filename="scripts/HelperProfiles.lua" />
+        <sourceFile filename="scripts/RegisterPlayerActionEvents.lua" />
+    </extraSourceFiles>
 </modDesc>

@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8" standalone="no"?>
-<modDesc descVersion="99">
+<modDesc descVersion="110">
     <author>SimGamerJen</author>
     <version>2.0.21.0</version>
     <title>
         <en>Helper Profiles</en>
         <de>Helferprofile</de>
-        <fr>Profils d'aides</fr>
+        <fr>Profils D'aides</fr>
     </title>
     <description>
         <en>HelperProfiles adds a game-styled helper overlay, configurable AI worker selection modes, and an optional AvatarSwitcher binding interface for assigning saved appearances to helper slots on a per-savegame basis. Core helper cycling, mode switching, overlay control, and console tools work without AvatarSwitcher. AvatarSwitcher is only required for custom appearance bindings.</en>

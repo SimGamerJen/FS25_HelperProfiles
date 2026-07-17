@@ -1,50 +1,155 @@
-<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<?xml version="1.0" encoding="utf-8"?>
 <modDesc descVersion="110">
     <author>SimGamerJen</author>
-    <version>2.0.21.0</version>
+    <version>2.0.25.0</version>
     <title>
         <en>Helper Profiles</en>
         <de>Helferprofile</de>
-        <fr>Profils D'aides</fr>
+        <fr>Profils d'aides</fr>
     </title>
     <description>
-        <en>HelperProfiles adds a game-styled helper overlay, configurable AI worker selection modes, and an optional AvatarSwitcher binding interface for assigning saved appearances to helper slots on a per-savegame basis. Core helper cycling, mode switching, overlay control, and console tools work without AvatarSwitcher. AvatarSwitcher is only required for custom appearance bindings.</en>
-        <de>HelperProfiles ergänzt eine spielähnliche Helferanzeige, konfigurierbare Auswahlmodi für KI-Helfer und eine optionale AvatarSwitcher-Anbindung, mit der gespeicherte Erscheinungsbilder pro Spielstand Helferplätzen zugewiesen werden können. Helferwechsel, Modusumschaltung, Overlay-Steuerung und Konsolenwerkzeuge funktionieren auch ohne AvatarSwitcher. AvatarSwitcher wird nur für benutzerdefinierte Erscheinungsbindungen benötigt.</de>
-        <fr>HelperProfiles ajoute une interface de type jeu pour les aides, des modes configurables de sélection des ouvriers IA et une intégration optionnelle avec AvatarSwitcher permettant d'assigner des apparences enregistrées aux emplacements d'aides pour chaque sauvegarde. Le changement d’aide, le changement de mode, le contrôle de l'overlay et les outils de console fonctionnent sans AvatarSwitcher. AvatarSwitcher n'est requis que pour les liaisons d’apparence personnalisées.</fr>
+        <en><![CDATA[
+Helper Profiles is a helper-management mod for Farming Simulator 25.
+
+It adds a game-styled helper overlay, configurable helper selection behaviour, helper hiring mode controls, console/debug tools, and an optional AvatarSwitcher binding interface for assigning saved appearances to helper profile slots on a per-savegame basis.
+
+Core features work without AvatarSwitcher:
+- Cycle through available helpers.
+- Toggle the helper overlay.
+- Switch between helper hiring modes.
+- Keep the full A-J roster visible, including greyed active workers that cannot be selected.
+- Display selected, next, available, and active helper states.
+
+Optional AvatarSwitcher integration:
+- Read AvatarSwitcher presets from modSettings/FS25_AvatarSwitcher/avatarPresets.xml.
+- Bind appearances to helper slots through an FS25-style XML GUI.
+- Store bindings per savegame under modSettings/FS25_HelperProfiles/saves/savegameX/appearanceLinks.xml.
+- Bind, clear, clear all, and save appearance links from the in-game interface.
+
+Migration note:
+Older workflows that edited maps_helpers.xml in the Farming Simulator basegame install path are deprecated. Restore the original basegame file and recreate custom appearances as AvatarSwitcher presets before binding them in Helper Profiles.
+
+Default controls:
+; cycles workers.
+SHIFT + ; toggles HelperProfiles mode.
+RCTRL + ; opens the appearance binding interface.
+RALT + ; toggles the overlay.
+]]></en>
+        <de><![CDATA[
+Helferprofile ist ein Helfer-Verwaltungsmod für Farming Simulator 25.
+
+Der Mod ergänzt ein spielähnliches Helfer-Overlay, konfigurierbares Auswahlverhalten für Helfer, Steuerung der Helfer-Einstellungsmodi, Konsolen-/Debug-Werkzeuge und eine optionale AvatarSwitcher-Bindungsoberfläche, mit der gespeicherte Erscheinungsbilder pro Spielstand Helferprofil-Slots zugewiesen werden können.
+
+Kernfunktionen funktionieren ohne AvatarSwitcher:
+- Durch verfügbare Helfer wechseln.
+- Das Helfer-Overlay ein- oder ausschalten.
+- Zwischen Helfer-Einstellungsmodi wechseln.
+- Die vollständige A-J-Liste sichtbar halten; aktive Helfer werden ausgegraut und können nicht ausgewählt werden.
+- Ausgewählte, nächste, verfügbare und aktive Helfer anzeigen.
+
+Optionale AvatarSwitcher-Integration:
+- AvatarSwitcher-Presets aus modSettings/FS25_AvatarSwitcher/avatarPresets.xml lesen.
+- Erscheinungsbilder über eine XML-GUI im FS25-Stil an Helfer-Slots binden.
+- Bindungen pro Spielstand unter modSettings/FS25_HelperProfiles/saves/savegameX/appearanceLinks.xml speichern.
+- Erscheinungsbild-Bindungen im Spiel binden, löschen, alle löschen und speichern.
+
+Migrationshinweis:
+Ältere Arbeitsweisen, bei denen maps_helpers.xml im Farming-Simulator-Basisinstallationspfad bearbeitet wurde, sind veraltet. Stelle die originale Basisdatei wieder her und erstelle eigene Erscheinungsbilder als AvatarSwitcher-Presets neu, bevor du sie in Helferprofile bindest.
+
+Standardsteuerung:
+; wechselt zwischen Helfern.
+SHIFT + ; schaltet den HelperProfiles-Modus um.
+RCTRL + ; öffnet die Erscheinungsbild-Bindungsoberfläche.
+RALT + ; schaltet das Overlay ein oder aus.
+]]></de>
+        <fr><![CDATA[
+Profils d'aides est un mod de gestion des aides pour Farming Simulator 25.
+
+Il ajoute une superposition d'aides au style du jeu, un comportement de sélection des aides configurable, des modes d'embauche des aides, des outils de console/débogage et une interface optionnelle de liaison AvatarSwitcher permettant d'assigner des apparences enregistrées aux emplacements de profils d'aides pour chaque sauvegarde.
+
+Les fonctions principales fonctionnent sans AvatarSwitcher :
+- Parcourir les aides disponibles.
+- Activer ou désactiver la superposition des aides.
+- Changer le mode d'embauche des aides.
+- Afficher l'aide sélectionnée, la prochaine aide, les aides libres et les aides actives.
+
+Intégration optionnelle avec AvatarSwitcher :
+- Lire les presets AvatarSwitcher depuis modSettings/FS25_AvatarSwitcher/avatarPresets.xml.
+- Lier des apparences aux emplacements d'aides via une interface XML au style FS25.
+- Enregistrer les liaisons par sauvegarde dans modSettings/FS25_HelperProfiles/saves/savegameX/appearanceLinks.xml.
+- Lier, effacer, tout effacer et enregistrer les liaisons d'apparence depuis l'interface en jeu.
+
+Note de migration :
+Les anciennes méthodes qui modifiaient maps_helpers.xml dans le dossier d'installation de base de Farming Simulator sont obsolètes. Restaurez le fichier d'origine du jeu, puis recréez vos apparences personnalisées comme presets AvatarSwitcher avant de les lier dans Profils d'aides.
+
+Commandes par défaut :
+; parcourt les aides.
+SHIFT + ; change le mode HelperProfiles.
+RCTRL + ; ouvre l'interface de liaison des apparences.
+RALT + ; active ou désactive la superposition.
+]]></fr>
     </description>
-    <multiplayer supported="true" />
+
+    <l10n filenamePrefix="l10n/l10n">
+        <text name="input_OPEN_HELPER_MENU">
+            <en>Cycle Helper</en>
+            <de>Helfer wechseln</de>
+            <fr>Parcourir les aides</fr>
+        </text>
+        <text name="input_HP_TOGGLE_OVERLAY">
+            <en>Toggle HelperProfiles Overlay</en>
+            <de>Helferprofile-Overlay umschalten</de>
+            <fr>Activer/désactiver la superposition HelperProfiles</fr>
+        </text>
+        <text name="input_HP_TOGGLE_MODE">
+            <en>Toggle HelperProfiles Mode</en>
+            <de>Helferprofile-Modus umschalten</de>
+            <fr>Changer le mode HelperProfiles</fr>
+        </text>
+        <text name="input_HP_OPEN_APPEARANCE_MENU">
+            <en>Open Helper Appearance Bindings</en>
+            <de>Helfer-Erscheinungsbildbindungen öffnen</de>
+            <fr>Ouvrir les liaisons d'apparence des aides</fr>
+        </text>
+    </l10n>
+
     <iconFilename>helperprofiles.dds</iconFilename>
+
     <actions>
-        <action name="OPEN_HELPER_MENU" category="SYSTEM" />
-        <action name="HP_TOGGLE_OVERLAY" category="MISC" />
-        <action name="HP_TOGGLE_MODE" category="MISC" />
-        <action name="HP_OPEN_APPEARANCE_MENU" category="MISC" />
+        <action name="OPEN_HELPER_MENU" category="SYSTEM"/>
+        <action name="HP_TOGGLE_OVERLAY" category="MISC"/>
+        <action name="HP_TOGGLE_MODE" category="MISC"/>
+        <action name="HP_OPEN_APPEARANCE_MENU" category="MISC"/>
     </actions>
+
     <inputBinding>
         <actionBinding action="OPEN_HELPER_MENU">
-            <binding device="KB_MOUSE_DEFAULT" input="KEY_semicolon" />
+            <binding device="KB_MOUSE_DEFAULT" input="KEY_semicolon"/>
         </actionBinding>
         <actionBinding action="HP_TOGGLE_MODE">
-            <binding device="KB_MOUSE_DEFAULT" input="KEY_lshift KEY_semicolon" />
-            <binding device="KB_MOUSE_DEFAULT" input="KEY_rshift KEY_semicolon" />
+            <binding device="KB_MOUSE_DEFAULT" input="KEY_lshift KEY_semicolon"/>
+            <binding device="KB_MOUSE_DEFAULT" input="KEY_rshift KEY_semicolon"/>
         </actionBinding>
         <actionBinding action="HP_OPEN_APPEARANCE_MENU">
-            <binding device="KB_MOUSE_DEFAULT" input="KEY_rctrl KEY_semicolon" />
+            <binding device="KB_MOUSE_DEFAULT" input="KEY_rctrl KEY_semicolon"/>
         </actionBinding>
         <actionBinding action="HP_TOGGLE_OVERLAY">
-            <binding device="KB_MOUSE_DEFAULT" input="KEY_ralt KEY_semicolon" />
+            <binding device="KB_MOUSE_DEFAULT" input="KEY_ralt KEY_semicolon"/>
         </actionBinding>
     </inputBinding>
-    <l10n filenamePrefix="l10n/l10n" />
+
+    <multiplayer supported="true"/>
+
     <extraSourceFiles>
-        <sourceFile filename="scripts/HP_Config.lua" />
-        <sourceFile filename="scripts/HP_UI.lua" />
-        <sourceFile filename="scripts/HP_Debug.lua" />
-        <sourceFile filename="scripts/HP_ASBridge.lua" />
-        <sourceFile filename="scripts/HP_WorkerAppearance.lua" />
-        <sourceFile filename="scripts/HP_AppearanceMenu.lua" />
-        <sourceFile filename="scripts/gui/HP_AppearanceBindingsScreen.lua" />
-        <sourceFile filename="scripts/HelperProfiles.lua" />
-        <sourceFile filename="scripts/RegisterPlayerActionEvents.lua" />
+        <sourceFile filename="scripts/HP_Config.lua"/>
+        <sourceFile filename="scripts/HP_UI.lua"/>
+        <sourceFile filename="scripts/HP_Debug.lua"/>
+        <sourceFile filename="scripts/HP_ASBridge.lua"/>
+        <sourceFile filename="scripts/HP_WorkerAppearance.lua"/>
+        <sourceFile filename="scripts/HP_AppearanceMenu.lua"/>
+        <sourceFile filename="scripts/gui/HP_AppearanceBindingsScreen.lua"/>
+        <sourceFile filename="scripts/HelperProfiles.lua"/>
+        <sourceFile filename="scripts/HP_IntegrationAPI.lua"/>
+        <sourceFile filename="scripts/RegisterPlayerActionEvents.lua"/>
     </extraSourceFiles>
 </modDesc>

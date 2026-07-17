@@ -3,13 +3,13 @@
 
 -- ============================================================================
 -- FS25_HelperProfiles
--- ModVersion: 1.1.0.2
+-- ModVersion: 2.0.25
 -- Script:     HP_UI.lua
 -- BuildTag:   20260105-1
 -- ============================================================================
 
 do
-    local MOD_VERSION   = "2.0.21"
+    local MOD_VERSION   = "2.0.25"
     local SCRIPT_NAME   = "HP_UI.lua"
     local BUILD_TAG     = "20260513-2"
     local SCRIPT_VER    = string.format("%s-%s+%s", MOD_VERSION, SCRIPT_NAME, BUILD_TAG)
@@ -155,6 +155,16 @@ function HP_UI:flash(text, secs) self.flashText = text or ""; self.flashTime = t
 
 -- ===== Data collection ========================================================
 
+local function hpI18n(key, fallback)
+    if g_i18n ~= nil and g_i18n.getText ~= nil then
+        local ok, value = pcall(g_i18n.getText, g_i18n, key)
+        if ok and value ~= nil and value ~= "" and value ~= key then
+            return tostring(value)
+        end
+    end
+    return fallback or key
+end
+
 local function isGuiHiddenProfile(name)
     if name == nil then
         return false
@@ -196,7 +206,8 @@ local function collectRows()
         nextHelper, reason = HelperProfiles:pickPreferredFreeHelper()
     end
 
-    local selName = (#profiles > 0 and profiles[selectedIdx] and getDisplayName(profiles[selectedIdx], selectedIdx)) or "-"
+    local selectedRef = HelperProfiles ~= nil and HelperProfiles.selectedHelperRef or nil
+    local selName = (selectedRef ~= nil and getDisplayName(selectedRef, selectedIdx)) or "-"
     local nextIdx = nil
     if nextHelper ~= nil then
         for i, candidate in ipairs(profiles) do if candidate == nextHelper then nextIdx = i; break end end
@@ -205,6 +216,8 @@ local function collectRows()
 
     local rows = {}
     local visibleCount = 0
+    local activeCount = 0
+    local availableCount = 0
 
     for idx, h in ipairs(profiles) do
         local helperName = h.name or ("Helper " .. idx)
@@ -213,11 +226,17 @@ local function collectRows()
         if not isGuiHiddenProfile(helperName) then
             visibleCount = visibleCount + 1
 
-            local state = (h.inUse and "IN USE") or "FREE"
+            local isActive = HelperProfiles ~= nil and HelperProfiles.isHelperActive ~= nil
+                and HelperProfiles:isHelperActive(h) or h.inUse == true
+            if isActive then activeCount = activeCount + 1 else availableCount = availableCount + 1 end
+
+            local state = isActive
+                and hpI18n("hp_state_active", "ACTIVE")
+                or hpI18n("hp_state_available", "AVAILABLE")
             local marks = {}
             if HP_UI.showMarkers then
-                if idx == selectedIdx then table.insert(marks, "» sel") end
-                if nextHelper == h   then table.insert(marks, "← next") end
+                if idx == selectedIdx and not isActive then table.insert(marks, "» sel") end
+                if nextHelper == h and not isActive then table.insert(marks, "← next") end
             end
             local suffix = (#marks > 0) and ("  " .. table.concat(marks, "  ")) or ""
             local appearance = nil
@@ -227,13 +246,15 @@ local function collectRows()
             end
             local appearanceText = appearance and ("  — " .. tostring(appearance)) or ""
             local baseHint = (displayName ~= helperName) and (" (" .. tostring(helperName) .. ")") or ""
-            local line = string.format("%02d  %s%s  [%s]%s%s", idx, displayName, baseHint, state, appearanceText, suffix)
+            local slotLabel = tostring(helperName)
+            if not slotLabel:match("^[A-J]$") then slotLabel = string.format("%02d", idx) end
+            local line = string.format("%s  %s%s  [%s]%s%s", slotLabel, displayName, baseHint, state, appearanceText, suffix)
 
             table.insert(rows, {
                 text = line,
-                inUse = (h.inUse == true),
-                isSelected = (idx == selectedIdx),
-                isNext = (nextHelper == h)
+                inUse = isActive,
+                isSelected = (idx == selectedIdx and not isActive),
+                isNext = (nextHelper == h and not isActive)
             })
         end
     end
@@ -248,7 +269,7 @@ local function collectRows()
         end
     end
 
-    local header = string.format("Mode: %s | Helpers shown: %d | Selected: %s | Next: %s", mode, visibleCount, selName, nextName)
+    local header = string.format("Mode: %s | Available: %d | Active: %d | Selected: %s | Next: %s", mode, availableCount, activeCount, selName, nextName)
     return header, rows
 end
 
@@ -371,10 +392,10 @@ function HP_UI:render(dtMillis)
 
     for i = 1, numRows do
         local r = rows[i]
-        if r.isSelected then
+        if r.inUse then
+            safeSetTextColor(0.55, 0.55, 0.55, 1)  -- active: greyed and non-selectable
+        elseif r.isSelected then
             safeSetTextColor(1.00, 0.95, 0.65, 1)  -- selected: warmer
-        elseif r.inUse then
-            safeSetTextColor(0.95, 0.85, 0.35, 1)  -- in use
         else
             safeSetTextColor(0.85, 0.95, 0.85, 1)  -- free
         end

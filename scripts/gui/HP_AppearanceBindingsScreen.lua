@@ -1,5 +1,5 @@
 -- HP_AppearanceBindingsScreen.lua (FS25_HelperProfiles)
--- ModVersion: 2.0.21
+-- ModVersion: 2.0.25
 -- BuildTag: 20260514.4
 -- XML dialog for per-save AvatarSwitcher appearance bindings.
 -- Reworked to follow the known-working AvatarSwitcher XML dialog pattern:
@@ -10,22 +10,6 @@ local HP_AppearanceBindingsScreen_mt = Class(HP_AppearanceBindingsScreen, Messag
 
 local LOG = "[FS25_HelperProfiles/AppearanceBindingsXML] "
 local function hpPrint(msg) print(LOG .. tostring(msg)) end
-
-local function hpL10n(key, fallback, ...)
-    local text = fallback or tostring(key or "")
-    if g_i18n ~= nil and key ~= nil then
-        local ok, value = pcall(function() return g_i18n:getText(key) end)
-        if ok and value ~= nil and tostring(value) ~= "" and tostring(value) ~= tostring(key) then
-            text = tostring(value)
-        end
-    end
-    if select("#", ...) > 0 then
-        local ok, formatted = pcall(string.format, text, ...)
-        if ok then return formatted end
-    end
-    return text
-end
-
 
 local HP_GUI_MOD_DIR = g_currentModDirectory or ""
 
@@ -41,6 +25,23 @@ local function normalizeName(value)
     local s = tostring(value or "")
     s = s:gsub("^%s+", ""):gsub("%s+$", "")
     return s:lower()
+end
+
+local function hpI18n(key, fallback)
+    if g_i18n ~= nil and g_i18n.getText ~= nil then
+        local ok, value = pcall(g_i18n.getText, g_i18n, key)
+        if ok and value ~= nil and value ~= "" and value ~= key then
+            return value
+        end
+    end
+    return fallback or key
+end
+
+local function hpFormat(key, fallback, ...)
+    local pattern = hpI18n(key, fallback)
+    local ok, value = pcall(string.format, pattern, ...)
+    if ok then return value end
+    return pattern
 end
 
 local function isHiddenHelperName(name)
@@ -102,21 +103,21 @@ function HP_AppearanceBindingsScreen:getHelperListLabel(helperRow)
 
         local baseLabel = tostring(displayName or helperRow.name or "")
         if helperRow.name ~= nil and tostring(helperRow.name) ~= "" and tostring(baseLabel) ~= tostring(helperRow.name) then
-            baseLabel = baseLabel .. " (" .. hpL10n("hp_gui_slot_label", "slot: %s", tostring(helperRow.name)) .. ")"
+            baseLabel = baseLabel .. " (" .. hpFormat("hp_slot_label", "slot: %s", tostring(helperRow.name)) .. ")"
         end
 
-        return baseLabel .. "  [" .. hpL10n("hp_gui_bound", "BOUND") .. "]  " .. bindingLabel
+        return baseLabel .. "  [" .. hpI18n("hp_state_bound", "BOUND") .. "]  " .. bindingLabel
     end
 
     -- Important: when a persisted binding is cleared in the draft, the visible
     -- slot label must revert to the real HelperProfiles slot name immediately.
     -- Do not reuse helperRow.displayName here, because that may have been
     -- derived from the previously persisted AvatarSwitcher binding.
-    return tostring(helperRow.name or helperRow.baseName or helperRow.label or "") .. "  [" .. hpL10n("hp_gui_unbound", "UNBOUND") .. "]"
+    return tostring(helperRow.name or helperRow.baseName or helperRow.label or "") .. "  [" .. hpI18n("hp_state_unbound", "UNBOUND") .. "]"
 end
 
 local function getHelperDisplayName(helper, idx)
-    local fallback = tostring((helper ~= nil and helper.name) or hpL10n("hp_gui_helper_fallback", "Helper %s", tostring(idx or "?")))
+    local fallback = tostring((helper ~= nil and helper.name) or ("Helper " .. tostring(idx or "?")))
     if HelperProfiles ~= nil and HelperProfiles.getDisplayNameForHelper ~= nil then
         local ok, displayName, baseName = pcall(HelperProfiles.getDisplayNameForHelper, HelperProfiles, helper, idx)
         if ok and displayName ~= nil and tostring(displayName) ~= "" then
@@ -130,13 +131,13 @@ local function getHelpers()
     local rows = {}
     local list = HelperProfiles ~= nil and HelperProfiles.getProfiles ~= nil and HelperProfiles:getProfiles() or {}
     for idx, helper in ipairs(list) do
-        local name = tostring(helper.name or hpL10n("hp_gui_helper_fallback", "Helper %s", tostring(idx)))
+        local name = tostring(helper.name or ("Helper " .. tostring(idx)))
         if not isHiddenHelperName(name) then
             local displayName, baseName = getHelperDisplayName(helper, idx)
             baseName = tostring(baseName or name)
             local label = tostring(displayName or name)
             if label ~= name then
-                label = label .. " (" .. hpL10n("hp_gui_slot_label", "slot: %s", name) .. ")"
+                label = label .. " (" .. hpFormat("hp_slot_label", "slot: %s", name) .. ")"
             end
             table.insert(rows, { index = idx, helper = helper, name = name, baseName = baseName, displayName = displayName, label = label })
         end
@@ -208,7 +209,7 @@ function HP_AppearanceBindingsScreen:reloadData(reloadBridge)
 
     self.helperRows = getHelpers()
     if #self.helperRows == 0 then
-        table.insert(self.helperRows, { index = 1, helper = nil, name = hpL10n("hp_gui_helper_fallback", "Helper %s", "1"), displayName = hpL10n("hp_gui_no_helpers", "No helpers available"), label = hpL10n("hp_gui_no_helpers", "No helpers available") })
+        table.insert(self.helperRows, { index = 1, helper = nil, name = hpI18n("hp_helper_fallback", "Helper 1"), displayName = hpI18n("hp_no_helpers_available", "No helpers available"), label = hpI18n("hp_no_helpers_available", "No helpers available") })
     end
 
     self.categoryRows = {}
@@ -221,7 +222,7 @@ function HP_AppearanceBindingsScreen:reloadData(reloadBridge)
         end
     end
     if #self.categoryRows == 0 then
-        table.insert(self.categoryRows, { id = "", label = hpL10n("hp_gui_no_categories", "No AvatarSwitcher categories found") })
+        table.insert(self.categoryRows, { id = "", label = hpI18n("hp_no_categories", "No AvatarSwitcher categories found") })
     end
 
     self.draftLinks = {}
@@ -292,7 +293,7 @@ function HP_AppearanceBindingsScreen:rebuildPresetRows()
     end
 
     if #self.presetRows == 0 then
-        table.insert(self.presetRows, { id = "", category = category or "", label = hpL10n("hp_gui_no_presets", "No appearances found"), preset = nil })
+        table.insert(self.presetRows, { id = "", category = category or "", label = "No appearances found", preset = nil })
     end
 
     self.selectedPresetIndex = clamp(self.selectedPresetIndex or 1, 1, #self.presetRows)
@@ -386,26 +387,26 @@ function HP_AppearanceBindingsScreen:updateDetailText()
     local category = self:getSelectedCategoryId()
     local presetRow = self:getSelectedPresetRow()
 
-    local detail = hpL10n("hp_gui_select_prompt", "Select a helper slot, category, and appearance.")
+    local detail = hpI18n("hp_detail_select", "Select a helper slot, category, and appearance.")
     if helperRow ~= nil and presetRow ~= nil and presetRow.id ~= nil and presetRow.id ~= "" then
-        detail = hpL10n("hp_gui_selected_status", "Selected: %s  |  %s  |  %s [%s]", tostring(helperRow.displayName or helperRow.name), tostring(category or "-"), tostring(presetRow.label or presetRow.id), tostring(presetRow.id))
+        detail = hpFormat("hp_detail_selected", "Selected: %s  |  %s  |  %s [%s]", tostring(helperRow.displayName or helperRow.name), tostring(category or "-"), tostring(presetRow.label or presetRow.id), tostring(presetRow.id))
     end
 
     if self.detailText ~= nil then self.detailText:setText(detail) end
 
     local status = self.actionMessage
     if status == nil or status == "" then
-        status = self.dirty and hpL10n("hp_gui_unsaved_changes", "Unsaved changes") or hpL10n("hp_gui_ready", "Ready")
+        status = self.dirty and hpI18n("hp_status_unsaved_changes", "Unsaved changes") or hpI18n("hp_status_ready", "Ready")
     elseif self.dirty then
-        status = status .. "  |  " .. hpL10n("hp_gui_unsaved_changes", "Unsaved changes")
+        status = status .. "  |  " .. hpI18n("hp_status_unsaved_changes", "Unsaved changes")
     end
 
     if helperRow ~= nil then
         local bindingLabel = self:getHelperBindingLabel(helperRow)
         if bindingLabel ~= nil and bindingLabel ~= "" then
-            status = status .. "  |  " .. hpL10n("hp_gui_current_binding", "Current binding: %s → %s", tostring(helperRow.displayName or helperRow.name), bindingLabel)
+            status = status .. "  |  " .. hpFormat("hp_status_current_binding", "Current binding: %s → %s", tostring(helperRow.displayName or helperRow.name), bindingLabel)
         else
-            status = status .. "  |  " .. hpL10n("hp_gui_current_binding_unbound", "Current binding: %s → Unbound", tostring(helperRow.displayName or helperRow.name))
+            status = status .. "  |  " .. hpFormat("hp_status_current_binding", "Current binding: %s → %s", tostring(helperRow.displayName or helperRow.name), hpI18n("hp_state_unbound_title", "Unbound"))
         end
     end
 
@@ -416,11 +417,11 @@ function HP_AppearanceBindingsScreen:onClickBindAppearance(sender)
     local helperRow = self:getSelectedHelperRow()
     local presetRow = self:getSelectedPresetRow()
     if helperRow == nil or helperRow.helper == nil then
-        self:setStatus(hpL10n("hp_gui_cannot_bind_no_helper", "Cannot bind: no helper selected"))
+        self:setStatus(hpI18n("hp_error_no_helper_selected", "Cannot bind: no helper selected"))
         return
     end
     if presetRow == nil or presetRow.id == nil or presetRow.id == "" then
-        self:setStatus(hpL10n("hp_gui_cannot_bind_no_appearance", "Cannot bind: no appearance selected"))
+        self:setStatus(hpI18n("hp_error_no_appearance_selected", "Cannot bind: no appearance selected"))
         return
     end
 
@@ -436,7 +437,7 @@ function HP_AppearanceBindingsScreen:onClickBindAppearance(sender)
 
     local helperName = tostring(helperRow.displayName or helperRow.name)
     local presetLabel = tostring(presetRow.label or presetRow.id)
-    self.actionMessage = hpL10n("hp_gui_draft_bind", "Draft bind: %s → %s [%s]. Press Save to persist.", helperName, presetLabel, tostring(presetRow.id))
+    self.actionMessage = hpFormat("hp_status_draft_bind", "Draft bind: %s → %s [%s]. Press Save to persist.", helperName, presetLabel, tostring(presetRow.id))
 
     if self.helperTable ~= nil then self.helperTable:reloadData() end
     self:updateDetailText()
@@ -452,7 +453,7 @@ function HP_AppearanceBindingsScreen:onClickClearBinding(sender)
     if helperRow == nil then return end
     self.draftLinks[normalizeName(helperRow.name)] = nil
     self.dirty = true
-    self.actionMessage = hpL10n("hp_gui_draft_cleared", "Draft binding cleared for %s. Press Save to persist.", tostring(helperRow.displayName or helperRow.name))
+    self.actionMessage = hpFormat("hp_status_draft_clear", "Draft binding cleared for %s. Press Save to persist.", tostring(helperRow.displayName or helperRow.name))
     if self.helperTable ~= nil then self.helperTable:reloadData() end
     self:updateDetailText()
 end
@@ -460,7 +461,7 @@ end
 function HP_AppearanceBindingsScreen:onClickClearAllBindings(sender)
     self.draftLinks = {}
     self.dirty = true
-    self.actionMessage = hpL10n("hp_gui_all_draft_cleared", "All draft bindings cleared. Press Save to persist.")
+    self.actionMessage = hpI18n("hp_status_draft_clear_all", "All draft bindings cleared. Press Save to persist.")
     if self.helperTable ~= nil then self.helperTable:reloadData() end
     self:updateDetailText()
 end
@@ -479,7 +480,7 @@ end
 
 function HP_AppearanceBindingsScreen:saveBindings(closeAfterSave)
     if HP_ASBridge == nil or HP_ASBridge.replaceLinksSnapshot == nil then
-        self:setStatus(hpL10n("hp_gui_save_failed_bridge", "Save failed: AS bridge unavailable"))
+        self:setStatus(hpI18n("hp_error_as_bridge_unavailable", "Save failed: AS bridge unavailable"))
         return false
     end
 
@@ -489,7 +490,7 @@ function HP_AppearanceBindingsScreen:saveBindings(closeAfterSave)
         if HP_WorkerAppearance ~= nil and HP_WorkerAppearance.refreshActiveWorkers ~= nil then
             HP_WorkerAppearance:refreshActiveWorkers()
         end
-        self.actionMessage = hpL10n("hp_gui_bindings_saved", "Bindings saved. Active workers refreshed.")
+        self.actionMessage = hpI18n("hp_status_bindings_saved", "Bindings saved. Active workers refreshed.")
         -- Rebuild rows from the saved bridge state so an unbound slot drops any
         -- stale display name that came from the previous persisted binding.
         self:reloadData(true)
@@ -497,7 +498,7 @@ function HP_AppearanceBindingsScreen:saveBindings(closeAfterSave)
         return true
     end
 
-    self:setStatus(hpL10n("hp_gui_save_failed", "Save failed: %s", tostring(err)))
+    self:setStatus(hpFormat("hp_error_save_failed", "Save failed: %s", tostring(err)))
     return false
 end
 

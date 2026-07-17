@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<l10n>
+    <texts>
+        <text name="hp_button_bind" text="Binden"/>
+        <text name="hp_button_clear" text="Löschen"/>
+        <text name="hp_button_clear_all" text="Alle löschen"/>
+        <text name="hp_button_close" text="Schließen"/>
+        <text name="hp_button_save" text="Speichern"/>
+        <text name="hp_detail_select" text="Wähle einen Helfer-Slot, eine Kategorie und ein Erscheinungsbild."/>
+        <text name="hp_detail_selected" text="Ausgewählt: %s  |  %s  |  %s [%s]"/>
+        <text name="hp_error_as_bridge_unavailable" text="Speichern fehlgeschlagen: AS-Bridge nicht verfügbar"/>
+        <text name="hp_error_no_appearance_selected" text="Binden nicht möglich: kein Erscheinungsbild ausgewählt"/>
+        <text name="hp_error_no_helper_selected" text="Binden nicht möglich: kein Helfer ausgewählt"/>
+        <text name="hp_error_save_failed" text="Speichern fehlgeschlagen: %s"/>
+        <text name="hp_flash_appearance_changed" text="%s Erscheinungsbild: %s"/>
+        <text name="hp_flash_appearance_cycle_failed" text="Erscheinungsbildwechsel fehlgeschlagen: %s"/>
+        <text name="hp_flash_as_bridge_unavailable" text="AvatarSwitcher-Bridge nicht verfügbar"/>
+        <text name="hp_flash_helper_selected" text="Helfer: %s (%d/%d)"/>
+        <text name="hp_flash_helpers_idle_reset" text="Helfer inaktiv: Liste auf Standardreihenfolge zurückgesetzt"/>
+        <text name="hp_flash_mode" text="Modus: %s"/>
+        <text name="hp_flash_no_helper_selected" text="Kein Helfer ausgewählt"/>
+        <text name="hp_flash_order_reset" text="Helferreihenfolge auf Standard zurückgesetzt"/>
+        <text name="hp_flash_reset_order_active" text="Helferreihenfolge kann nicht zurückgesetzt werden: Helfer aktiv"/>
+        <text name="hp_flash_reset_order_no_default" text="Helferreihenfolge kann nicht zurückgesetzt werden: keine Standardreihenfolge zwischengespeichert"/>
+        <text name="hp_header_appearance" text="Erscheinungsbild"/>
+        <text name="hp_header_category" text="Kategorie"/>
+        <text name="hp_header_helper_binding_state" text="Helfer / Bindungsstatus"/>
+        <text name="hp_header_preset_id" text="Preset-ID"/>
+        <text name="hp_helper_fallback" text="Helfer 1"/>
+        <text name="hp_helper_generic" text="Helfer"/>
+        <text name="hp_no_appearances" text="Keine Erscheinungsbilder gefunden"/>
+        <text name="hp_no_categories" text="Keine AvatarSwitcher-Kategorien gefunden"/>
+        <text name="hp_no_helpers_available" text="Keine Helfer verfügbar"/>
+        <text name="hp_slot_label" text="Slot: %s"/>
+        <text name="hp_state_active" text="AKTIV"/>
+        <text name="hp_state_available" text="VERFÜGBAR"/>
+        <text name="hp_flash_helper_active" text="%s ist aktiv und kann nicht ausgewählt werden"/>
+        <text name="hp_state_bound" text="GEBUNDEN"/>
+        <text name="hp_state_unbound" text="NICHT GEBUNDEN"/>
+        <text name="hp_state_unbound_title" text="Nicht gebunden"/>
+        <text name="hp_status_bindings_saved" text="Bindungen gespeichert. Aktive Helfer aktualisiert."/>
+        <text name="hp_status_current_binding" text="Aktuelle Bindung: %s → %s"/>
+        <text name="hp_status_draft_bind" text="Entwurf gebunden: %s → %s [%s]. Zum Übernehmen Speichern drücken."/>
+        <text name="hp_status_draft_clear" text="Bindungsentwurf für %s gelöscht. Zum Übernehmen Speichern drücken."/>
+        <text name="hp_status_draft_clear_all" text="Alle Bindungsentwürfe gelöscht. Zum Übernehmen Speichern drücken."/>
+        <text name="hp_status_ready" text="Bereit"/>
+        <text name="hp_status_unsaved_changes" text="Ungespeicherte Änderungen"/>
+        <text name="hp_title_appearance_bindings" text="Helferprofil-Erscheinungsbildbindungen"/>
+        <text name="input_HP_OPEN_APPEARANCE_MENU" text="Helfer-Erscheinungsbildbindungen öffnen"/>
+        <text name="input_HP_TOGGLE_MODE" text="Helferprofile-Modus umschalten"/>
+        <text name="input_HP_TOGGLE_OVERLAY" text="Helferprofile-Overlay umschalten"/>
+        <text name="input_OPEN_HELPER_MENU" text="Helfer wechseln"/>
+    </texts>
+</l10n>

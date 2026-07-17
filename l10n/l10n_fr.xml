@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<l10n>
+    <texts>
+        <text name="hp_button_bind" text="Lier"/>
+        <text name="hp_button_clear" text="Effacer"/>
+        <text name="hp_button_clear_all" text="Tout effacer"/>
+        <text name="hp_button_close" text="Fermer"/>
+        <text name="hp_button_save" text="Enregistrer"/>
+        <text name="hp_detail_select" text="Sélectionnez un emplacement d’aide, une catégorie et une apparence."/>
+        <text name="hp_detail_selected" text="Sélection : %s  |  %s  |  %s [%s]"/>
+        <text name="hp_error_as_bridge_unavailable" text="Échec de l’enregistrement : bridge AS indisponible"/>
+        <text name="hp_error_no_appearance_selected" text="Liaison impossible : aucune apparence sélectionnée"/>
+        <text name="hp_error_no_helper_selected" text="Liaison impossible : aucune aide sélectionnée"/>
+        <text name="hp_error_save_failed" text="Échec de l’enregistrement : %s"/>
+        <text name="hp_flash_appearance_changed" text="Apparence de %s : %s"/>
+        <text name="hp_flash_appearance_cycle_failed" text="Échec du changement d’apparence : %s"/>
+        <text name="hp_flash_as_bridge_unavailable" text="Bridge AvatarSwitcher indisponible"/>
+        <text name="hp_flash_helper_selected" text="Aide : %s (%d/%d)"/>
+        <text name="hp_flash_helpers_idle_reset" text="Aides inactives : liste réinitialisée dans l’ordre par défaut"/>
+        <text name="hp_flash_mode" text="Mode : %s"/>
+        <text name="hp_flash_no_helper_selected" text="Aucune aide sélectionnée"/>
+        <text name="hp_flash_order_reset" text="Ordre des aides réinitialisé par défaut"/>
+        <text name="hp_flash_reset_order_active" text="Impossible de réinitialiser l’ordre des aides : aides actives"/>
+        <text name="hp_flash_reset_order_no_default" text="Impossible de réinitialiser l’ordre des aides : aucun ordre par défaut en cache"/>
+        <text name="hp_header_appearance" text="Apparence"/>
+        <text name="hp_header_category" text="Catégorie"/>
+        <text name="hp_header_helper_binding_state" text="Aide / état de liaison"/>
+        <text name="hp_header_preset_id" text="ID du preset"/>
+        <text name="hp_helper_fallback" text="Aide 1"/>
+        <text name="hp_helper_generic" text="Aide"/>
+        <text name="hp_no_appearances" text="Aucune apparence trouvée"/>
+        <text name="hp_no_categories" text="Aucune catégorie AvatarSwitcher trouvée"/>
+        <text name="hp_no_helpers_available" text="Aucune aide disponible"/>
+        <text name="hp_slot_label" text="emplacement : %s"/>
+        <text name="hp_state_active" text="ACTIVE"/>
+        <text name="hp_state_available" text="DISPONIBLE"/>
+        <text name="hp_flash_helper_active" text="%s est active et ne peut pas être sélectionnée"/>
+        <text name="hp_state_bound" text="LIÉ"/>
+        <text name="hp_state_unbound" text="NON LIÉ"/>
+        <text name="hp_state_unbound_title" text="Non lié"/>
+        <text name="hp_status_bindings_saved" text="Liaisons enregistrées. Aides actives actualisées."/>
+        <text name="hp_status_current_binding" text="Liaison actuelle : %s → %s"/>
+        <text name="hp_status_draft_bind" text="Liaison en brouillon : %s → %s [%s]. Appuyez sur Enregistrer pour conserver."/>
+        <text name="hp_status_draft_clear" text="Liaison en brouillon effacée pour %s. Appuyez sur Enregistrer pour conserver."/>
+        <text name="hp_status_draft_clear_all" text="Toutes les liaisons en brouillon ont été effacées. Appuyez sur Enregistrer pour conserver."/>
+        <text name="hp_status_ready" text="Prêt"/>
+        <text name="hp_status_unsaved_changes" text="Modifications non enregistrées"/>
+        <text name="hp_title_appearance_bindings" text="Liaisons d’apparence des profils d’aides"/>
+        <text name="input_HP_OPEN_APPEARANCE_MENU" text="Ouvrir les liaisons d’apparence des aides"/>
+        <text name="input_HP_TOGGLE_MODE" text="Changer le mode HelperProfiles"/>
+        <text name="input_HP_TOGGLE_OVERLAY" text="Activer/désactiver la superposition HelperProfiles"/>
+        <text name="input_OPEN_HELPER_MENU" text="Parcourir les aides"/>
+    </texts>
+</l10n>

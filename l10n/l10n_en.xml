@@ -1,40 +1,54 @@
 <?xml version="1.0" encoding="utf-8" standalone="no"?>
 <l10n>
-  <texts>
-    <text name="input_OPEN_HELPER_MENU">Cycle Helper</text>
-    <text name="input_HP_TOGGLE_OVERLAY">Toggle Overlay</text>
-    <text name="input_HP_TOGGLE_MODE">Toggle Helper Mode</text>
-    <text name="input_HP_OPEN_APPEARANCE_MENU">Open Helper Appearance Bindings</text>
-    <text name="hp_gui_title">Helper Profile Appearance Bindings</text>
-    <text name="hp_gui_helper_binding_state">Helper / Binding State</text>
-    <text name="hp_gui_category">Category</text>
-    <text name="hp_gui_appearance">Appearance</text>
-    <text name="hp_gui_preset_id">Preset ID</text>
-    <text name="hp_gui_select_prompt">Select a helper slot, category, and appearance.</text>
-    <text name="hp_gui_ready">Ready</text>
-    <text name="hp_gui_close">Close</text>
-    <text name="hp_gui_bind">Bind</text>
-    <text name="hp_gui_clear">Clear</text>
-    <text name="hp_gui_clear_all">Clear All</text>
-    <text name="hp_gui_save">Save</text>
-    <text name="hp_gui_bound">BOUND</text>
-    <text name="hp_gui_unbound">UNBOUND</text>
-    <text name="hp_gui_slot_label">slot: %s</text>
-    <text name="hp_gui_helper_fallback">Helper %s</text>
-    <text name="hp_gui_no_helpers">No helpers available</text>
-    <text name="hp_gui_no_categories">No AvatarSwitcher categories found</text>
-    <text name="hp_gui_no_presets">No appearances found</text>
-    <text name="hp_gui_selected_status">Selected: %s  |  %s  |  %s [%s]</text>
-    <text name="hp_gui_unsaved_changes">Unsaved changes</text>
-    <text name="hp_gui_current_binding">Current binding: %s → %s</text>
-    <text name="hp_gui_current_binding_unbound">Current binding: %s → Unbound</text>
-    <text name="hp_gui_cannot_bind_no_helper">Cannot bind: no helper selected</text>
-    <text name="hp_gui_cannot_bind_no_appearance">Cannot bind: no appearance selected</text>
-    <text name="hp_gui_draft_bind">Draft bind: %s → %s [%s]. Press Save to persist.</text>
-    <text name="hp_gui_draft_cleared">Draft binding cleared for %s. Press Save to persist.</text>
-    <text name="hp_gui_all_draft_cleared">All draft bindings cleared. Press Save to persist.</text>
-    <text name="hp_gui_save_failed_bridge">Save failed: AS bridge unavailable</text>
-    <text name="hp_gui_bindings_saved">Bindings saved. Active workers refreshed.</text>
-    <text name="hp_gui_save_failed">Save failed: %s</text>
-  </texts>
+    <texts>
+        <text name="hp_button_bind" text="Bind"/>
+        <text name="hp_button_clear" text="Clear"/>
+        <text name="hp_button_clear_all" text="Clear All"/>
+        <text name="hp_button_close" text="Close"/>
+        <text name="hp_button_save" text="Save"/>
+        <text name="hp_detail_select" text="Select a helper slot, category, and appearance."/>
+        <text name="hp_detail_selected" text="Selected: %s  |  %s  |  %s [%s]"/>
+        <text name="hp_error_as_bridge_unavailable" text="Save failed: AS bridge unavailable"/>
+        <text name="hp_error_no_appearance_selected" text="Cannot bind: no appearance selected"/>
+        <text name="hp_error_no_helper_selected" text="Cannot bind: no helper selected"/>
+        <text name="hp_error_save_failed" text="Save failed: %s"/>
+        <text name="hp_flash_appearance_changed" text="%s appearance: %s"/>
+        <text name="hp_flash_appearance_cycle_failed" text="Appearance cycle failed: %s"/>
+        <text name="hp_flash_as_bridge_unavailable" text="AvatarSwitcher bridge unavailable"/>
+        <text name="hp_flash_helper_selected" text="Helper: %s (%d/%d)"/>
+        <text name="hp_flash_helpers_idle_reset" text="Helpers idle: list reset to default order"/>
+        <text name="hp_flash_mode" text="Mode: %s"/>
+        <text name="hp_flash_no_helper_selected" text="No helper selected"/>
+        <text name="hp_flash_order_reset" text="Helper order reset to default"/>
+        <text name="hp_flash_reset_order_active" text="Cannot reset helper order: helpers active"/>
+        <text name="hp_flash_reset_order_no_default" text="Cannot reset helper order: no default cached yet"/>
+        <text name="hp_header_appearance" text="Appearance"/>
+        <text name="hp_header_category" text="Category"/>
+        <text name="hp_header_helper_binding_state" text="Helper / Binding State"/>
+        <text name="hp_header_preset_id" text="Preset ID"/>
+        <text name="hp_helper_fallback" text="Helper 1"/>
+        <text name="hp_helper_generic" text="Helper"/>
+        <text name="hp_no_appearances" text="No appearances found"/>
+        <text name="hp_no_categories" text="No AvatarSwitcher categories found"/>
+        <text name="hp_no_helpers_available" text="No helpers available"/>
+        <text name="hp_slot_label" text="slot: %s"/>
+        <text name="hp_state_active" text="ACTIVE"/>
+        <text name="hp_state_available" text="AVAILABLE"/>
+        <text name="hp_flash_helper_active" text="%s is active and cannot be selected"/>
+        <text name="hp_state_bound" text="BOUND"/>
+        <text name="hp_state_unbound" text="UNBOUND"/>
+        <text name="hp_state_unbound_title" text="Unbound"/>
+        <text name="hp_status_bindings_saved" text="Bindings saved. Active workers refreshed."/>
+        <text name="hp_status_current_binding" text="Current binding: %s → %s"/>
+        <text name="hp_status_draft_bind" text="Draft bind: %s → %s [%s]. Press Save to persist."/>
+        <text name="hp_status_draft_clear" text="Draft binding cleared for %s. Press Save to persist."/>
+        <text name="hp_status_draft_clear_all" text="All draft bindings cleared. Press Save to persist."/>
+        <text name="hp_status_ready" text="Ready"/>
+        <text name="hp_status_unsaved_changes" text="Unsaved changes"/>
+        <text name="hp_title_appearance_bindings" text="Helper Profile Appearance Bindings"/>
+        <text name="input_HP_OPEN_APPEARANCE_MENU" text="Open Helper Appearance Bindings"/>
+        <text name="input_HP_TOGGLE_MODE" text="Toggle HelperProfiles Mode"/>
+        <text name="input_HP_TOGGLE_OVERLAY" text="Toggle HelperProfiles Overlay"/>
+        <text name="input_OPEN_HELPER_MENU" text="Cycle Helper"/>
+    </texts>
 </l10n>

@@ -654,3 +654,10 @@ When contributing, please update this README if you add or change:
 
 This is an unofficial Farming Simulator 25 mod and is not affiliated with or endorsed by GIANTS Software.
 
+---
+
+## Licence and Permissions
+
+Copyright © 2026 SimGamerJen. All rights reserved.
+
+You may download and use this mod for personal use. You may not modify, redistribute, re-upload, or publish this mod, in whole or in part, or any derivative version without prior written permission from SimGamerJen.

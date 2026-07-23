@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<?xml version='1.0' encoding='UTF-8'?>
 <l10n>
     <texts>
         <text name="hp_button_bind" text="Lier"/>
@@ -15,11 +15,15 @@
         <text name="hp_flash_appearance_changed" text="Apparence de %s : %s"/>
         <text name="hp_flash_appearance_cycle_failed" text="Échec du changement d’apparence : %s"/>
         <text name="hp_flash_as_bridge_unavailable" text="Bridge AvatarSwitcher indisponible"/>
+        <text name="hp_flash_config_loaded" text="Superposition HP : configuration chargée"/>
+        <text name="hp_flash_config_saved" text="Superposition HP : configuration par défaut enregistrée"/>
+        <text name="hp_flash_helper_active" text="%s est active et ne peut pas être sélectionnée"/>
         <text name="hp_flash_helper_selected" text="Aide : %s (%d/%d)"/>
         <text name="hp_flash_helpers_idle_reset" text="Aides inactives : liste réinitialisée dans l’ordre par défaut"/>
         <text name="hp_flash_mode" text="Mode : %s"/>
         <text name="hp_flash_no_helper_selected" text="Aucune aide sélectionnée"/>
         <text name="hp_flash_order_reset" text="Ordre des aides réinitialisé par défaut"/>
+        <text name="hp_flash_overlay_on" text="Superposition HelperProfiles : ACTIVÉE"/>
         <text name="hp_flash_reset_order_active" text="Impossible de réinitialiser l’ordre des aides : aides actives"/>
         <text name="hp_flash_reset_order_no_default" text="Impossible de réinitialiser l’ordre des aides : aucun ordre par défaut en cache"/>
         <text name="hp_header_appearance" text="Apparence"/>
@@ -31,10 +35,22 @@
         <text name="hp_no_appearances" text="Aucune apparence trouvée"/>
         <text name="hp_no_categories" text="Aucune catégorie AvatarSwitcher trouvée"/>
         <text name="hp_no_helpers_available" text="Aucune aide disponible"/>
+        <text name="hp_overlay_header_appearance" text="APPARENCE"/>
+        <text name="hp_overlay_header_next" text="SUIV."/>
+        <text name="hp_overlay_header_selected" text="SÉL."/>
+        <text name="hp_overlay_header_slot" text="EMPL."/>
+        <text name="hp_overlay_header_status" text="ÉTAT"/>
+        <text name="hp_overlay_header_worker" text="AIDE"/>
+        <text name="hp_overlay_label_active" text="Actifs"/>
+        <text name="hp_overlay_label_available" text="Disponibles"/>
+        <text name="hp_overlay_label_mode" text="Mode"/>
+        <text name="hp_overlay_label_next" text="Suivant"/>
+        <text name="hp_overlay_label_selected" text="Sélectionné"/>
+        <text name="hp_overlay_mode_first_free" text="Premier disponible"/>
+        <text name="hp_overlay_mode_prefer_selected" text="Préférer la sélection"/>
         <text name="hp_slot_label" text="emplacement : %s"/>
         <text name="hp_state_active" text="ACTIVE"/>
         <text name="hp_state_available" text="DISPONIBLE"/>
-        <text name="hp_flash_helper_active" text="%s est active et ne peut pas être sélectionnée"/>
         <text name="hp_state_bound" text="LIÉ"/>
         <text name="hp_state_unbound" text="NON LIÉ"/>
         <text name="hp_state_unbound_title" text="Non lié"/>

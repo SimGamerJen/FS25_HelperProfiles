@@ -1,5 +1,5 @@
 -- HP_AppearanceMenu.lua (FS25_HelperProfiles)
--- ModVersion: 2.0.25
+-- ModVersion: 2.0.26
 -- BuildTag: 20260513.3
 -- Mouse-driven per-save helper appearance binding interface.
 -- Uses HP_ASBridge direct AvatarSwitcher preset data and stores preset IDs behind the scenes.

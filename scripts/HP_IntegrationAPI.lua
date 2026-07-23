@@ -5,7 +5,7 @@
 
 HP_IntegrationAPI = HP_IntegrationAPI or {
     apiVersion = 4,
-    modVersion = "2.0.25.0",
+    modVersion = "2.0.26.0",
     published = false,
     api = nil
 }

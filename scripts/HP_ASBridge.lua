@@ -1,5 +1,5 @@
 -- HP_ASBridge.lua (FS25_HelperProfiles)
--- ModVersion: 2.0.25
+-- ModVersion: 2.0.26
 -- BuildTag: 20260513.4
 -- Optional bridge to FS25_AvatarSwitcher presets.
 -- v2.0.3: adds direct preset-file fallback because FS25/Luau can isolate mod globals.

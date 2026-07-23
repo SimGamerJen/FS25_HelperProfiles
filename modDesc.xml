@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <modDesc descVersion="110">
     <author>SimGamerJen</author>
-    <version>2.0.25.0</version>
+    <version>2.0.26.0</version>
     <title>
         <en>Helper Profiles</en>
         <de>Helferprofile</de>
@@ -11,7 +11,9 @@
         <en><![CDATA[
 Helper Profiles is a helper-management mod for Farming Simulator 25.
 
-It adds a game-styled helper overlay, configurable helper selection behaviour, helper hiring mode controls, console/debug tools, and an optional AvatarSwitcher binding interface for assigning saved appearances to helper profile slots on a per-savegame basis.
+It adds an autosizing tabular helper overlay, configurable helper selection behaviour, helper hiring mode controls, console/debug tools, and an optional AvatarSwitcher binding interface for assigning saved appearances to helper profile slots on a per-savegame basis.
+
+This version is designed for single-player use.
 
 Core features work without AvatarSwitcher:
 - Cycle through available helpers.
@@ -38,7 +40,9 @@ RALT + ; toggles the overlay.
         <de><![CDATA[
 Helferprofile ist ein Helfer-Verwaltungsmod für Farming Simulator 25.
 
-Der Mod ergänzt ein spielähnliches Helfer-Overlay, konfigurierbares Auswahlverhalten für Helfer, Steuerung der Helfer-Einstellungsmodi, Konsolen-/Debug-Werkzeuge und eine optionale AvatarSwitcher-Bindungsoberfläche, mit der gespeicherte Erscheinungsbilder pro Spielstand Helferprofil-Slots zugewiesen werden können.
+Der Mod ergänzt ein automatisch skalierendes tabellarisches Helfer-Overlay, konfigurierbares Auswahlverhalten für Helfer, Steuerung der Helfer-Einstellungsmodi, Konsolen-/Debug-Werkzeuge und eine optionale AvatarSwitcher-Bindungsoberfläche, mit der gespeicherte Erscheinungsbilder pro Spielstand Helferprofil-Slots zugewiesen werden können.
+
+Diese Version ist für den Einzelspielermodus vorgesehen.
 
 Kernfunktionen funktionieren ohne AvatarSwitcher:
 - Durch verfügbare Helfer wechseln.
@@ -65,7 +69,9 @@ RALT + ; schaltet das Overlay ein oder aus.
         <fr><![CDATA[
 Profils d'aides est un mod de gestion des aides pour Farming Simulator 25.
 
-Il ajoute une superposition d'aides au style du jeu, un comportement de sélection des aides configurable, des modes d'embauche des aides, des outils de console/débogage et une interface optionnelle de liaison AvatarSwitcher permettant d'assigner des apparences enregistrées aux emplacements de profils d'aides pour chaque sauvegarde.
+Il ajoute une superposition tabulaire à dimensionnement automatique, un comportement de sélection des aides configurable, des modes d'embauche des aides, des outils de console/débogage et une interface optionnelle de liaison AvatarSwitcher permettant d'assigner des apparences enregistrées aux emplacements de profils d'aides pour chaque sauvegarde.
+
+Cette version est conçue pour le mode solo.
 
 Les fonctions principales fonctionnent sans AvatarSwitcher :
 - Parcourir les aides disponibles.
@@ -90,30 +96,33 @@ RALT + ; active ou désactive la superposition.
 ]]></fr>
     </description>
 
-    <l10n filenamePrefix="l10n/l10n">
-        <text name="input_OPEN_HELPER_MENU">
-            <en>Cycle Helper</en>
-            <de>Helfer wechseln</de>
-            <fr>Parcourir les aides</fr>
-        </text>
-        <text name="input_HP_TOGGLE_OVERLAY">
-            <en>Toggle HelperProfiles Overlay</en>
-            <de>Helferprofile-Overlay umschalten</de>
-            <fr>Activer/désactiver la superposition HelperProfiles</fr>
-        </text>
-        <text name="input_HP_TOGGLE_MODE">
-            <en>Toggle HelperProfiles Mode</en>
-            <de>Helferprofile-Modus umschalten</de>
-            <fr>Changer le mode HelperProfiles</fr>
-        </text>
-        <text name="input_HP_OPEN_APPEARANCE_MENU">
-            <en>Open Helper Appearance Bindings</en>
-            <de>Helfer-Erscheinungsbildbindungen öffnen</de>
-            <fr>Ouvrir les liaisons d'apparence des aides</fr>
-        </text>
-    </l10n>
+    <changelog>
+        <en><![CDATA[
+Version 2.0.26.0:
+- Reworked the helper overlay into a clean, autosizing table.
+- Added measured columns, compact status information, and row highlighting.
+- Hides the appearance column when no appearance bindings are displayed.
+- Set multiplayer support to false.
+]]></en>
+        <de><![CDATA[
+Version 2.0.26.0:
+- Das Helfer-Overlay wurde zu einer übersichtlichen, automatisch skalierenden Tabelle überarbeitet.
+- Gemessene Spalten, kompakte Statusinformationen und Zeilenhervorhebung wurden hinzugefügt.
+- Die Spalte für Erscheinungsbilder wird ausgeblendet, wenn keine Bindungen angezeigt werden.
+- Die Mehrspielerunterstützung wurde auf false gesetzt.
+]]></de>
+        <fr><![CDATA[
+Version 2.0.26.0 :
+- La superposition des aides a été transformée en un tableau clair à dimensionnement automatique.
+- Ajout de colonnes mesurées, d'informations d'état compactes et de la surbrillance des lignes.
+- La colonne d'apparence est masquée lorsqu'aucune liaison n'est affichée.
+- La prise en charge du multijoueur a été définie sur false.
+]]></fr>
+    </changelog>
 
-    <iconFilename>helperprofiles.dds</iconFilename>
+    <l10n filenamePrefix="l10n/l10n"/>
+
+    <iconFilename>icon_helperProfiles.dds</iconFilename>
 
     <actions>
         <action name="OPEN_HELPER_MENU" category="SYSTEM"/>
@@ -138,7 +147,7 @@ RALT + ; active ou désactive la superposition.
         </actionBinding>
     </inputBinding>
 
-    <multiplayer supported="true"/>
+    <multiplayer supported="false"/>
 
     <extraSourceFiles>
         <sourceFile filename="scripts/HP_Config.lua"/>

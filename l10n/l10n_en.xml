@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<?xml version='1.0' encoding='UTF-8'?>
 <l10n>
     <texts>
         <text name="hp_button_bind" text="Bind"/>
@@ -15,11 +15,15 @@
         <text name="hp_flash_appearance_changed" text="%s appearance: %s"/>
         <text name="hp_flash_appearance_cycle_failed" text="Appearance cycle failed: %s"/>
         <text name="hp_flash_as_bridge_unavailable" text="AvatarSwitcher bridge unavailable"/>
+        <text name="hp_flash_config_loaded" text="HP overlay: config loaded"/>
+        <text name="hp_flash_config_saved" text="HP overlay: default config saved"/>
+        <text name="hp_flash_helper_active" text="%s is active and cannot be selected"/>
         <text name="hp_flash_helper_selected" text="Helper: %s (%d/%d)"/>
         <text name="hp_flash_helpers_idle_reset" text="Helpers idle: list reset to default order"/>
         <text name="hp_flash_mode" text="Mode: %s"/>
         <text name="hp_flash_no_helper_selected" text="No helper selected"/>
         <text name="hp_flash_order_reset" text="Helper order reset to default"/>
+        <text name="hp_flash_overlay_on" text="HelperProfiles overlay: ON"/>
         <text name="hp_flash_reset_order_active" text="Cannot reset helper order: helpers active"/>
         <text name="hp_flash_reset_order_no_default" text="Cannot reset helper order: no default cached yet"/>
         <text name="hp_header_appearance" text="Appearance"/>
@@ -31,10 +35,22 @@
         <text name="hp_no_appearances" text="No appearances found"/>
         <text name="hp_no_categories" text="No AvatarSwitcher categories found"/>
         <text name="hp_no_helpers_available" text="No helpers available"/>
+        <text name="hp_overlay_header_appearance" text="APPEARANCE"/>
+        <text name="hp_overlay_header_next" text="NEXT"/>
+        <text name="hp_overlay_header_selected" text="SEL"/>
+        <text name="hp_overlay_header_slot" text="SLOT"/>
+        <text name="hp_overlay_header_status" text="STATUS"/>
+        <text name="hp_overlay_header_worker" text="WORKER"/>
+        <text name="hp_overlay_label_active" text="Active"/>
+        <text name="hp_overlay_label_available" text="Available"/>
+        <text name="hp_overlay_label_mode" text="Mode"/>
+        <text name="hp_overlay_label_next" text="Next"/>
+        <text name="hp_overlay_label_selected" text="Selected"/>
+        <text name="hp_overlay_mode_first_free" text="First available"/>
+        <text name="hp_overlay_mode_prefer_selected" text="Prefer selected"/>
         <text name="hp_slot_label" text="slot: %s"/>
         <text name="hp_state_active" text="ACTIVE"/>
         <text name="hp_state_available" text="AVAILABLE"/>
-        <text name="hp_flash_helper_active" text="%s is active and cannot be selected"/>
         <text name="hp_state_bound" text="BOUND"/>
         <text name="hp_state_unbound" text="UNBOUND"/>
         <text name="hp_state_unbound_title" text="Unbound"/>

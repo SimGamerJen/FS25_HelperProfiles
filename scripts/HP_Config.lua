@@ -3,13 +3,13 @@
 
 -- ============================================================================
 -- FS25_HelperProfiles
--- ModVersion: 2.0.25
+-- ModVersion: 2.0.26
 -- Script:     HP_Config.lua
 -- BuildTag:   20260102.1
 -- ============================================================================
 
 do
-    local MOD_VERSION   = "2.0.25"
+    local MOD_VERSION   = "2.0.26"
     local SCRIPT_NAME   = "HP_Config.lua"
     local BUILD_TAG     = "20260102.1"
     local SCRIPT_VER    = string.format("%s-%s+%s", MOD_VERSION, SCRIPT_NAME, BUILD_TAG)
@@ -28,7 +28,7 @@ end
 HP_Config = {
     dir   = nil,
     path  = nil,
-    _ver  = 1,
+    _ver  = 2,
 }
 
 local function _userPath()
@@ -42,17 +42,13 @@ local function _mkDir(path)
     if createFolder ~= nil then
         return createFolder(path)
     end
-    -- fallback: try Lua I/O (will only work if FS allows; guarded anyway)
-    local ok = os.execute and os.execute(string.format('mkdir "%s"', path)) or false
-    return ok == true or ok == 0
+    return false
 end
 
 local function _fileExists(path)
     if fileExists ~= nil then
         return fileExists(path)
     end
-    local f = io.open(path, "rb")
-    if f then f:close(); return true end
     return false
 end
 
@@ -72,7 +68,9 @@ function HP_Config:getDefaults()
         x           = HP_UI and HP_UI.x           or 0.985,
         y           = HP_UI and HP_UI.y           or 0.965,
         scale       = HP_UI and HP_UI.scale       or 1.0,
-        width       = HP_UI and HP_UI.width       or 0.36,
+        width       = HP_UI and HP_UI.width       or 0.24,
+        autoSize    = HP_UI and HP_UI.autoSize    ~= false,
+        columnGap   = HP_UI and HP_UI.columnGap   or 0.010,
         opacity     = HP_UI and HP_UI.opacity     or 0.85,
         pad         = HP_UI and HP_UI.pad         or 0.006,
         rowGap      = HP_UI and HP_UI.rowGap      or 0.006,
@@ -92,6 +90,8 @@ function HP_Config:applyToUI(cfg)
     HP_UI:setAnchor(cfg.anchor)
     HP_UI:setPos(cfg.x, cfg.y)
     if HP_UI.setWidth then HP_UI:setWidth(cfg.width) end
+    if HP_UI.setAutoSize then HP_UI:setAutoSize(cfg.autoSize) end
+    if HP_UI.setColumnGap then HP_UI:setColumnGap(cfg.columnGap) end
     HP_UI:setScale(cfg.scale)
     HP_UI:setOpacity(cfg.opacity)
     HP_UI:setPadding(cfg.pad)
@@ -125,6 +125,8 @@ function HP_Config:read(pathOverride)
     cfg.y           = xml:getFloat ("hp.ui#y",       cfg.y)
     cfg.scale       = xml:getFloat ("hp.ui#scale",   cfg.scale)
     cfg.width       = xml:getFloat ("hp.ui#width",   cfg.width)
+    cfg.autoSize    = xml:getBool  ("hp.ui#autoSize", cfg.autoSize)
+    cfg.columnGap   = xml:getFloat ("hp.ui#columnGap", cfg.columnGap)
     cfg.opacity     = xml:getFloat ("hp.ui#opacity", cfg.opacity)
     cfg.pad         = xml:getFloat ("hp.ui#pad",     cfg.pad)
     cfg.rowGap      = xml:getFloat ("hp.ui#rowGap",  cfg.rowGap)
@@ -137,6 +139,17 @@ function HP_Config:read(pathOverride)
     cfg.bindHud     = xml:getBool  ("hp.ui#bindHud", cfg.bindHud)
 
     xml:delete()
+
+    -- Version 1 used width as a fixed 0.4-screen panel. Migrate it to the new
+    -- measured table layout so existing installations receive autosizing.
+    if (cfg.version or 1) < 2 then
+        local defaults = self:getDefaults()
+        cfg.width = defaults.width
+        cfg.autoSize = true
+        cfg.columnGap = defaults.columnGap
+        cfg.version = self._ver
+    end
+
     return cfg, nil
 end
 
@@ -156,6 +169,8 @@ function HP_Config:write(pathOverride)
         cfg.y           = HP_UI.y
         cfg.scale       = HP_UI.scale
         cfg.width       = HP_UI.width or cfg.width
+        cfg.autoSize    = HP_UI.autoSize ~= false
+        cfg.columnGap   = HP_UI.columnGap or cfg.columnGap
         cfg.opacity     = HP_UI.opacity
         cfg.pad         = HP_UI.pad
         cfg.rowGap      = HP_UI.rowGap
@@ -175,6 +190,8 @@ function HP_Config:write(pathOverride)
     xml:setFloat ("hp.ui#y",       cfg.y)
     xml:setFloat ("hp.ui#scale",   cfg.scale)
     xml:setFloat ("hp.ui#width",   cfg.width)
+    xml:setBool  ("hp.ui#autoSize", cfg.autoSize)
+    xml:setFloat ("hp.ui#columnGap", cfg.columnGap)
     xml:setFloat ("hp.ui#opacity", cfg.opacity)
     xml:setFloat ("hp.ui#pad",     cfg.pad)
     xml:setFloat ("hp.ui#rowGap",  cfg.rowGap)

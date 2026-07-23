@@ -2,13 +2,13 @@
 
 -- ============================================================================
 -- FS25_HelperProfiles
--- ModVersion: 2.0.25
+-- ModVersion: 2.0.26
 -- Script:     HP_Debug.lua
 -- BuildTag:   20260105-1
 -- ============================================================================
 
 do
-    local MOD_VERSION   = "2.0.25"
+    local MOD_VERSION   = "2.0.26"
     local SCRIPT_NAME   = "HP_Debug.lua"
     local BUILD_TAG     = "20260512-2"
     local SCRIPT_VER    = string.format("%s-%s+%s", MOD_VERSION, SCRIPT_NAME, BUILD_TAG)
@@ -75,8 +75,9 @@ function Debug:hpOverlay(...)
         _printf("hpOverlay commands:")
         _printf("  on|off|toggle")
         _printf("  pos <x 0..1> <y 0..1> | anchor TL|TR|BL|BR")
-        _printf("  scale <0.5..2.0> | width <0.15..0.90> | opacity <0..1> | font <0.010..0.030>")
-        _printf("  rowgap <0.001..0.03> | maxrows <3..30> | pad <0..0.05>")
+        _printf("  scale <0.5..2.0> | width <0.15..0.90> | autosize on|off")
+        _printf("  opacity <0..1> | font <0.010..0.030> | rowgap <0.001..0.03>")
+        _printf("  colgap <0.002..0.04> | maxrows <3..30> | pad <0..0.05>")
         _printf("  bg on|off | outline on|off | markers on|off | bindhud on|off")
         _printf("  debounce <ms>")
         _printf("  save [filename]   (to modSettings/FS25_HelperProfiles)")
@@ -103,6 +104,11 @@ function Debug:hpOverlay(...)
         if HP_UI.setWidth then HP_UI:setWidth(b) end
         _printf("Overlay width=%.3f (screen units)", HP_UI.width); return
 
+    elseif a == "autosize" then
+        local bol = _boolArg(b); if bol == nil then _printf("Usage: hpOverlay autosize on|off"); return end
+        if HP_UI.setAutoSize then HP_UI:setAutoSize(bol) end
+        _printf("Overlay autosize=%s", tostring(HP_UI.autoSize)); return
+
     elseif a == "opacity" then
         HP_UI:setOpacity(b); _printf("Overlay opacity=%.2f", HP_UI.opacity); return
 
@@ -111,6 +117,10 @@ function Debug:hpOverlay(...)
 
     elseif a == "rowgap" then
         HP_UI:setRowGap(b); _printf("Overlay rowGap=%.3f", HP_UI.rowGap); return
+
+    elseif a == "colgap" then
+        if HP_UI.setColumnGap then HP_UI:setColumnGap(b) end
+        _printf("Overlay columnGap=%.3f", HP_UI.columnGap); return
 
     elseif a == "maxrows" then
         HP_UI:setMaxRows(b); _printf("Overlay maxRows=%d", HP_UI.maxRows); return

@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<?xml version='1.0' encoding='UTF-8'?>
 <l10n>
     <texts>
         <text name="hp_button_bind" text="Binden"/>
@@ -15,11 +15,15 @@
         <text name="hp_flash_appearance_changed" text="%s Erscheinungsbild: %s"/>
         <text name="hp_flash_appearance_cycle_failed" text="Erscheinungsbildwechsel fehlgeschlagen: %s"/>
         <text name="hp_flash_as_bridge_unavailable" text="AvatarSwitcher-Bridge nicht verfügbar"/>
+        <text name="hp_flash_config_loaded" text="HP-Overlay: Konfiguration geladen"/>
+        <text name="hp_flash_config_saved" text="HP-Overlay: Standardkonfiguration gespeichert"/>
+        <text name="hp_flash_helper_active" text="%s ist aktiv und kann nicht ausgewählt werden"/>
         <text name="hp_flash_helper_selected" text="Helfer: %s (%d/%d)"/>
         <text name="hp_flash_helpers_idle_reset" text="Helfer inaktiv: Liste auf Standardreihenfolge zurückgesetzt"/>
         <text name="hp_flash_mode" text="Modus: %s"/>
         <text name="hp_flash_no_helper_selected" text="Kein Helfer ausgewählt"/>
         <text name="hp_flash_order_reset" text="Helferreihenfolge auf Standard zurückgesetzt"/>
+        <text name="hp_flash_overlay_on" text="Helferprofile-Overlay: EIN"/>
         <text name="hp_flash_reset_order_active" text="Helferreihenfolge kann nicht zurückgesetzt werden: Helfer aktiv"/>
         <text name="hp_flash_reset_order_no_default" text="Helferreihenfolge kann nicht zurückgesetzt werden: keine Standardreihenfolge zwischengespeichert"/>
         <text name="hp_header_appearance" text="Erscheinungsbild"/>
@@ -31,10 +35,22 @@
         <text name="hp_no_appearances" text="Keine Erscheinungsbilder gefunden"/>
         <text name="hp_no_categories" text="Keine AvatarSwitcher-Kategorien gefunden"/>
         <text name="hp_no_helpers_available" text="Keine Helfer verfügbar"/>
+        <text name="hp_overlay_header_appearance" text="AUSSEHEN"/>
+        <text name="hp_overlay_header_next" text="NÄCH."/>
+        <text name="hp_overlay_header_selected" text="AUSW."/>
+        <text name="hp_overlay_header_slot" text="PLATZ"/>
+        <text name="hp_overlay_header_status" text="STATUS"/>
+        <text name="hp_overlay_header_worker" text="HELFER"/>
+        <text name="hp_overlay_label_active" text="Aktiv"/>
+        <text name="hp_overlay_label_available" text="Verfügbar"/>
+        <text name="hp_overlay_label_mode" text="Modus"/>
+        <text name="hp_overlay_label_next" text="Nächster"/>
+        <text name="hp_overlay_label_selected" text="Ausgewählt"/>
+        <text name="hp_overlay_mode_first_free" text="Erster verfügbarer"/>
+        <text name="hp_overlay_mode_prefer_selected" text="Ausgewählten bevorzugen"/>
         <text name="hp_slot_label" text="Slot: %s"/>
         <text name="hp_state_active" text="AKTIV"/>
         <text name="hp_state_available" text="VERFÜGBAR"/>
-        <text name="hp_flash_helper_active" text="%s ist aktiv und kann nicht ausgewählt werden"/>
         <text name="hp_state_bound" text="GEBUNDEN"/>
         <text name="hp_state_unbound" text="NICHT GEBUNDEN"/>
         <text name="hp_state_unbound_title" text="Nicht gebunden"/>

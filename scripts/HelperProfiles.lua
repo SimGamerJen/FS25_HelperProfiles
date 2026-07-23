@@ -3,13 +3,13 @@
 
 -- ============================================================================
 -- FS25_HelperProfiles
--- ModVersion: 2.0.25
+-- ModVersion: 2.0.26
 -- Script:     HelperProfiles.lua
 -- BuildTag:   20260105-1
 -- ============================================================================
 
 do
-    local MOD_VERSION   = "2.0.25"
+    local MOD_VERSION   = "2.0.26"
     local SCRIPT_NAME   = "HelperProfiles.lua"
     local BUILD_TAG     = "20260513-2"
     local SCRIPT_VER    = string.format("%s-%s+%s", MOD_VERSION, SCRIPT_NAME, BUILD_TAG)

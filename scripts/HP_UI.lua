@@ -1,22 +1,22 @@
--- HP_UI.lua (FS25_HelperProfiles) — FS25-styled overlay (guarded APIs)
--- Now also auto-loads config from modSettings/FS25_HelperProfiles/config.xml (if HP_Config is present)
+-- HP_UI.lua (FS25_HelperProfiles) — autosizing tabular helper overlay
+-- Loads optional UI configuration from modSettings/FS25_HelperProfiles/config.xml.
 
 -- ============================================================================
 -- FS25_HelperProfiles
--- ModVersion: 2.0.25
+-- ModVersion: 2.0.26
 -- Script:     HP_UI.lua
--- BuildTag:   20260105-1
+-- BuildTag:   20260721-1
 -- ============================================================================
 
 do
-    local MOD_VERSION   = "2.0.25"
-    local SCRIPT_NAME   = "HP_UI.lua"
-    local BUILD_TAG     = "20260513-2"
-    local SCRIPT_VER    = string.format("%s-%s+%s", MOD_VERSION, SCRIPT_NAME, BUILD_TAG)
+    local MOD_VERSION = "2.0.26"
+    local SCRIPT_NAME = "HP_UI.lua"
+    local BUILD_TAG = "20260721-1"
+    local SCRIPT_VER = string.format("%s-%s+%s", MOD_VERSION, SCRIPT_NAME, BUILD_TAG)
 
     local vi = rawget(_G, "FS25_HelperProfiles_VersionInfo")
     if vi == nil then
-        vi = { modVersion = MOD_VERSION, scripts = {} }
+        vi = {modVersion = MOD_VERSION, scripts = {}}
         _G.FS25_HelperProfiles_VersionInfo = vi
     end
 
@@ -27,38 +27,55 @@ end
 
 ---@class HP_UI
 HP_UI = {
-    bindHud     = true,  -- when true, overlay hides if base HUD is hidden (HideHUD etc.)
-    visible     = true,
-    anchor      = "TR",   -- TL | TR | BL | BR
-    x           = 0.985,  -- screen-space (0..1) anchor offset
-    y           = 0.900,
-    scale       = 1.0,
-    opacity     = 0.4,   -- background opacity
-    pad         = 0.006,  -- panel padding
-    rowGap      = 0.006,  -- vertical gap between rows
-    fontSize    = 0.014,  -- base font size
-    maxRows     = 10,
-    width       = 0.4,   -- panel width in screen units (0..1)
-    bgEnabled   = true,
-    outline     = false,  -- thin outline around panel
-    shadow      = false,  -- soft text shadow
-    showMarkers = true,   -- « selected / ← next markers
-    flashText   = nil,
-    flashTime   = 0
+    bindHud = true,       -- hide with the base HUD
+    visible = true,
+    anchor = "TR",       -- TL | TR | BL | BR
+    x = 0.985,
+    y = 0.900,
+    scale = 1.0,
+    opacity = 0.4,
+    pad = 0.006,
+    rowGap = 0.006,
+    columnGap = 0.010,
+    sectionGap = 0.004,
+    fontSize = 0.014,     -- retained from the previous overlay
+    maxRows = 10,
+    width = 0.24,         -- minimum width while autosizing; fixed width otherwise
+    maxWidth = 0.94,
+    autoSize = true,
+    bgEnabled = true,
+    outline = false,
+    shadow = false,
+    showMarkers = true,
+    flashText = nil,
+    flashTime = 0
 }
 
--- ===== Safe wrappers (no-ops if engine funcs missing) ========================
+-- ===== Safe engine wrappers ==================================================
 
-local function safeSetTextAlign(a)
+local function safeSetTextAlign(alignment)
     if _G.setTextAlignment ~= nil then
-        setTextAlignment(a)
+        setTextAlignment(alignment)
     end
 end
 
-local function safeRenderText(x, y, size, txt)
+local function safeRenderText(x, y, size, text)
     if _G.renderText ~= nil then
-        renderText(x, y, size, txt)
+        renderText(x, y, size, text)
     end
+end
+
+local function safeGetTextWidth(size, text)
+    text = tostring(text or "")
+    if _G.getTextWidth ~= nil then
+        local ok, width = pcall(getTextWidth, size, text)
+        if ok and type(width) == "number" then
+            return width
+        end
+    end
+
+    -- Conservative fallback for environments where the renderer is unavailable.
+    return #text * size * 0.52
 end
 
 local function safeGetTextColor()
@@ -74,46 +91,55 @@ local function safeSetTextColor(r, g, b, a)
     end
 end
 
--- rectangles: prefer drawFilledRect; if missing, no-op
-local function safeRect(x, y, w, h, r, g, b, a)
+local function safeRect(x, y, width, height, r, g, b, a)
     if _G.drawFilledRect ~= nil then
-        drawFilledRect(x, y, w, h, r, g, b, a)
+        drawFilledRect(x, y, width, height, r, g, b, a)
     end
 end
 
-local function drawOutline(x, y, w, h, a)
-    local t = 0.0018
-    safeRect(x, y, w, t, 1, 1, 1, a)                 -- bottom
-    safeRect(x, y + h - t, w, t, 1, 1, 1, a)         -- top
-    safeRect(x, y, t, h, 1, 1, 1, a)                 -- left
-    safeRect(x + w - t, y, t, h, 1, 1, 1, a)         -- right
+local function drawOutline(x, y, width, height, alpha)
+    local thickness = 0.0018
+    safeRect(x, y, width, thickness, 1, 1, 1, alpha)
+    safeRect(x, y + height - thickness, width, thickness, 1, 1, 1, alpha)
+    safeRect(x, y, thickness, height, 1, 1, 1, alpha)
+    safeRect(x + width - thickness, y, thickness, height, 1, 1, 1, alpha)
 end
 
-local function shadowedText(x, y, size, txt)
+local function shadowedText(x, y, size, text)
     if not HP_UI.shadow then
-        safeRenderText(x, y, size, txt)
+        safeRenderText(x, y, size, text)
         return
     end
-    local ox, oy = 0.0012, -0.0012
+
+    local offsetX, offsetY = 0.0012, -0.0012
     local r, g, b, a = safeGetTextColor()
     safeSetTextColor(0, 0, 0, math.min(1, a * 0.75))
-    safeRenderText(x + ox, y + oy, size, txt)
+    safeRenderText(x + offsetX, y + offsetY, size, text)
     safeSetTextColor(r, g, b, a)
-    safeRenderText(x, y, size, txt)
+    safeRenderText(x, y, size, text)
 end
 
-local function clamp(v, lo, hi)
-    if v < lo then
-        return lo
-    elseif v > hi then
-        return hi
+local function clamp(value, minimum, maximum)
+    if value < minimum then return minimum end
+    if value > maximum then return maximum end
+    return value
+end
+
+local function setLeftAlignment()
+    if _G.RenderText ~= nil and RenderText.ALIGN_LEFT ~= nil then
+        safeSetTextAlign(RenderText.ALIGN_LEFT)
     end
-    return v
 end
 
--- ===== Public config setters ==================================================
+local function setCenterAlignment()
+    if _G.RenderText ~= nil and RenderText.ALIGN_CENTER ~= nil then
+        safeSetTextAlign(RenderText.ALIGN_CENTER)
+    end
+end
 
-function HP_UI:setVisible(val) self.visible = val and true or false end
+-- ===== Public configuration setters =========================================
+
+function HP_UI:setVisible(value) self.visible = value and true or false end
 function HP_UI:toggle() self.visible = not self.visible end
 
 function HP_UI:setAnchor(anchor)
@@ -128,32 +154,30 @@ function HP_UI:setPos(x, y)
     self.y = clamp(tonumber(y) or self.y, 0.0, 1.0)
 end
 
-function HP_UI:setScale(s)      self.scale    = clamp(tonumber(s)  or self.scale,    0.5, 2.0) end
-function HP_UI:setOpacity(a)    self.opacity  = clamp(tonumber(a)  or self.opacity,  0.0, 1.0) end
-function HP_UI:setFontSize(sz)  self.fontSize = clamp(tonumber(sz) or self.fontSize, 0.010, 0.030) end
-function HP_UI:setRowGap(gap)   self.rowGap   = clamp(tonumber(gap) or self.rowGap,  0.001, 0.030) end
+function HP_UI:setScale(scale) self.scale = clamp(tonumber(scale) or self.scale, 0.5, 2.0) end
+function HP_UI:setOpacity(alpha) self.opacity = clamp(tonumber(alpha) or self.opacity, 0.0, 1.0) end
+function HP_UI:setFontSize(size) self.fontSize = clamp(tonumber(size) or self.fontSize, 0.010, 0.030) end
+function HP_UI:setRowGap(gap) self.rowGap = clamp(tonumber(gap) or self.rowGap, 0.001, 0.030) end
+function HP_UI:setColumnGap(gap) self.columnGap = clamp(tonumber(gap) or self.columnGap, 0.002, 0.040) end
 
-function HP_UI:setMaxRows(n)
-    local val = tonumber(n) or self.maxRows
-    val = math.floor(val)
-    self.maxRows = clamp(val, 3, 30)
+function HP_UI:setMaxRows(count)
+    local value = math.floor(tonumber(count) or self.maxRows)
+    self.maxRows = clamp(value, 3, 30)
 end
 
-function HP_UI:setWidth(w)
-    w = tonumber(w)
-    if not w then return end
-    -- sensible bounds for 16:9; tweak if you like
-    if w < 0.15 then w = 0.15 end
-    if w > 0.90 then w = 0.90 end
-    self.width = w
+function HP_UI:setWidth(width)
+    width = tonumber(width)
+    if width == nil then return end
+    self.width = clamp(width, 0.15, 0.90)
 end
 
-function HP_UI:setBackground(b) self.bgEnabled = b and true or false end
-function HP_UI:setPadding(pad)  self.pad      = clamp(tonumber(pad) or self.pad, 0.0, 0.05) end
-function HP_UI:setOutline(b)    self.outline  = b and true or false end
-function HP_UI:flash(text, secs) self.flashText = text or ""; self.flashTime = tonumber(secs) or 2.0 end
+function HP_UI:setAutoSize(enabled) self.autoSize = enabled and true or false end
+function HP_UI:setBackground(enabled) self.bgEnabled = enabled and true or false end
+function HP_UI:setPadding(padding) self.pad = clamp(tonumber(padding) or self.pad, 0.0, 0.05) end
+function HP_UI:setOutline(enabled) self.outline = enabled and true or false end
+function HP_UI:flash(text, seconds) self.flashText = text or ""; self.flashTime = tonumber(seconds) or 2.0 end
 
--- ===== Data collection ========================================================
+-- ===== Data collection =======================================================
 
 local function hpI18n(key, fallback)
     if g_i18n ~= nil and g_i18n.getText ~= nil then
@@ -166,265 +190,401 @@ local function hpI18n(key, fallback)
 end
 
 local function isGuiHiddenProfile(name)
-    if name == nil then
-        return false
-    end
-
+    if name == nil then return false end
     return string.find(string.upper(tostring(name)), "SPARE", 1, true) ~= nil
 end
 
-local function getDisplayName(helper, idx)
+local function getDisplayName(helper, index)
     if HelperProfiles ~= nil and HelperProfiles.getDisplayNameForHelper ~= nil then
-        local ok, displayName = pcall(HelperProfiles.getDisplayNameForHelper, HelperProfiles, helper, idx)
-        if ok and displayName ~= nil and tostring(displayName) ~= "" then return tostring(displayName) end
+        local ok, displayName = pcall(HelperProfiles.getDisplayNameForHelper, HelperProfiles, helper, index)
+        if ok and displayName ~= nil and tostring(displayName) ~= "" then
+            return tostring(displayName)
+        end
     end
-    return tostring((helper ~= nil and helper.name) or ("Helper " .. tostring(idx or "?")))
+    return tostring((helper ~= nil and helper.name) or ("Helper " .. tostring(index or "?")))
 end
 
-local function getBaseName(helper, idx)
-    return tostring((helper ~= nil and helper.name) or ("Helper " .. tostring(idx or "?")))
+local function getAppearanceLabel(helper, index)
+    if HelperProfiles ~= nil and HelperProfiles.getAppearanceLabelForHelper ~= nil then
+        local ok, label = pcall(HelperProfiles.getAppearanceLabelForHelper, HelperProfiles, helper, index)
+        if ok and label ~= nil and tostring(label) ~= "" then
+            local text = tostring(label)
+            if text == "no AS preset" or text == "AS presets unavailable" then
+                return "-"
+            end
+            return text
+        end
+    end
+    return "-"
+end
+
+local function getModeLabel(mode)
+    if mode == "firstFree" then
+        return hpI18n("hp_overlay_mode_first_free", "First available")
+    end
+    if mode == "preferSelected" then
+        return hpI18n("hp_overlay_mode_prefer_selected", "Prefer selected")
+    end
+    return tostring(mode or "-")
 end
 
 local function collectRows()
+    local summary = {
+        mode = "-",
+        availableCount = 0,
+        activeCount = 0,
+        selectedName = "-",
+        nextName = "-"
+    }
+
     if HelperProfiles == nil or HelperProfiles.getProfiles == nil then
-        return "Helpers active: 0 | Selected: - | Next: -", {}
+        return summary, {}
     end
 
     local profiles = HelperProfiles:getProfiles() or {}
 
-    local selectedIdx
-    if HelperProfiles.getSelectionIndex ~= nil then
-        selectedIdx = HelperProfiles:getSelectionIndex()
-    else
-        selectedIdx = HelperProfiles.selectedIdx
-    end
+    local selectedIdx = HelperProfiles.getSelectionIndex ~= nil
+        and HelperProfiles:getSelectionIndex() or HelperProfiles.selectedIdx
     if type(selectedIdx) ~= "number" then selectedIdx = 1 end
     if selectedIdx < 1 or selectedIdx > #profiles then selectedIdx = 1 end
 
-    local nextHelper, reason = nil, "n/a"
+    local nextHelper = nil
     if HelperProfiles.pickPreferredFreeHelper ~= nil then
-        nextHelper, reason = HelperProfiles:pickPreferredFreeHelper()
+        nextHelper = HelperProfiles:pickPreferredFreeHelper()
     end
 
-    local selectedRef = HelperProfiles ~= nil and HelperProfiles.selectedHelperRef or nil
-    local selName = (selectedRef ~= nil and getDisplayName(selectedRef, selectedIdx)) or "-"
+    local selectedRef = HelperProfiles.selectedHelperRef
+    summary.selectedName = selectedRef ~= nil and getDisplayName(selectedRef, selectedIdx) or "-"
+
     local nextIdx = nil
     if nextHelper ~= nil then
-        for i, candidate in ipairs(profiles) do if candidate == nextHelper then nextIdx = i; break end end
+        for index, candidate in ipairs(profiles) do
+            if candidate == nextHelper then
+                nextIdx = index
+                break
+            end
+        end
+        summary.nextName = getDisplayName(nextHelper, nextIdx or "?")
     end
-    local nextName = nextHelper and getDisplayName(nextHelper, nextIdx or "?") or ("(" .. tostring(reason) .. ")")
+
+    if HelperProfiles.getPickMode ~= nil then
+        local ok, mode = pcall(HelperProfiles.getPickMode, HelperProfiles)
+        if ok then summary.mode = getModeLabel(mode) end
+    elseif HelperProfiles._pickMode ~= nil then
+        summary.mode = getModeLabel(HelperProfiles._pickMode)
+    end
 
     local rows = {}
-    local visibleCount = 0
-    local activeCount = 0
-    local availableCount = 0
-
-    for idx, h in ipairs(profiles) do
-        local helperName = h.name or ("Helper " .. idx)
-        local displayName = getDisplayName(h, idx)
-
+    for index, helper in ipairs(profiles) do
+        local helperName = tostring(helper.name or ("Helper " .. tostring(index)))
         if not isGuiHiddenProfile(helperName) then
-            visibleCount = visibleCount + 1
+            local isActive = HelperProfiles.isHelperActive ~= nil
+                and HelperProfiles:isHelperActive(helper) or helper.inUse == true
 
-            local isActive = HelperProfiles ~= nil and HelperProfiles.isHelperActive ~= nil
-                and HelperProfiles:isHelperActive(h) or h.inUse == true
-            if isActive then activeCount = activeCount + 1 else availableCount = availableCount + 1 end
+            if isActive then
+                summary.activeCount = summary.activeCount + 1
+            else
+                summary.availableCount = summary.availableCount + 1
+            end
 
-            local state = isActive
-                and hpI18n("hp_state_active", "ACTIVE")
-                or hpI18n("hp_state_available", "AVAILABLE")
-            local marks = {}
-            if HP_UI.showMarkers then
-                if idx == selectedIdx and not isActive then table.insert(marks, "» sel") end
-                if nextHelper == h and not isActive then table.insert(marks, "← next") end
+            local slotLabel = helperName
+            if not slotLabel:match("^[A-J]$") then
+                slotLabel = string.format("%02d", index)
             end
-            local suffix = (#marks > 0) and ("  " .. table.concat(marks, "  ")) or ""
-            local appearance = nil
-            if HelperProfiles ~= nil and HelperProfiles.getAppearanceLabelForHelper ~= nil then
-                local ok, label = pcall(HelperProfiles.getAppearanceLabelForHelper, HelperProfiles, h, idx)
-                if ok and label ~= nil and label ~= "" then appearance = label end
-            end
-            local appearanceText = appearance and ("  — " .. tostring(appearance)) or ""
-            local baseHint = (displayName ~= helperName) and (" (" .. tostring(helperName) .. ")") or ""
-            local slotLabel = tostring(helperName)
-            if not slotLabel:match("^[A-J]$") then slotLabel = string.format("%02d", idx) end
-            local line = string.format("%s  %s%s  [%s]%s%s", slotLabel, displayName, baseHint, state, appearanceText, suffix)
 
             table.insert(rows, {
-                text = line,
+                slot = slotLabel,
+                worker = getDisplayName(helper, index),
+                status = isActive
+                    and hpI18n("hp_state_active", "ACTIVE")
+                    or hpI18n("hp_state_available", "AVAILABLE"),
+                appearance = getAppearanceLabel(helper, index),
+                selected = (HP_UI.showMarkers and index == selectedIdx and not isActive) and "»" or "",
+                next = (HP_UI.showMarkers and nextHelper == helper and not isActive) and "←" or "",
                 inUse = isActive,
-                isSelected = (idx == selectedIdx and not isActive),
-                isNext = (nextHelper == h and not isActive)
+                isSelected = index == selectedIdx and not isActive,
+                isNext = nextHelper == helper and not isActive
             })
         end
     end
 
-    local mode = "-"
-    if HelperProfiles ~= nil then
-        if HelperProfiles.getPickMode ~= nil then
-            local ok, res = pcall(function() return HelperProfiles:getPickMode() end)
-            if ok and res ~= nil and res ~= "" then mode = tostring(res) end
-        elseif HelperProfiles._pickMode ~= nil then
-            mode = tostring(HelperProfiles._pickMode)
+    return summary, rows
+end
+
+-- ===== Layout ================================================================
+
+local function getColumnKeys(rows, rowCount)
+    local keys = {"slot", "worker", "status"}
+    local showAppearance = false
+    for index = 1, rowCount do
+        if rows[index].appearance ~= nil and rows[index].appearance ~= "" and rows[index].appearance ~= "-" then
+            showAppearance = true
+            break
+        end
+    end
+    if showAppearance then table.insert(keys, "appearance") end
+    if HP_UI.showMarkers then
+        table.insert(keys, "selected")
+        table.insert(keys, "next")
+    end
+    return keys
+end
+
+local function getColumnHeaders()
+    return {
+        slot = hpI18n("hp_overlay_header_slot", "SLOT"),
+        worker = hpI18n("hp_overlay_header_worker", "WORKER"),
+        status = hpI18n("hp_overlay_header_status", "STATUS"),
+        appearance = hpI18n("hp_overlay_header_appearance", "APPEARANCE"),
+        selected = hpI18n("hp_overlay_header_selected", "SEL"),
+        next = hpI18n("hp_overlay_header_next", "NEXT")
+    }
+end
+
+local function buildSummaryLine(summary)
+    return string.format(
+        "%s: %s   |   %s: %d   |   %s: %d",
+        hpI18n("hp_overlay_label_mode", "Mode"), summary.mode,
+        hpI18n("hp_overlay_label_available", "Available"), summary.availableCount,
+        hpI18n("hp_overlay_label_active", "Active"), summary.activeCount
+    )
+end
+
+local function measureColumns(columnKeys, headers, rows, rowCount, fontSize, gap)
+    local widths = {}
+    local totalWidth = 0
+
+    for _, key in ipairs(columnKeys) do
+        widths[key] = safeGetTextWidth(fontSize, headers[key])
+    end
+
+    if widths.status ~= nil then
+        widths.status = math.max(
+            widths.status,
+            safeGetTextWidth(fontSize, hpI18n("hp_state_active", "ACTIVE")),
+            safeGetTextWidth(fontSize, hpI18n("hp_state_available", "AVAILABLE"))
+        )
+    end
+
+    for index = 1, rowCount do
+        local row = rows[index]
+        for _, key in ipairs(columnKeys) do
+            widths[key] = math.max(widths[key], safeGetTextWidth(fontSize, row[key] or ""))
         end
     end
 
-    local header = string.format("Mode: %s | Available: %d | Active: %d | Selected: %s | Next: %s", mode, availableCount, activeCount, selName, nextName)
-    return header, rows
+    for index, key in ipairs(columnKeys) do
+        totalWidth = totalWidth + widths[key]
+        if index < #columnKeys then totalWidth = totalWidth + gap end
+    end
+
+    return widths, totalWidth
 end
 
--- ===== Layout helpers =========================================================
-
-local function place(w, h)
-    local x = HP_UI.x
-    local y = HP_UI.y
+local function place(width, height)
+    local x, y
     if HP_UI.anchor == "TR" then
-        return x - w, y - h
+        x, y = HP_UI.x - width, HP_UI.y - height
     elseif HP_UI.anchor == "TL" then
-        return x, y - h
+        x, y = HP_UI.x, HP_UI.y - height
     elseif HP_UI.anchor == "BR" then
-        return x - w, y
+        x, y = HP_UI.x - width, HP_UI.y
+    else
+        x, y = HP_UI.x, HP_UI.y
     end
-    return x, y -- BL
+
+    -- Keep the complete panel inside the screen even with long localised text.
+    x = clamp(x, 0.005, math.max(0.005, 0.995 - width))
+    y = clamp(y, 0.005, math.max(0.005, 0.995 - height))
+    return x, y
 end
 
--- Replace the whole function with this version
+local function buildColumnPositions(columnKeys, startX, widths, gap)
+    local positions = {}
+    local x = startX
+    for index, key in ipairs(columnKeys) do
+        positions[key] = x
+        x = x + widths[key]
+        if index < #columnKeys then x = x + gap end
+    end
+    return positions
+end
+
+-- ===== Input and HUD state ===================================================
+
 function HP_UI:onToggleAction(actionName, inputValue, callbackState, isAnalog)
-    -- GIANTS sends either (name, value, state, isAnalog) OR (name, keyStatus)
-    local v = 0
+    local value = 0
     if type(inputValue) == "number" then
-        v = inputValue                      -- typical path: >0 on press, 0 on release
+        value = inputValue
     elseif type(inputValue) == "boolean" then
-        v = inputValue and 1 or 0
+        value = inputValue and 1 or 0
     else
-        -- Some builds pass keyStatus as 2nd arg when using legacy style
-        -- e.g. function(self, actionName, keyStatus)
-        v = tonumber(callbackState) or 0
+        value = tonumber(callbackState) or 0
     end
 
-    if v <= 0 then return end  -- only act on press
+    if value <= 0 then return end
     self:toggle()
     if self.visible then
-        self:flash("HelperProfiles overlay: ON", 1.25)
+        self:flash(hpI18n("hp_flash_overlay_on", "HelperProfiles overlay: ON"), 1.25)
     else
         print("[FS25_HelperProfiles] Overlay: OFF")
     end
 end
 
-local function _isBaseHudShown()
-    -- Prefer mission HUD visibility if available
+local function isBaseHudShown()
     if g_currentMission ~= nil then
         local hud = g_currentMission.hud
         if hud ~= nil then
             if hud.getIsVisible ~= nil then
-                local ok, res = pcall(function() return hud:getIsVisible() end)
-                if ok then return res end
+                local ok, result = pcall(hud.getIsVisible, hud)
+                if ok then return result end
             end
             if hud.getVisible ~= nil then
-                local ok, res = pcall(function() return hud:getVisible() end)
-                if ok then return res end
+                local ok, result = pcall(hud.getVisible, hud)
+                if ok then return result end
             end
             if hud.isVisible ~= nil then
                 return hud.isVisible and true or false
             end
         end
     end
-    -- Fallback to game setting, many mods flip this when hiding the HUD
+
     if g_gameSettings ~= nil and g_gameSettings.getValue ~= nil then
-        local ok, res = pcall(function() return g_gameSettings:getValue("showHud") end)
-        if ok and res ~= nil then return (res == true) end
+        local ok, result = pcall(g_gameSettings.getValue, g_gameSettings, "showHud")
+        if ok and result ~= nil then return result == true end
     end
-    -- Default: assume shown
+
     return true
 end
 
--- ===== Render =================================================================
+-- ===== Render ================================================================
 
 function HP_UI:render(dtMillis)
-    -- flash banner (top-center)
     if self.flashTime ~= nil and self.flashTime > 0 then
         local dt = tonumber(dtMillis) or 16
         self.flashTime = math.max(0, self.flashTime - dt * 0.001)
         if self.flashTime > 0 and self.flashText ~= nil and self.flashText ~= "" then
-            if _G.RenderText ~= nil and RenderText.ALIGN_CENTER ~= nil then
-                safeSetTextAlign(RenderText.ALIGN_CENTER)
-            end
+            setCenterAlignment()
             safeSetTextColor(1, 1, 1, 1)
             shadowedText(0.5, 0.94, 0.021 * self.scale, self.flashText)
-            if _G.RenderText ~= nil and RenderText.ALIGN_LEFT ~= nil then
-                safeSetTextAlign(RenderText.ALIGN_LEFT)
-            end
+            setLeftAlignment()
         end
     end
 
-    -- Follow base HUD visibility when requested
-    if self.bindHud and (not _isBaseHudShown()) then
-        return
-    end
-
+    if self.bindHud and not isBaseHudShown() then return end
     if not self.visible then return end
 
-    local header, rows = collectRows()
-    local numRows = math.min(#rows, self.maxRows)
+    local summary, rows = collectRows()
+    local rowCount = math.min(#rows, self.maxRows)
+    local headers = getColumnHeaders()
+    local columnKeys = getColumnKeys(rows, rowCount)
+    local summaryLine = buildSummaryLine(summary)
 
-    local fs   = self.fontSize * self.scale
-    local line = fs + self.rowGap * self.scale
-    local pad  = self.pad * self.scale
+    local fontSize = self.fontSize * self.scale
+    local lineHeight = fontSize + self.rowGap * self.scale
+    local padding = self.pad * self.scale
+    local columnGap = self.columnGap * self.scale
+    local sectionGap = self.sectionGap * self.scale
 
-    local width  = (self.width or 0.36) * self.scale
-    local height = (pad * 2) + (line * (numRows + 1)) -- header + rows
+    local columnWidths, tableWidth = measureColumns(columnKeys, headers, rows, rowCount, fontSize, columnGap)
+    local summaryWidth = safeGetTextWidth(fontSize, summaryLine)
+    local contentWidth = math.max(tableWidth, summaryWidth)
 
-    local px, py = place(width, height)
+    local minimumWidth = (self.width or 0.24) * self.scale
+    local measuredWidth = contentWidth + padding * 2
+    local panelWidth = self.autoSize and math.max(minimumWidth, measuredWidth) or minimumWidth
+    panelWidth = math.min(panelWidth, (self.maxWidth or 0.94))
+
+    local panelHeight = padding * 2 + fontSize + lineHeight * (rowCount + 1) + sectionGap
+    local panelX, panelY = place(panelWidth, panelHeight)
 
     if self.bgEnabled then
-        safeRect(px, py, width, height, 0, 0, 0, self.opacity)
+        safeRect(panelX, panelY, panelWidth, panelHeight, 0, 0, 0, self.opacity)
         if self.outline then
-            drawOutline(px, py, width, height, math.min(1, self.opacity + 0.15))
+            drawOutline(panelX, panelY, panelWidth, panelHeight, math.min(1, self.opacity + 0.15))
         end
     end
 
-    local x = px + pad
-    local y = py + height - pad - fs
+    local contentX = panelX + padding
+    local y = panelY + panelHeight - padding - fontSize
 
+    setLeftAlignment()
     safeSetTextColor(1, 1, 1, 1)
-    shadowedText(x, y, fs, header)
-    y = y - line
+    shadowedText(contentX, y, fontSize, summaryLine)
+    y = y - lineHeight - sectionGap
 
-    for i = 1, numRows do
-        local r = rows[i]
-        if r.inUse then
-            safeSetTextColor(0.55, 0.55, 0.55, 1)  -- active: greyed and non-selectable
-        elseif r.isSelected then
-            safeSetTextColor(1.00, 0.95, 0.65, 1)  -- selected: warmer
+    local positions = buildColumnPositions(columnKeys, contentX, columnWidths, columnGap)
+
+    safeSetTextColor(0.78, 0.86, 0.72, 1)
+    for _, key in ipairs(columnKeys) do
+        if key == "selected" or key == "next" then
+            setCenterAlignment()
+            shadowedText(positions[key] + columnWidths[key] * 0.5, y, fontSize, headers[key])
         else
-            safeSetTextColor(0.85, 0.95, 0.85, 1)  -- free
+            setLeftAlignment()
+            shadowedText(positions[key], y, fontSize, headers[key])
         end
-        shadowedText(x, y, fs, r.text)
-        y = y - line
+    end
+    setLeftAlignment()
+
+    local separatorY = y - self.rowGap * self.scale * 0.40
+    safeRect(contentX, separatorY, math.min(contentWidth, panelWidth - padding * 2), 0.0012, 1, 1, 1, 0.24)
+    y = y - lineHeight
+
+    for index = 1, rowCount do
+        local row = rows[index]
+
+        if row.isSelected then
+            safeRect(
+                contentX - padding * 0.35,
+                y - self.rowGap * self.scale * 0.35,
+                panelWidth - padding * 1.3,
+                lineHeight * 0.92,
+                0.45, 0.62, 0.12, 0.16
+            )
+        end
+
+        if row.inUse then
+            safeSetTextColor(0.55, 0.55, 0.55, 1)
+        elseif row.isSelected then
+            safeSetTextColor(1.00, 0.95, 0.65, 1)
+        else
+            safeSetTextColor(0.85, 0.95, 0.85, 1)
+        end
+
+        for _, key in ipairs(columnKeys) do
+            if key == "selected" or key == "next" then
+                setCenterAlignment()
+                shadowedText(positions[key] + columnWidths[key] * 0.5, y, fontSize, row[key])
+            else
+                setLeftAlignment()
+                shadowedText(positions[key], y, fontSize, row[key])
+            end
+        end
+
+        y = y - lineHeight
     end
 
+    setLeftAlignment()
     safeSetTextColor(1, 1, 1, 1)
 end
 
--- ===== Engine hooks ===========================================================
+-- ===== Engine hooks ==========================================================
 
 function HP_UI:loadMap()
-    -- Load external config if available
-    if HP_Config and HP_Config.read and HP_Config.applyToUI and HP_Config.init then
+    if HP_Config ~= nil and HP_Config.read ~= nil and HP_Config.applyToUI ~= nil and HP_Config.init ~= nil then
         HP_Config:init()
-        local cfg, err = HP_Config:read()
-        if cfg then
-            HP_Config:applyToUI(cfg)
-            self:flash("HP overlay: config loaded", 2.0)
-        else
-            -- first run: write defaults so users have a file to tweak
-            if HP_Config.write then
-                local ok = HP_Config:write()
-                if ok then self:flash("HP overlay: default config saved", 2.0) end
+        local config = HP_Config:read()
+        if config ~= nil then
+            HP_Config:applyToUI(config)
+            self:flash(hpI18n("hp_flash_config_loaded", "HP overlay: config loaded"), 2.0)
+        elseif HP_Config.write ~= nil then
+            local ok = HP_Config:write()
+            if ok then
+                self:flash(hpI18n("hp_flash_config_saved", "HP overlay: default config saved"), 2.0)
             end
         end
     else
-        -- Keep previous behavior if config system isn't present
         self:flash("HelperProfiles overlay: hpOverlay help", 4.0)
     end
 end

@@ -76,6 +76,7 @@
         <text name="hp_status_ready" text="Bereit"/>
         <text name="hp_status_unsaved_changes" text="Ungespeicherte Änderungen"/>
         <text name="hp_title_appearance_bindings" text="Helferprofile"/>
+        <text name="input_HP_CLEAR_ALL_BINDINGS" text="Alle Helfer-Erscheinungsbildbindungen löschen"/>
         <text name="input_HP_OPEN_APPEARANCE_MENU" text="Helfer-Erscheinungsbildbindungen öffnen"/>
         <text name="input_HP_TOGGLE_MODE" text="Helferprofile-Modus umschalten"/>
         <text name="input_HP_TOGGLE_OVERLAY" text="Helferprofile-Overlay umschalten"/>

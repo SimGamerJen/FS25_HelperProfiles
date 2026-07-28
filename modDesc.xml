@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <modDesc descVersion="110">
     <author>SimGamerJen</author>
-    <version>2.0.27.2</version>
+    <version>2.0.27.3</version>
     <title>
         <en>Helper Profiles</en>
         <de>Helferprofile</de>
@@ -98,6 +98,11 @@ RALT + ; active ou désactive la superposition.
 
     <changelog>
         <en><![CDATA[
+Version 2.0.27.3:
+- Fixed duplicate shortcut prompts in the Profiles screen button bar.
+- Added distinct ESC, X, C, A, and Enter actions for Close, Bind, Clear, Clear All, and Save.
+- Explicitly registers the custom Clear All action while the dialog is open so the A shortcut invokes the correct command.
+
 Version 2.0.27.2:
 - Added a live HelperPayroll ROLE column to the main HelperProfiles overlay.
 - Compacted repeated worker names in the appearance column so the additional role column fits cleanly.
@@ -119,6 +124,11 @@ Version 2.0.26.0:
 - Set multiplayer support to false.
 ]]></en>
         <de><![CDATA[
+Version 2.0.27.3:
+- Doppelte Tastenkürzel in der Schaltflächenleiste des Profilfensters wurden behoben.
+- Separate Aktionen für ESC, X, C, A und Enter wurden für Schließen, Binden, Löschen, Alle löschen und Speichern hinzugefügt.
+- Die benutzerdefinierte Aktion Alle löschen wird beim Öffnen des Dialogs ausdrücklich registriert, damit die Taste A den richtigen Befehl ausführt.
+
 Version 2.0.27.2:
 - Eine Live-Spalte ROLLE für HelperPayroll wurde dem Haupt-Overlay von Helferprofile hinzugefügt.
 - Wiederholte Helfernamen in der Erscheinungsbildspalte werden gekürzt, damit die neue Spalte sauber passt.
@@ -140,6 +150,11 @@ Version 2.0.26.0:
 - Die Mehrspielerunterstützung wurde auf false gesetzt.
 ]]></de>
         <fr><![CDATA[
+Version 2.0.27.3 :
+- Correction des raccourcis en double dans la barre de boutons de l'écran des profils.
+- Ajout d'actions distinctes ESC, X, C, A et Entrée pour Fermer, Lier, Effacer, Tout effacer et Enregistrer.
+- L'action personnalisée Tout effacer est enregistrée explicitement pendant l'ouverture de la fenêtre afin que la touche A lance la bonne commande.
+
 Version 2.0.27.2 :
 - Ajout d’une colonne RÔLE HelperPayroll en direct dans la superposition principale de Profils d’aides.
 - Suppression du nom d’aide répété dans la colonne d’apparence afin d’intégrer proprement la nouvelle colonne.
@@ -171,6 +186,7 @@ Version 2.0.26.0 :
         <action name="HP_TOGGLE_OVERLAY" category="MISC"/>
         <action name="HP_TOGGLE_MODE" category="MISC"/>
         <action name="HP_OPEN_APPEARANCE_MENU" category="MISC"/>
+        <action name="HP_CLEAR_ALL_BINDINGS" category="MENU" axisType="HALF"/>
     </actions>
 
     <inputBinding>
@@ -186,6 +202,9 @@ Version 2.0.26.0 :
         </actionBinding>
         <actionBinding action="HP_TOGGLE_OVERLAY">
             <binding device="KB_MOUSE_DEFAULT" input="KEY_ralt KEY_semicolon"/>
+        </actionBinding>
+        <actionBinding action="HP_CLEAR_ALL_BINDINGS">
+            <binding device="KB_MOUSE_DEFAULT" input="KEY_a"/>
         </actionBinding>
     </inputBinding>
 

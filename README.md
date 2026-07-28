@@ -2,7 +2,7 @@
 
 **FS25 HelperProfiles** is a single-player helper-management mod for Farming Simulator 25. It provides a clean, autosizing helper roster, deterministic helper selection controls, save-specific appearance bindings through AvatarSwitcher, and optional payroll-role integration with HelperPayroll.
 
-> **Current version:** `2.0.27.2` beta  
+> **Current version:** `2.0.27.3` beta  
 > **Game:** Farming Simulator 25  
 > **Multiplayer:** Not supported
 
@@ -329,6 +329,12 @@ If HelperPayroll is detected before its API is ready, the screen and overlay sho
 ### Requesting support
 
 Include the HelperProfiles version, companion-mod versions, relevant `log.txt` excerpt, savegame number, screenshots, and exact reproduction steps.
+
+## Version 2.0.27.3
+
+- Corrected duplicate button-bar shortcuts in the Profiles screen.
+- Added distinct keyboard actions: **ESC** Close, **X** Bind, **C** Clear, **A** Clear All, and **Enter** Save.
+- Added dialog-specific registration and cleanup for the custom Clear All action so the A shortcut executes reliably.
 
 ## Version 2.0.27.2
 

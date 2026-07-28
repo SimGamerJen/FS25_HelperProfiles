@@ -76,6 +76,7 @@
         <text name="hp_status_ready" text="Ready"/>
         <text name="hp_status_unsaved_changes" text="Unsaved changes"/>
         <text name="hp_title_appearance_bindings" text="Helper Profiles"/>
+        <text name="input_HP_CLEAR_ALL_BINDINGS" text="Clear All Helper Appearance Bindings"/>
         <text name="input_HP_OPEN_APPEARANCE_MENU" text="Open Helper Appearance Bindings"/>
         <text name="input_HP_TOGGLE_MODE" text="Toggle HelperProfiles Mode"/>
         <text name="input_HP_TOGGLE_OVERLAY" text="Toggle HelperProfiles Overlay"/>

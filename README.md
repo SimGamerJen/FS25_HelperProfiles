@@ -33,7 +33,7 @@
 
 ### Profiles and appearance bindings
 
-<img width="2936" height="1483" alt="HelperProfiles profile-management screen" src="https://github.com/user-attachments/assets/e4c6228a-4b0e-4049-b7a4-deb8b0b62cd6" />
+<img width="1920" height="1080" alt="HelperProfiles_appearance_binding_1920" src="https://github.com/user-attachments/assets/ea6def70-4c20-41b3-a371-88a62b3fe318" />
 
 ### Activated workers
 

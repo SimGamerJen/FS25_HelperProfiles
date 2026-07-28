@@ -171,6 +171,7 @@ Version 2.0.26.0 :
         <action name="HP_TOGGLE_OVERLAY" category="MISC"/>
         <action name="HP_TOGGLE_MODE" category="MISC"/>
         <action name="HP_OPEN_APPEARANCE_MENU" category="MISC"/>
+        <action name="HP_CLEAR_ALL_BINDINGS" category="MENU" axisType="HALF"/>
     </actions>
 
     <inputBinding>
@@ -186,6 +187,9 @@ Version 2.0.26.0 :
         </actionBinding>
         <actionBinding action="HP_TOGGLE_OVERLAY">
             <binding device="KB_MOUSE_DEFAULT" input="KEY_ralt KEY_semicolon"/>
+        </actionBinding>
+        <actionBinding action="HP_CLEAR_ALL_BINDINGS">
+            <binding device="KB_MOUSE_DEFAULT" input="KEY_a"/>
         </actionBinding>
     </inputBinding>
 

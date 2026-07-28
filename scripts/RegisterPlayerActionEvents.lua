@@ -223,3 +223,80 @@ if Vehicle ~= nil and Vehicle.removeActionEvents ~= nil and Utils ~= nil and Uti
         end
     )
 end
+
+-- ---------------------------------------------------------------------------
+-- Appearance dialog custom menu action
+--
+-- FS25's standard dialog button dispatcher handles the built-in MENU_* actions
+-- automatically. HP_CLEAR_ALL_BINDINGS is a mod action, so register it explicitly
+-- while the appearance dialog is open. The button still uses the same action for
+-- its glyph, keeping the displayed key and the configured binding in sync.
+-- ---------------------------------------------------------------------------
+if HP_AppearanceBindingsScreen ~= nil then
+    local _hpAppearanceBindingsOnOpen = HP_AppearanceBindingsScreen.onOpen
+    local _hpAppearanceBindingsOnClose = HP_AppearanceBindingsScreen.onClose
+
+    local function _removeAppearanceClearAllAction(screen)
+        local id = screen ~= nil and screen._clearAllBindingsActionEventId or nil
+        if id ~= nil and g_inputBinding ~= nil and g_inputBinding.removeActionEvent ~= nil then
+            pcall(function()
+                g_inputBinding:removeActionEvent(id)
+            end)
+        end
+        if screen ~= nil then
+            screen._clearAllBindingsActionEventId = nil
+        end
+    end
+
+    local function _onAppearanceClearAllAction(screen, actionName, inputValue, callbackState, isAnalog)
+        if screen == nil or not _isPress(inputValue, callbackState) then return end
+        if screen.onClickClearAllBindings ~= nil then
+            screen:onClickClearAllBindings(nil)
+        end
+    end
+
+    local function _registerAppearanceClearAllAction(screen)
+        _removeAppearanceClearAllAction(screen)
+
+        local inputAction = InputAction ~= nil and InputAction.HP_CLEAR_ALL_BINDINGS or nil
+        if screen == nil or g_inputBinding == nil or g_inputBinding.registerActionEvent == nil or inputAction == nil then
+            print(LOG .. "❌ Failed to register HP_CLEAR_ALL_BINDINGS (appearance dialog): input action unavailable")
+            return
+        end
+
+        local callOk, registered, id = pcall(function()
+            return g_inputBinding:registerActionEvent(
+                inputAction,
+                screen,
+                _onAppearanceClearAllAction,
+                false,
+                true,
+                false,
+                true
+            )
+        end)
+
+        if callOk and registered == true and id ~= nil then
+            screen._clearAllBindingsActionEventId = id
+            _setActionEventLowPriority(id, false)
+            if g_inputBinding.setActionEventActive ~= nil then
+                g_inputBinding:setActionEventActive(id, true)
+            end
+            print(LOG .. "✅ Registered HP_CLEAR_ALL_BINDINGS (appearance dialog)")
+        else
+            print(LOG .. "❌ Failed to register HP_CLEAR_ALL_BINDINGS (appearance dialog)")
+        end
+    end
+
+    function HP_AppearanceBindingsScreen:onOpen()
+        _hpAppearanceBindingsOnOpen(self)
+        -- Register after MessageDialog:onOpen so the action is added to the
+        -- currently active GUI input context rather than the player context.
+        _registerAppearanceClearAllAction(self)
+    end
+
+    function HP_AppearanceBindingsScreen:onClose()
+        _removeAppearanceClearAllAction(self)
+        return _hpAppearanceBindingsOnClose(self)
+    end
+end

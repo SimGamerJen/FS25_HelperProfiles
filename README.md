@@ -1,4 +1,4 @@
-# FS25 HelperProfiles
+<img width="1920" height="1080" alt="HelperProfiles_active_worker_with_mod_XML_defined_appearance_1920" src="https://github.com/user-attachments/assets/61415560-4af5-4309-9911-283d4bbcd098" /><img width="1920" height="1080" alt="HelperProfiles_active_worker_with_mod_XML_defined_appearance_1920" src="https://github.com/user-attachments/assets/bcd2c438-8865-45e2-a32d-1b9f02ccc1f6" /># FS25 HelperProfiles
 
 **FS25 HelperProfiles** is a single-player helper-management mod for Farming Simulator 25. It provides a clean, autosizing helper roster, deterministic helper selection controls, save-specific appearance bindings through AvatarSwitcher, and optional payroll-role integration with HelperPayroll.
 
@@ -23,15 +23,23 @@
 
 ### Helper roster overlay
 
-<img width="2077" height="1115" alt="HelperProfiles roster overlay" src="https://github.com/user-attachments/assets/f0b58897-cb28-48c3-8fb0-2fc8e832ba93" />
+<img width="1920" height="1080" alt="HelperProfiles_UI_1920" src="https://github.com/user-attachments/assets/40897fad-807a-483d-8049-f513b6f44c54" />
+
+## Mode options
+
+<img width="1920" height="1080" alt="HelperProfiles_mode_toggle_First_available_1920" src="https://github.com/user-attachments/assets/4ff0ecf5-9c4f-472a-a16a-966fe67d9599" />
+
+<img width="1920" height="1080" alt="HelperProfiles_mode_toggle_prefer_selected_1920" src="https://github.com/user-attachments/assets/0dc6ad7e-8a3a-4199-94d0-a4b4ceb65807" />
 
 ### Profiles and appearance bindings
 
 <img width="2936" height="1483" alt="HelperProfiles profile-management screen" src="https://github.com/user-attachments/assets/e4c6228a-4b0e-4049-b7a4-deb8b0b62cd6" />
 
-### Multiple active workers
+### Activated workers
 
-<img width="2338" height="1608" alt="Multiple active helpers with different appearances" src="https://github.com/user-attachments/assets/758b8d47-536b-4c86-ae40-213ea8985dcd" />
+<img width="1920" height="1080" alt="HelperProfiles_active_worker_with_mod_XML_defined_appearance_1920" src="https://github.com/user-attachments/assets/741ce686-83a7-4e24-aac2-80372275d858" />
+
+<img width="1920" height="1080" alt="HelperProfiles_active_worker_with_native_worker_appearance_but_selected_1920" src="https://github.com/user-attachments/assets/9757c4b3-f08a-4543-8ae1-e10a57f74162" />
 
 ## Installation
 

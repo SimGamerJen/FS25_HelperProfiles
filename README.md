@@ -1,4 +1,4 @@
-<img width="1920" height="1080" alt="HelperProfiles_active_worker_with_mod_XML_defined_appearance_1920" src="https://github.com/user-attachments/assets/61415560-4af5-4309-9911-283d4bbcd098" /><img width="1920" height="1080" alt="HelperProfiles_active_worker_with_mod_XML_defined_appearance_1920" src="https://github.com/user-attachments/assets/bcd2c438-8865-45e2-a32d-1b9f02ccc1f6" /># FS25 HelperProfiles
+# FS25 HelperProfiles
 
 **FS25 HelperProfiles** is a single-player helper-management mod for Farming Simulator 25. It provides a clean, autosizing helper roster, deterministic helper selection controls, save-specific appearance bindings through AvatarSwitcher, and optional payroll-role integration with HelperPayroll.
 

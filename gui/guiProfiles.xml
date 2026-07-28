@@ -59,8 +59,12 @@
         <textAlignment value="left" />
     </Profile>
 
-    <Profile name="hpButtonClear" extends="buttonExtra1">
-        <inputAction value="" />
+    <Profile name="hpButtonClear" extends="buttonExtra2">
+        <inputAction value="MENU_EXTRA_2" />
+    </Profile>
+
+    <Profile name="hpButtonClearAll" extends="buttonExtra1">
+        <inputAction value="HP_CLEAR_ALL_BINDINGS" />
     </Profile>
 
     <Profile name="hpButtonSave" extends="buttonExtra1">

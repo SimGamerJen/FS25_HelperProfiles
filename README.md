@@ -23,15 +23,23 @@
 
 ### Helper roster overlay
 
-<img width="2077" height="1115" alt="HelperProfiles roster overlay" src="https://github.com/user-attachments/assets/f0b58897-cb28-48c3-8fb0-2fc8e832ba93" />
+<img width="1920" height="1080" alt="HelperProfiles_UI_1920" src="https://github.com/user-attachments/assets/40897fad-807a-483d-8049-f513b6f44c54" />
+
+## Mode options
+
+<img width="1920" height="1080" alt="HelperProfiles_mode_toggle_First_available_1920" src="https://github.com/user-attachments/assets/4ff0ecf5-9c4f-472a-a16a-966fe67d9599" />
+
+<img width="1920" height="1080" alt="HelperProfiles_mode_toggle_prefer_selected_1920" src="https://github.com/user-attachments/assets/0dc6ad7e-8a3a-4199-94d0-a4b4ceb65807" />
 
 ### Profiles and appearance bindings
 
 <img width="2936" height="1483" alt="HelperProfiles profile-management screen" src="https://github.com/user-attachments/assets/e4c6228a-4b0e-4049-b7a4-deb8b0b62cd6" />
 
-### Multiple active workers
+### Activated workers
 
-<img width="2338" height="1608" alt="Multiple active helpers with different appearances" src="https://github.com/user-attachments/assets/758b8d47-536b-4c86-ae40-213ea8985dcd" />
+<img width="1920" height="1080" alt="HelperProfiles_active_worker_with_mod_XML_defined_appearance_1920" src="https://github.com/user-attachments/assets/741ce686-83a7-4e24-aac2-80372275d858" />
+
+<img width="1920" height="1080" alt="HelperProfiles_active_worker_with_native_worker_appearance_but_selected_1920" src="https://github.com/user-attachments/assets/9757c4b3-f08a-4543-8ae1-e10a57f74162" />
 
 ## Installation
 
@@ -80,31 +88,43 @@ The next helper is the worker the current hiring logic expects to allocate. In `
 
 ### `preferSelected`
 
-- Tries the currently selected helper first.
-- Falls back to another free helper if the selected worker is already active.
+This is the default mode.
+
+- The selected helper is used when free.
+- If the selected helper is unavailable, HelperProfiles falls back to the next free helper.
 
 ### `firstFree`
 
-- Uses the first available worker from the current helper ordering.
-- The selected row remains visible but does not force assignment.
+- The first free helper in roster order is used.
+- The selected preference does not override that ordering.
 
-## Main Overlay
+The full A–J roster remains visible. Workers already active on jobs are shown as in use and cannot be selected until released.
 
-The overlay is an autosizing roster table rather than a fixed text block. It can display:
+## Overlay
 
-- Slot.
-- Worker name.
-- Selection marker.
-- Expected next worker.
-- Availability or active state.
-- Bound appearance.
+The overlay can display:
+
+- Helper slot and display name.
+- Selected and next markers.
+- `FREE` or `IN USE` status.
+- Bound AvatarSwitcher appearance.
 - HelperPayroll role.
+- Current HelperProfiles hiring mode.
 
-The appearance column is hidden when no appearance data is available. The role column is hidden when HelperPayroll is absent.
+The appearance column is hidden when no appearance information is available. The role column appears only when HelperPayroll is detected; it can temporarily show `WAITING` while HelperPayroll publishes its API.
 
-Overlay settings include:
+### Overlay configuration
 
-- Screen anchor and position.
+The default configuration file is:
+
+```text
+Documents/My Games/FarmingSimulator2025/modSettings/FS25_HelperProfiles/config.xml
+```
+
+Configurable properties include:
+
+- Position and anchor.
+- Scale and width.
 - Font size and row spacing.
 - Padding and maximum rows.
 - Background opacity and visibility.
@@ -218,67 +238,118 @@ Common legacy location:
 <Farming Simulator 25 install folder>/data/maps/maps_helpers.xml
 ```
 
+HelperProfiles does not automatically import custom definitions from an edited basegame file.
+
 ## Console Commands
 
-Run a command with `help` to see its available options.
+Open the in-game console and use the following commands.
 
-| Command | Purpose |
+### Overlay
+
+| Command | Description |
 |---|---|
-| `hpOverlay` | Configures the roster overlay. |
-| `hpPickMode` | Reads or changes the hiring mode. |
-| `hpSelect` | Selects a helper by name, index, or slot. |
-| `hpResetOrder` | Restores the cached default helper order when safe. |
-| `hpAppearance` | Opens, inspects, reloads, or manages appearance bindings. |
-| `hpPayroll` | Reports HelperPayroll integration status. |
-| `hpDiag` | Displays diagnostic information. |
-| `hpDiagLog` | Writes detailed diagnostic output to the log. |
+| `hpOverlay on` | Shows the overlay. |
+| `hpOverlay off` | Hides the overlay. |
+| `hpOverlay toggle` | Toggles overlay visibility. |
+| `hpOverlay status` | Prints overlay status and configuration. |
+| `hpOverlay pos <x> <y>` | Sets normalized screen position. |
+| `hpOverlay anchor TL\|TR\|BL\|BR` | Sets the anchor corner. |
+| `hpOverlay scale <0.5..2.0>` | Sets overlay scale. |
+| `hpOverlay width <0.15..0.90>` | Sets overlay width. |
+| `hpOverlay font <0.010..0.030>` | Sets font size. |
+| `hpOverlay rowgap <0.001..0.03>` | Sets row spacing. |
+| `hpOverlay maxrows <3..30>` | Sets maximum visible rows. |
+| `hpOverlay pad <0..0.05>` | Sets padding. |
+| `hpOverlay opacity <0..1>` | Sets background opacity. |
+| `hpOverlay bg on\|off` | Controls the background. |
+| `hpOverlay outline on\|off` | Controls the outline. |
+| `hpOverlay markers on\|off` | Controls selected/next markers. |
+| `hpOverlay bindhud on\|off` | Follows or ignores base-HUD visibility. |
+| `hpOverlay debounce <ms>` | Sets the worker-cycle debounce interval. |
+| `hpOverlay save [filename]` | Saves the current overlay configuration. |
+| `hpOverlay load [filename]` | Loads an overlay configuration. |
+| `hpOverlay reset` | Restores and saves the defaults. |
+
+### Selection and mode
+
+| Command | Description |
+|---|---|
+| `hpSelect <index>` | Selects a helper by index. |
+| `hpCycle [delta]` | Cycles selection; negative values cycle backwards. |
+| `hpNext` | Selects the next helper. |
+| `hpMode status` | Prints the current hiring mode. |
+| `hpMode preferSelected` | Prefers the selected free helper. |
+| `hpMode firstFree` | Uses the first free helper in roster order. |
+| `hpDump` | Prints helper state for diagnostics. |
+
+### Profiles and version
+
+| Command | Description |
+|---|---|
+| `hpAppearance menu` | Opens the Profiles screen. |
+| `hpAppearance status` | Prints appearance-binding status. |
+| `hpAppearance refresh` | Refreshes active worker appearances. |
+| `hpVersion` | Prints mod and script version information. |
 
 ## Troubleshooting
 
-### The default keybind does not appear
+### Overlay is not visible
 
-Farming Simulator can retain previous control assignments in the user's input-binding file. Reassign the action manually or reset the relevant controls.
-
-### An active helper cannot be selected
-
-This is intentional. Active helpers remain visible but are excluded from the selectable free-helper cycle.
-
-### Appearance controls show no presets
-
-Confirm that AvatarSwitcher has at least one saved preset in `avatarPresets.xml`, then reload the Profiles screen.
-
-### Payroll-role controls are missing
-
-Confirm that HelperPayroll `0.4.1.1` or a compatible later build is enabled. Use:
+When `bindhud` is enabled, the overlay follows the base game HUD.
 
 ```text
-hpPayroll status
+hpOverlay bindhud off
+hpOverlay on
 ```
 
-If HelperPayroll is detected but still starting, the screen displays a waiting state and retries automatically.
+### Selection skips or advances twice
 
-### Assigned roles do not affect payroll
-
-Set HelperPayroll's payroll mode to:
+Increase the debounce value:
 
 ```text
-helperSlot
+hpOverlay debounce 300
 ```
 
-In `roleType` mode, HelperPayroll intentionally uses the single globally selected role instead of individual helper assignments.
+### Appearance categories are missing
+
+Confirm that AvatarSwitcher is installed and enabled, at least one preset has been saved, `avatarPresets.xml` exists, and preset IDs, categories, and descriptions are valid.
+
+### Payroll role controls are missing
+
+Confirm that:
+
+- HelperPayroll is installed and enabled for the same savegame.
+- HelperPayroll is version `0.4.1.1` or a compatible later build.
+- Only one copy of each mod ZIP exists in the mods folder.
+- The game was fully restarted after replacing either mod.
+- `log.txt` contains the HelperPayroll API publication message.
+
+If HelperPayroll is detected before its API is ready, the screen and overlay should show a waiting state and retry automatically.
+
+### Requesting support
+
+Include the HelperProfiles version, companion-mod versions, relevant `log.txt` excerpt, savegame number, screenshots, and exact reproduction steps.
+
+## Version 2.0.27.2
+
+- Added optional HelperPayroll role selection to the Profiles screen.
+- Added staged per-helper role editing with save-specific persistence through HelperPayroll.
+- Added load-order-safe global and mission API discovery.
+- Added automatic retry and visible waiting states.
+- Added a live HelperPayroll **ROLE** column to the main overlay.
+- Compacted repeated appearance text so the additional column fits cleanly.
+- Retained operation when HelperPayroll or AvatarSwitcher is absent.
 
 ## Development Status
 
-This is a beta build intended for continued testing.
+This is a beta integration build. The next planned HelperProfiles development phase is an expanded helper roster beyond the vanilla A–J limit, followed by available/unavailable roster management.
 
-Planned development includes:
+## Permissions
 
-- Expanding the usable helper roster beyond the vanilla A–J limit.
-- Stable internal identities for a larger helper pool.
-- Compatibility handling for other helper-limit mods.
-- Available and unavailable roster status.
-- Further profile-management and companion-mod integration improvements.
+Copyright © 2026 SimGamerJen. All rights reserved.
 
-## Licence
+You may download and use this mod for personal use. You may not modify, redistribute, re-upload, or publish this mod, in whole or in part, or publish a derivative version without prior written permission from SimGamerJen.
 
-Copyright © SimGamerJen. All rights reserved unless otherwise stated in the repository licence.
+## Disclaimer
+
+FS25 HelperProfiles is an unofficial Farming Simulator 25 mod and is not affiliated with or endorsed by GIANTS Software.

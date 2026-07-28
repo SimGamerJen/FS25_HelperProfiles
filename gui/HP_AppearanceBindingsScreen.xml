@@ -76,7 +76,7 @@
             <Button profile="buttonBack" text="$l10n_hp_button_close" onClick="onClickBack" />
             <Button profile="buttonExtra1" text="$l10n_hp_button_bind" onClick="onClickBindAppearance" />
             <Button profile="hpButtonClear" text="$l10n_hp_button_clear" onClick="onClickClearBinding" />
-            <Button profile="hpButtonClear" text="$l10n_hp_button_clear_all" onClick="onClickClearAllBindings" />
+            <Button profile="hpButtonClearAll" text="$l10n_hp_button_clear_all" onClick="onClickClearAllBindings" />
             <Button profile="hpButtonSave" text="$l10n_hp_button_save" onClick="onClickSave" />
         </BoxLayout>
     </GuiElement>

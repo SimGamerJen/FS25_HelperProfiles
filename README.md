@@ -1,663 +1,347 @@
 # FS25 HelperProfiles
 
-**FS25 HelperProfiles** is a Farming Simulator 25 helper-management mod that adds a game-styled helper overlay, configurable helper selection behaviour, console/debug tools, and an optional **AvatarSwitcher binding interface** for assigning saved appearances to helper profile slots on a per-savegame basis.
+**FS25 HelperProfiles** is a single-player helper-management mod for Farming Simulator 25. It provides a clean, autosizing helper roster, deterministic helper selection controls, save-specific appearance bindings through AvatarSwitcher, and optional payroll-role integration with HelperPayroll.
 
-This is a stable release. **FS25_AvatarSwitcher** is optional for the core HelperProfiles overlay, worker cycling, and helper mode features. Install and enable [FS25_AvatarSwitcher](https://github.com/SimGamerJen/FS25_AvatarSwitcher) if you want to use custom appearance bindings.
+> **Current version:** `2.0.27.2` beta  
+> **Game:** Farming Simulator 25  
+> **Multiplayer:** Not supported
 
----
+## Main Features
 
-## What It Does
-
-HelperProfiles gives you more control and visibility over AI workers in FS25.
-
-It can:
-
-- Show an in-game overlay listing activated helpers.
-- Display the currently selected helper.
-- Display the next helper the game is expected to hire.
-- Switch between helper hiring modes.
-- Provide console commands for debugging, selection, overlay control, and version checks.
-- Store overlay configuration in `modSettings/FS25_HelperProfiles`.
-- Optionally integrate with **FS25_AvatarSwitcher** to bind saved appearances to helper slots.
-
-The AvatarSwitcher binding system is designed to avoid direct runtime AI avatar injection. Previous experiments with direct AI worker avatar/playerStyle injection caused ghosted workers in vehicles, so this mod uses safer binding logic instead.
-
----
+- Displays the complete vanilla A–J helper roster in an autosizing table.
+- Shows each helper's selected, next, free, and in-use state.
+- Keeps active workers visible but greyed and unavailable for selection.
+- Cycles the preferred helper before starting a new AI job.
+- Supports `preferSelected` and `firstFree` hiring modes.
+- Stores overlay configuration under `modSettings/FS25_HelperProfiles`.
+- Optionally binds AvatarSwitcher appearances to helper profiles per savegame.
+- Optionally assigns HelperPayroll roles to helper profiles per savegame.
+- Displays a live HelperPayroll **ROLE** column when the companion API is available.
+- Provides console commands for configuration, diagnostics, selection, and integration support.
 
 ## Screenshots
 
-Suggested screenshots to add here:
+### Helper roster overlay
 
-1. **Main HelperProfiles overlay**  
+<img width="2077" height="1115" alt="HelperProfiles roster overlay" src="https://github.com/user-attachments/assets/f0b58897-cb28-48c3-8fb0-2fc8e832ba93" />
 
-<img width="2077" height="1115" alt="hp_hud" src="https://github.com/user-attachments/assets/f0b58897-cb28-48c3-8fb0-2fc8e832ba93" />
+### Profiles and appearance bindings
 
-2. **Helper binding interface**  
+<img width="2936" height="1483" alt="HelperProfiles profile-management screen" src="https://github.com/user-attachments/assets/e4c6228a-4b0e-4049-b7a4-deb8b0b62cd6" />
 
-<img width="2936" height="1483" alt="hp_binding_interface" src="https://github.com/user-attachments/assets/e4c6228a-4b0e-4049-b7a4-deb8b0b62cd6" />
+### Multiple active workers
 
-3. **Two active helpers with different appearances**  
-
-<img width="2338" height="1608" alt="multiple_workers_support" src="https://github.com/user-attachments/assets/758b8d47-536b-4c86-ae40-213ea8985dcd" />
-
----
+<img width="2338" height="1608" alt="Multiple active helpers with different appearances" src="https://github.com/user-attachments/assets/758b8d47-536b-4c86-ae40-213ea8985dcd" />
 
 ## Installation
 
-1. Download `FS25_HelperProfiles.zip` from the GitHub release.
-2. Place the ZIP into your FS25 mods folder. Do not unpack it.
+1. Download `FS25_HelperProfiles.zip`.
+2. Place the ZIP directly in the Farming Simulator 25 mods folder. Do not unpack it.
 
 ```text
 Documents/My Games/FarmingSimulator2025/mods
 ```
 
-3. Launch Farming Simulator 25.
-4. Enable **FS25 HelperProfiles** for your savegame.
-5. If using appearance bindings, also enable **FS25_AvatarSwitcher**.
+3. Enable **Helper Profiles** for the intended savegame.
+4. Enable the optional companion mods only when their features are required:
+   - [FS25_AvatarSwitcher](https://github.com/SimGamerJen/FS25_AvatarSwitcher) for custom appearance bindings.
+   - [FS25_HelperPayroll](https://github.com/SimGamerJen/FS25_HelperPayroll) for payroll-role assignment and the overlay role column.
 
-The mod will create its settings folder here:
+Test beta builds on a copied savegame before using them in an important playthrough.
 
-```text
-Documents/My Games/FarmingSimulator2025/modSettings/FS25_HelperProfiles
-```
+## Default Controls
 
-The overlay config is stored at:
-
-```text
-Documents/My Games/FarmingSimulator2025/modSettings/FS25_HelperProfiles/config.xml
-```
-
-Savegame-specific binding data is stored under the HelperProfiles modSettings structure:
-
-```text
-Documents/My Games/FarmingSimulator2025/modSettings/FS25_HelperProfiles/saves/savegameX/appearanceLinks.xml
-```
-
----
-
-## Compatibility
-
-### Farming Simulator
-
-- Built for Farming Simulator 25.
-- Tested in normal gameplay with multiple active helpers.
-
-### AvatarSwitcher
-
-AvatarSwitcher is not a hard dependency for the core HelperProfiles features.
-
-These features work without AvatarSwitcher:
-
-- Worker cycling.
-- HelperProfiles mode switching.
-- Overlay toggle and overlay configuration.
-- Console/debug tools.
-
-The helper appearance binding interface requires **FS25_AvatarSwitcher** and its `avatarPresets.xml` data.
-
-HelperProfiles reads AvatarSwitcher preset data so the UI can display readable categories and appearance descriptions while using preset IDs internally.
-
-### Savegames
-
-Bindings are intended to be savegame-specific. As with any gameplay mod update, test on a copied savegame before using it in an important save.
-
----
-
-## Migration Notes
-
-### Important: legacy `maps_helpers.xml` edits
-
-Very early HelperProfiles/custom-helper workflows required editing the basegame `maps_helpers.xml` file in the Farming Simulator 25 install directory.
-
-That workflow is now deprecated.
-
-The current HelperProfiles + AvatarSwitcher workflow does **not** use edited basegame helper XML files. Custom helper appearances should now be created as AvatarSwitcher presets and then bound to HelperProfiles slots through the in-game binding interface.
-
-If you previously edited the basegame file, restore the original version before using this release.
-
-Common legacy file location:
-
-```text
-<Farming Simulator 25 install folder>/data/maps/maps_helpers.xml
-```
-
-Depending on where the game is installed, this may be under a Steam, GIANTS/eShop, Epic, or custom install path.
-
-### Migrating from the old `maps_helpers.xml` workflow
-
-HelperProfiles does **not** currently auto-import helper definitions from an edited `maps_helpers.xml` file.
-
-Recommended migration path:
-
-1. Back up your edited `maps_helpers.xml` file somewhere safe.
-2. Restore the original basegame `maps_helpers.xml` file.
-   - If you kept a clean backup, copy that back into the game install folder.
-   - If you do not have a clean backup, use your game launcher’s file verification/repair option to restore the original game files.
-3. Install and enable `FS25_AvatarSwitcher`.
-4. Recreate your custom helper appearances as AvatarSwitcher presets.
-5. Install and enable `FS25_HelperProfiles`.
-6. Open the HelperProfiles appearance binding interface with:
-
-```text
-RCTRL + ;
-```
-
-or with the console command:
-
-```text
-hpAppearance menu
-```
-
-7. Bind each HelperProfiles slot to the appropriate AvatarSwitcher preset.
-8. Press **Bind** to stage the slot binding.
-9. Press **Save** to persist the bindings for the active savegame.
-
-The new per-savegame binding file is stored at:
-
-```text
-Documents/My Games/FarmingSimulator2025/modSettings/FS25_HelperProfiles/saves/savegameX/appearanceLinks.xml
-```
-
-AvatarSwitcher presets are stored at:
-
-```text
-Documents/My Games/FarmingSimulator2025/modSettings/FS25_AvatarSwitcher/avatarPresets.xml
-```
-
-### Upgrading from older HelperProfiles builds
-
-Some earlier HelperProfiles builds may have stored appearance bindings globally at:
-
-```text
-Documents/My Games/FarmingSimulator2025/modSettings/FS25_HelperProfiles/appearanceLinks.xml
-```
-
-Current builds store bindings per savegame:
-
-```text
-Documents/My Games/FarmingSimulator2025/modSettings/FS25_HelperProfiles/saves/savegameX/appearanceLinks.xml
-```
-
-HelperProfiles includes migration support for the older global `appearanceLinks.xml` file. When a savegame is loaded, the mod should migrate the old binding file into the active savegame-specific folder.
-
-Recommended steps:
-
-1. Back up your existing `modSettings/FS25_HelperProfiles` folder.
-2. Install the current HelperProfiles release.
-3. Load your savegame.
-4. Open the appearance binding interface with `RCTRL + ;` or:
-
-```text
-hpAppearance menu
-```
-
-5. Confirm your bindings are present.
-6. Press **Save** in the binding interface.
-
-### AvatarSwitcher dependency
-
-HelperProfiles does not have a hard dependency on AvatarSwitcher for its core features.
-
-These features work without AvatarSwitcher:
-
-- Worker cycling.
-- HelperProfiles mode switching.
-- Overlay toggle.
-- Console/debug tools.
-
-AvatarSwitcher is required for custom appearance bindings, because HelperProfiles reads AvatarSwitcher presets from:
-
-```text
-Documents/My Games/FarmingSimulator2025/modSettings/FS25_AvatarSwitcher/avatarPresets.xml
-```
-
-and stores per-savegame bindings in:
-
-```text
-Documents/My Games/FarmingSimulator2025/modSettings/FS25_HelperProfiles/saves/savegameX/appearanceLinks.xml
-```
-
-### Default keybinds
-
-```text
-;           Cycle workers
-SHIFT + ;   Toggle HelperProfiles mode
-RCTRL + ;   Open appearance binding interface
-RALT + ;    Toggle overlay
-```
-
-If the defaults do not appear after upgrading, Farming Simulator may be preserving older local keybind overrides. Reset or manually reassign the HelperProfiles controls in the game controls menu.
-
----
-
-## Main Features
-
-### Helper Overlay
-
-The overlay can show:
-
-- Activated helpers.
-- Current selected helper.
-- Next helper that will be hired.
-- `FREE` / `IN USE` worker status.
-- Current helper hiring mode.
-
-The overlay supports configurable:
-
-- Position.
-- Anchor.
-- Scale.
-- Width.
-- Font size.
-- Row spacing.
-- Padding.
-- Opacity.
-- Background visibility.
-- Marker visibility.
-- Base HUD binding.
-
-### Helper Hiring Modes
-
-HelperProfiles supports two runtime hiring modes:
-
-#### `preferSelected`
-
-Default mode.
-
-The mod attempts to hire the currently selected helper if that helper is free. If the selected helper is unavailable, it falls back to the next available helper.
-
-#### `firstFree`
-
-The mod always hires the first available helper in list order.
-
-This behaves closer to a simple deterministic helper allocation mode.
-
----
-
-## AvatarSwitcher Binding Interface
-
-The new binding interface allows you to assign AvatarSwitcher appearances to HelperProfiles binding slots without relying on console commands.
-
-From the interface, you can:
-
-- Select a binding slot.
-- Select an AvatarSwitcher category.
-- Select an appearance from that category.
-- Bind the selected appearance to the selected slot.
-- Save the binding.
-- Clear the selected binding.
-- Clear all bindings.
-- Close the interface when finished.
-
-The UI displays readable preset names/descriptions. The underlying preset ID is used internally when applying the appearance.
-
-### Binding Workflow
-
-1. Open the HelperProfiles binding interface in-game.
-2. Select the helper binding slot you want to configure.
-3. Choose an AvatarSwitcher category.
-4. Choose an appearance from the filtered appearance dropdown.
-5. Click **Bind** to stage the binding.
-6. Confirm the slot shows as `[BOUND]`.
-7. Click **Save** to persist the binding for the current savegame.
-
-### Clearing Bindings
-
-Use:
-
-- **Clear** to remove the selected slot binding.
-- **Clear All** to remove every binding for the current savegame.
-
-After clearing, click **Save** to persist the unbound state for the current savegame.
-
-### Tested Binding Behaviour
-
-The following behaviour has been tested successfully:
-
-- Two separate workers running in parallel with different appearances.
-- Switching into the cab of active workers while maintaining the correct helper appearance.
-- Mouse-driven category and appearance selection.
-- Category filtering.
-- Saving bindings to the active savegame.
-- Clearing individual bindings.
-- Clearing all bindings.
-- Dropdowns no longer allowing click-through to controls behind them.
-- Modal dialogs no longer allowing mouse clicks to pass through.
-- HelperProfiles UI text input no longer affecting the wardrobe screen behind it.
-
----
-
-## Multi-language Support
-
-HelperProfiles supports GIANTS-style external localization files. The modDesc references:
-
-```xml
-<l10n filenamePrefix="l10n/l10n">
-```
-
-The English localization file is included at:
-
-```text
-l10n/l10n_en.xml
-```
-
-To add another language, copy `l10n_en.xml`, rename it using the appropriate language suffix, and translate the text values. For example:
-
-```text
-l10n/l10n_de.xml
-l10n/l10n_fr.xml
-l10n/l10n_es.xml
-```
-
-Do not add untranslated duplicate language files for ModHub-style validation, as identical translations can be flagged as obsolete localization.
-
-Currently localized areas include:
-
-- Input binding names.
-- XML appearance binding interface labels.
-- XML appearance binding interface buttons.
-- XML appearance binding interface status messages.
-
----
-
-## Keybinds
-
-Keybinds can be assigned under:
+Keybinds can be reassigned under:
 
 ```text
 Options → Controls → Helper Profiles
 ```
 
-Default bindings:
-
-| Action | Default Binding | Description |
+| Action | Default binding | Description |
 |---|---:|---|
-| HP: Cycle workers | `;` | Cycles the selected HelperProfiles worker slot. |
-| HP: Toggle mode | `SHIFT + ;` | Switches between helper hiring modes. |
-| HP: Open appearance bindings | `RCTRL + ;` | Opens the binding interface to bind AvatarSwitcher appearances to AI worker slots. |
-| HP: Toggle overlay | `RALT + ;` | Shows or hides the HelperProfiles overlay. |
+| Cycle workers | `;` | Cycles through selectable free helpers. |
+| Toggle HelperProfiles mode | `SHIFT + ;` | Switches between `preferSelected` and `firstFree`. |
+| Open Profiles screen | `RCTRL + ;` | Opens appearance bindings and optional HelperPayroll role controls. |
+| Toggle overlay | `RALT + ;` | Shows or hides the HelperProfiles overlay. |
 
-Helper selection cycling hooks the game action used by the base helper menu and includes internal debounce handling. Plain `;` cycling is suppressed when Shift, Ctrl, or Alt is held so the modifier bindings can work separately.
+Plain `;` cycling is suppressed while Shift, Ctrl, or Alt is held so the modifier bindings remain independent.
 
-If another mod already uses the same keybind, assign a different key in the FS25 controls menu.
+Farming Simulator may retain older local key assignments after an update. Reset or manually reassign the controls if the defaults do not appear.
 
----
+## Helper Selection and Hiring Modes
+
+### Selected
+
+The selected helper is the worker HelperProfiles will prefer for the next AI job when the current mode allows it.
+
+### Next
+
+The next helper is the worker the current hiring logic expects to allocate. In `preferSelected` mode, **Selected** and **Next** can legitimately show the same worker when the selected worker is free.
+
+### `preferSelected`
+
+This is the default mode.
+
+- The selected helper is used when free.
+- If the selected helper is unavailable, HelperProfiles falls back to the next free helper.
+
+### `firstFree`
+
+- The first free helper in roster order is used.
+- The selected preference does not override that ordering.
+
+The full A–J roster remains visible. Workers already active on jobs are shown as in use and cannot be selected until released.
+
+## Overlay
+
+The overlay can display:
+
+- Helper slot and display name.
+- Selected and next markers.
+- `FREE` or `IN USE` status.
+- Bound AvatarSwitcher appearance.
+- HelperPayroll role.
+- Current HelperProfiles hiring mode.
+
+The appearance column is hidden when no appearance information is available. The role column appears only when HelperPayroll is detected; it can temporarily show `WAITING` while HelperPayroll publishes its API.
+
+### Overlay configuration
+
+The default configuration file is:
+
+```text
+Documents/My Games/FarmingSimulator2025/modSettings/FS25_HelperProfiles/config.xml
+```
+
+Configurable properties include:
+
+- Position and anchor.
+- Scale and width.
+- Font size and row spacing.
+- Padding and maximum rows.
+- Background opacity and visibility.
+- Outline and marker visibility.
+- Base-HUD visibility binding.
+- Input debounce.
+
+## Profiles Screen
+
+Open the Profiles screen with:
+
+```text
+RCTRL + ;
+```
+
+or:
+
+```text
+hpAppearance menu
+```
+
+The screen combines helper-profile management with optional companion-mod controls.
+
+### AvatarSwitcher appearance bindings
+
+When AvatarSwitcher is installed and has saved presets, the screen can:
+
+- Select a helper profile.
+- Filter presets by category.
+- Select a saved appearance.
+- Stage a binding.
+- Clear one binding or all bindings.
+- Save the staged changes for the active savegame.
+
+AvatarSwitcher presets are read from:
+
+```text
+Documents/My Games/FarmingSimulator2025/modSettings/FS25_AvatarSwitcher/avatarPresets.xml
+```
+
+HelperProfiles stores appearance bindings at:
+
+```text
+Documents/My Games/FarmingSimulator2025/modSettings/FS25_HelperProfiles/saves/savegameX/appearanceLinks.xml
+```
+
+HelperProfiles uses preset IDs internally while displaying readable categories and descriptions in the UI.
+
+### HelperPayroll role assignment
+
+When HelperPayroll `0.4.1.1` or a compatible later build is active, the Profiles screen also displays the selected helper's payroll role.
+
+- Role definitions are supplied by HelperPayroll.
+- Role changes are staged in the HelperProfiles screen.
+- **Save** writes the assignment through the HelperPayroll API.
+- Set HelperPayroll's payroll mode to `helperSlot` for individual worker assignments to control payroll calculations; `roleType` continues to use one globally selected role.
+- HelperPayroll owns the compensation rules and persistence.
+- HelperProfiles owns helper identity and presentation.
+- Assignments are save-specific.
+- The controls remain hidden when HelperPayroll is not installed.
+- A visible waiting state is used if HelperPayroll is loaded but its API is not ready yet.
+
+Changing a worker's role does not alter the payroll terms already captured by an active job.
+
+## Optional Companion Mods
+
+### AvatarSwitcher
+
+AvatarSwitcher is not a hard dependency. Without it, HelperProfiles still provides worker cycling, hiring-mode control, the roster overlay, helper status, console tools, diagnostics, and HelperPayroll integration.
+
+Only custom appearance binding requires AvatarSwitcher.
+
+### HelperPayroll
+
+HelperPayroll is not a hard dependency. Without it, HelperProfiles still provides all non-payroll features.
+
+With a compatible HelperPayroll build:
+
+- The overlay gains a **ROLE** column.
+- Roles can be assigned from the Profiles screen.
+- Stable helper identities are supplied to HelperPayroll.
+- HelperPayroll stores the mapping and calculates compensation.
+
+## Save Data and Migration
+
+### Appearance bindings
+
+Current per-save location:
+
+```text
+Documents/My Games/FarmingSimulator2025/modSettings/FS25_HelperProfiles/saves/savegameX/appearanceLinks.xml
+```
+
+Older builds may have used:
+
+```text
+Documents/My Games/FarmingSimulator2025/modSettings/FS25_HelperProfiles/appearanceLinks.xml
+```
+
+HelperProfiles includes migration support for the older global file. Back up the existing `modSettings/FS25_HelperProfiles` folder before upgrading.
+
+### Legacy `maps_helpers.xml` workflow
+
+Editing the basegame `maps_helpers.xml` file is deprecated and is not required by the current HelperProfiles workflow.
+
+Restore the original basegame file, recreate custom appearances as AvatarSwitcher presets, and bind those presets through the Profiles screen.
+
+Common legacy location:
+
+```text
+<Farming Simulator 25 install folder>/data/maps/maps_helpers.xml
+```
+
+HelperProfiles does not automatically import custom definitions from an edited basegame file.
 
 ## Console Commands
 
-Open the in-game console and use the commands below.
+Open the in-game console and use the following commands.
 
-Arguments in `<angle brackets>` are required. Arguments in `[square brackets]` are optional.
-
----
-
-### Overlay Visibility and Placement
+### Overlay
 
 | Command | Description |
 |---|---|
-| `hpOverlay on` | Show the overlay. |
-| `hpOverlay off` | Hide the overlay. |
-| `hpOverlay toggle` | Toggle overlay visibility. |
-| `hpOverlay pos <x 0..1> <y 0..1>` | Set overlay position using normalized screen coordinates. |
-| `hpOverlay anchor TL\|TR\|BL\|BR` | Set the overlay anchor corner. |
+| `hpOverlay on` | Shows the overlay. |
+| `hpOverlay off` | Hides the overlay. |
+| `hpOverlay toggle` | Toggles overlay visibility. |
+| `hpOverlay status` | Prints overlay status and configuration. |
+| `hpOverlay pos <x> <y>` | Sets normalized screen position. |
+| `hpOverlay anchor TL\|TR\|BL\|BR` | Sets the anchor corner. |
+| `hpOverlay scale <0.5..2.0>` | Sets overlay scale. |
+| `hpOverlay width <0.15..0.90>` | Sets overlay width. |
+| `hpOverlay font <0.010..0.030>` | Sets font size. |
+| `hpOverlay rowgap <0.001..0.03>` | Sets row spacing. |
+| `hpOverlay maxrows <3..30>` | Sets maximum visible rows. |
+| `hpOverlay pad <0..0.05>` | Sets padding. |
+| `hpOverlay opacity <0..1>` | Sets background opacity. |
+| `hpOverlay bg on\|off` | Controls the background. |
+| `hpOverlay outline on\|off` | Controls the outline. |
+| `hpOverlay markers on\|off` | Controls selected/next markers. |
+| `hpOverlay bindhud on\|off` | Follows or ignores base-HUD visibility. |
+| `hpOverlay debounce <ms>` | Sets the worker-cycle debounce interval. |
+| `hpOverlay save [filename]` | Saves the current overlay configuration. |
+| `hpOverlay load [filename]` | Loads an overlay configuration. |
+| `hpOverlay reset` | Restores and saves the defaults. |
 
----
-
-### Overlay Sizing and Style
-
-| Command | Description |
-|---|---|
-| `hpOverlay scale <0.5..2.0>` | Set overlay scale. |
-| `hpOverlay width <0.15..0.90>` | Set overlay width. |
-| `hpOverlay font <0.010..0.030>` | Set font size. |
-| `hpOverlay rowgap <0.001..0.03>` | Set row spacing. |
-| `hpOverlay maxrows <3..30>` | Set maximum visible rows. |
-| `hpOverlay pad <0..0.05>` | Set overlay padding. |
-| `hpOverlay opacity <0..1>` | Set background opacity. |
-| `hpOverlay bg on\|off` | Toggle overlay background. |
-| `hpOverlay outline on\|off` | Toggle overlay outline. |
-| `hpOverlay markers on\|off` | Toggle selected/next helper markers. |
-| `hpOverlay bindhud on\|off` | Make overlay follow base HUD visibility. |
-
----
-
-### Input Behaviour
+### Selection and mode
 
 | Command | Description |
 |---|---|
-| `hpOverlay debounce <ms>` | Adjust helper cycling debounce time. Increase this if selection double-advances. |
+| `hpSelect <index>` | Selects a helper by index. |
+| `hpCycle [delta]` | Cycles selection; negative values cycle backwards. |
+| `hpNext` | Selects the next helper. |
+| `hpMode status` | Prints the current hiring mode. |
+| `hpMode preferSelected` | Prefers the selected free helper. |
+| `hpMode firstFree` | Uses the first free helper in roster order. |
+| `hpDump` | Prints helper state for diagnostics. |
 
----
-
-### Config Commands
-
-Config is stored in:
-
-```text
-Documents/My Games/FarmingSimulator2025/modSettings/FS25_HelperProfiles/config.xml
-```
+### Profiles and version
 
 | Command | Description |
 |---|---|
-| `hpOverlay save [filename]` | Save overlay config to `config.xml` or a named XML file. |
-| `hpOverlay load [filename]` | Load overlay config from `config.xml` or a named XML file. |
-| `hpOverlay reset` | Reset overlay config to defaults and save. |
-
----
-
-### Helper Selection Commands
-
-| Command | Description |
-|---|---|
-| `hpSelect <index>` | Select helper by index. |
-| `hpCycle [delta]` | Cycle helper selection. Defaults to `1`. Use a negative value to cycle backwards. |
-| `hpNext` | Select the next helper. |
-| `hpDump` | Dump helper state to the log/console for debugging. |
-
----
-
-### Helper Hiring Mode Commands
-
-| Command | Description |
-|---|---|
-| `hpMode status` | Show current helper hiring mode. |
-| `hpMode firstFree` | Always hire the first available helper in list order. |
-| `hpMode preferSelected` | Prefer the selected helper if free, otherwise use the next free helper. |
-
-Default mode is:
-
-```text
-preferSelected
-```
-
----
-
-### Appearance Binding Commands
-
-| Command | Description |
-|---|---|
-| `hpAppearance menu` | Open the appearance binding interface. |
-| `hpAppearance status` | Print appearance binding status to the log/console. |
-| `hpAppearance refresh` | Refresh active worker appearances from saved bindings. |
-
----
-
-### Version Command
-
-| Command | Description |
-|---|---|
-| `hpVersion` | Print mod/script version details to the log/console. Useful for support reports. |
-
----
-
-## Config File Example
-
-Default path:
-
-```text
-Documents/My Games/FarmingSimulator2025/modSettings/FS25_HelperProfiles/config.xml
-```
-
-Example:
-
-```xml
-<hp version="1">
-  <ui anchor="TR" x="0.985" y="0.900" scale="1.0" width="0.19"
-      opacity="0.85" pad="0.006" rowGap="0.006" font="0.014" maxRows="10"
-      bg="true" outline="false" shadow="false" markers="true" bindHud="true" />
-</hp>
-```
-
-You can edit this file by hand or use the `hpOverlay save`, `hpOverlay load`, and `hpOverlay reset` console commands.
-
----
+| `hpAppearance menu` | Opens the Profiles screen. |
+| `hpAppearance status` | Prints appearance-binding status. |
+| `hpAppearance refresh` | Refreshes active worker appearances. |
+| `hpVersion` | Prints mod and script version information. |
 
 ## Troubleshooting
 
 ### Overlay is not visible
 
-If `bindhud` is enabled, the overlay only appears when the base game HUD is visible.
-
-Try:
+When `bindhud` is enabled, the overlay follows the base game HUD.
 
 ```text
 hpOverlay bindhud off
 hpOverlay on
 ```
 
-### Keybind is not firing
-
-Check that the keybind is assigned under:
-
-```text
-Options → Controls → Helper Profiles
-```
-
-Also check for conflicts with other mods using the same key.
-
-### Helper selection skips or double-advances
+### Selection skips or advances twice
 
 Increase the debounce value:
-
-```text
-hpOverlay debounce 220
-```
-
-If needed, try a higher value such as:
 
 ```text
 hpOverlay debounce 300
 ```
 
-### AvatarSwitcher categories or appearances are missing
+### Appearance categories are missing
 
-Check that:
+Confirm that AvatarSwitcher is installed and enabled, at least one preset has been saved, `avatarPresets.xml` exists, and preset IDs, categories, and descriptions are valid.
 
-- FS25_AvatarSwitcher is installed and enabled for the savegame.
-- AvatarSwitcher has generated or loaded `avatarPresets.xml`.
-- At least one AvatarSwitcher preset has been saved.
-- The preset entries have valid IDs, categories, and descriptions/names.
-- The savegame has both mods enabled.
+### Payroll role controls are missing
 
-### Appearance binding does not apply as expected
+Confirm that:
 
-Check:
+- HelperPayroll is installed and enabled for the same savegame.
+- HelperPayroll is version `0.4.1.1` or a compatible later build.
+- Only one copy of each mod ZIP exists in the mods folder.
+- The game was fully restarted after replacing either mod.
+- `log.txt` contains the HelperPayroll API publication message.
 
-- The helper slot has a saved binding.
-- The selected AvatarSwitcher preset ID still exists.
-- The helper is being hired through normal helper flow.
-- No other helper/avatar mod is overriding the same behaviour.
+If HelperPayroll is detected before its API is ready, the screen and overlay should show a waiting state and retry automatically.
 
-For support, include:
+### Requesting support
 
-- FS25 log excerpt.
-- HelperProfiles version.
-- AvatarSwitcher version.
-- Savegame number.
-- Steps to reproduce.
-- Screenshots of the binding UI if relevant.
+Include the HelperProfiles version, companion-mod versions, relevant `log.txt` excerpt, savegame number, screenshots, and exact reproduction steps.
 
----
+## Version 2.0.27.2
 
-## Release Notes
+- Added optional HelperPayroll role selection to the Profiles screen.
+- Added staged per-helper role editing with save-specific persistence through HelperPayroll.
+- Added load-order-safe global and mission API discovery.
+- Added automatic retry and visible waiting states.
+- Added a live HelperPayroll **ROLE** column to the main overlay.
+- Compacted repeated appearance text so the additional column fits cleanly.
+- Retained operation when HelperPayroll or AvatarSwitcher is absent.
 
-This is a stable release.
+## Development Status
 
-Known risk areas:
+This is a beta integration build. The next planned HelperProfiles development phase is an expanded helper roster beyond the vanilla A–J limit, followed by available/unavailable roster management.
 
-- UI scaling across different resolutions and aspect ratios.
-- Mod conflicts with other UI or helper-related mods.
-- AvatarSwitcher preset collections with unusual or missing category/name data.
-- Savegame-specific edge cases.
-
-Recommended practice:
-
-- Test on copied savegames first.
-- Keep a backup of important saves.
-- Report errors with the FS25 log attached.
-
----
-
-## Packaging Checklist
-
-Before publishing a release ZIP:
-
-- Confirm `modDesc.xml` version is updated.
-- Confirm script header version/build tag is updated.
-- Confirm the ZIP is named `FS25_HelperProfiles.zip` or another valid FS25 mod name.
-- Confirm the internal mod folder/file structure is not nested incorrectly.
-- Confirm there are no temporary logs, backups, or test files in the ZIP.
-- Confirm `icon.dds` is present and referenced correctly in `modDesc.xml`.
-- Confirm screenshots are added to the GitHub release or README.
-- Do not mark stable releases as pre-release. Use pre-release only for alpha or beta builds.
-
----
-
-## Suggested GitHub Release Details
-
-### Tag
-
-```text
-v2.0.21
-```
-
-### Release Title
-
-```text
-FS25_HelperProfiles v2.0.21 – XML Appearance Binding Interface
-```
-
-### Short Release Summary
-
-```text
-This release adds the new HelperProfiles binding interface for assigning AvatarSwitcher appearances to helper slots, along with the existing helper overlay, hiring mode controls, and console/debug tools.
-```
-
----
-
-## Contributing
-
-Pull requests are welcome.
-
-When contributing, please update this README if you add or change:
-
-- Console commands.
-- Config keys.
-- Keybinds.
-- UI behaviour.
-- AvatarSwitcher integration behaviour.
-- Savegame binding behaviour.
-
----
-
-## Disclaimer
-
-This is an unofficial Farming Simulator 25 mod and is not affiliated with or endorsed by GIANTS Software.
-
----
-
-## Licence and Permissions
+## Permissions
 
 Copyright © 2026 SimGamerJen. All rights reserved.
 
-You may download and use this mod for personal use. You may not modify, redistribute, re-upload, or publish this mod, in whole or in part, or any derivative version without prior written permission from SimGamerJen.
+You may download and use this mod for personal use. You may not modify, redistribute, re-upload, or publish this mod, in whole or in part, or publish a derivative version without prior written permission from SimGamerJen.
+
+## Disclaimer
+
+FS25 HelperProfiles is an unofficial Farming Simulator 25 mod and is not affiliated with or endorsed by GIANTS Software.

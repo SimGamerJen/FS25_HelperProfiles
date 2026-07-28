@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <modDesc descVersion="110">
     <author>SimGamerJen</author>
-    <version>2.0.27.3</version>
+    <version>2.1.0.0</version>
     <title>
         <en>Helper Profiles</en>
         <de>Helferprofile</de>
@@ -19,7 +19,7 @@ Core features work without AvatarSwitcher:
 - Cycle through available helpers.
 - Toggle the helper overlay.
 - Switch between helper hiring modes.
-- Keep the full A-J roster visible, including greyed active workers that cannot be selected.
+- Expand and keep the full A-T roster visible, including greyed active workers that cannot be selected.
 - Display selected, next, available, and active helper states.
 
 Optional AvatarSwitcher integration:
@@ -48,7 +48,7 @@ Kernfunktionen funktionieren ohne AvatarSwitcher:
 - Durch verfügbare Helfer wechseln.
 - Das Helfer-Overlay ein- oder ausschalten.
 - Zwischen Helfer-Einstellungsmodi wechseln.
-- Die vollständige A-J-Liste sichtbar halten; aktive Helfer werden ausgegraut und können nicht ausgewählt werden.
+- Die vollständige A-T-Liste erweitern und sichtbar halten; aktive Helfer werden ausgegraut und können nicht ausgewählt werden.
 - Ausgewählte, nächste, verfügbare und aktive Helfer anzeigen.
 
 Optionale AvatarSwitcher-Integration:
@@ -98,6 +98,13 @@ RALT + ; active ou désactive la superposition.
 
     <changelog>
         <en><![CDATA[
+Version 2.1.0.0:
+- Added an experimental twenty-helper roster by extending the standard A-J helpers with slots K-T.
+- Added stable helper01-helper20 canonical slot identities while retaining legacy A-J mapping compatibility.
+- Updated the Profiles screen, overlay, HelperProfiles API, appearance bindings, and HelperPayroll integration for twenty slots.
+- Added external-roster detection so HelperProfiles does not stack its expansion on another helper-roster mod or custom map roster.
+- Added hpRoster diagnostics and automatic overlay paging between A-J and K-T.
+
 Version 2.0.27.3:
 - Fixed duplicate shortcut prompts in the Profiles screen button bar.
 - Added distinct ESC, X, C, A, and Enter actions for Close, Bind, Clear, Clear All, and Save.
@@ -124,6 +131,13 @@ Version 2.0.26.0:
 - Set multiplayer support to false.
 ]]></en>
         <de><![CDATA[
+Version 2.1.0.0:
+- Eine experimentelle Liste mit zwanzig Helfern wurde hinzugefügt; die Standardhelfer A-J werden um K-T erweitert.
+- Stabile kanonische Slot-Identitäten helper01-helper20 wurden ergänzt, wobei die Kompatibilität mit vorhandenen A-J-Zuordnungen erhalten bleibt.
+- Profilfenster, Overlay, HelperProfiles-API, Erscheinungsbildbindungen und HelperPayroll-Integration unterstützen nun zwanzig Slots.
+- Eine Erkennung externer Helferlisten verhindert, dass HelperProfiles eine andere Mod- oder Karten-Erweiterung doppelt ergänzt.
+- hpRoster-Diagnose und automatische Overlay-Seiten A-J/K-T wurden hinzugefügt.
+
 Version 2.0.27.3:
 - Doppelte Tastenkürzel in der Schaltflächenleiste des Profilfensters wurden behoben.
 - Separate Aktionen für ESC, X, C, A und Enter wurden für Schließen, Binden, Löschen, Alle löschen und Speichern hinzugefügt.
@@ -150,6 +164,13 @@ Version 2.0.26.0:
 - Die Mehrspielerunterstützung wurde auf false gesetzt.
 ]]></de>
         <fr><![CDATA[
+Version 2.1.0.0 :
+- Ajout expérimental d’une liste de vingt aides en complétant les aides standard A-J avec les emplacements K-T.
+- Ajout des identités canoniques stables helper01-helper20 tout en conservant la compatibilité avec les liaisons A-J existantes.
+- Mise à jour de l’écran des profils, de la superposition, de l’API HelperProfiles, des liaisons d’apparence et de l’intégration HelperPayroll pour vingt emplacements.
+- Ajout de la détection des listes externes afin d’éviter une double extension avec un autre mod ou une carte personnalisée.
+- Ajout du diagnostic hpRoster et de pages automatiques A-J/K-T dans la superposition.
+
 Version 2.0.27.3 :
 - Correction des raccourcis en double dans la barre de boutons de l'écran des profils.
 - Ajout d'actions distinctes ESC, X, C, A et Entrée pour Fermer, Lier, Effacer, Tout effacer et Enregistrer.
@@ -211,6 +232,7 @@ Version 2.0.26.0 :
     <multiplayer supported="false"/>
 
     <extraSourceFiles>
+        <sourceFile filename="scripts/HP_SlotRegistry.lua"/>
         <sourceFile filename="scripts/HP_Config.lua"/>
         <sourceFile filename="scripts/HP_UI.lua"/>
         <sourceFile filename="scripts/HP_Debug.lua"/>
@@ -219,6 +241,7 @@ Version 2.0.26.0 :
         <sourceFile filename="scripts/HP_AppearanceMenu.lua"/>
         <sourceFile filename="scripts/gui/HP_AppearanceBindingsScreen.lua"/>
         <sourceFile filename="scripts/HelperProfiles.lua"/>
+        <sourceFile filename="scripts/HP_RosterExpansion.lua"/>
         <sourceFile filename="scripts/HP_IntegrationAPI.lua"/>
         <sourceFile filename="scripts/RegisterPlayerActionEvents.lua"/>
     </extraSourceFiles>

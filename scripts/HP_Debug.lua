@@ -2,13 +2,13 @@
 
 -- ============================================================================
 -- FS25_HelperProfiles
--- ModVersion: 2.0.27.3
+-- ModVersion: 2.1.0.0
 -- Script:     HP_Debug.lua
 -- BuildTag:   20260105-1
 -- ============================================================================
 
 do
-    local MOD_VERSION   = "2.0.27.3"
+    local MOD_VERSION   = "2.1.0.0"
     local SCRIPT_NAME   = "HP_Debug.lua"
     local BUILD_TAG     = "20260512-2"
     local SCRIPT_VER    = string.format("%s-%s+%s", MOD_VERSION, SCRIPT_NAME, BUILD_TAG)
@@ -484,6 +484,13 @@ function Debug:hpMode(...)
     end
 end
 
+function Debug:hpRoster(...)
+    if HP_RosterExpansion ~= nil and HP_RosterExpansion.consoleCommandStatus ~= nil then
+        return HP_RosterExpansion:consoleCommandStatus(...)
+    end
+    print("[HP] Roster expansion module unavailable")
+end
+
 function Debug:loadMap()
     registerCommandDual("hpOverlay",    "Configure HelperProfiles overlay", "hpOverlay")
     registerCommandDual("hpSelect",     "Select helper index",             "hpSelect")
@@ -493,6 +500,7 @@ function Debug:loadMap()
     registerCommandDual("hpMode",       "Set helper selection mode (firstFree/preferSelected)", "hpMode")
     registerCommandDual("hpResetOrder", "Reset helper list to default order (when idle)", "hpResetOrder")
     registerCommandDual("hpAppearance", "Bind/cycle AvatarSwitcher appearances for helpers", "hpAppearance")
+    registerCommandDual("hpRoster",     "Show expanded helper roster status", "hpRoster")
 end
 
 addModEventListener(HP_Debug)

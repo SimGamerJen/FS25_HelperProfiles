@@ -1,5 +1,5 @@
 -- HP_AppearanceBindingsScreen.lua (FS25_HelperProfiles)
--- ModVersion: 2.0.27.3
+-- ModVersion: 2.1.0.0
 -- BuildTag: 20260727.2
 -- XML dialog for per-save AvatarSwitcher appearance bindings.
 -- Reworked to follow the known-working AvatarSwitcher XML dialog pattern:
@@ -102,9 +102,13 @@ local function callPayrollAPI(methodName, ...)
 end
 
 local function slotForIndex(index)
-    index = tonumber(index)
-    if index == nil or index < 1 or index > 10 then return nil end
-    return string.char(string.byte("A") + math.floor(index) - 1)
+    if HP_SlotRegistry ~= nil and HP_SlotRegistry.indexToSlot ~= nil then
+        local numeric = math.floor(tonumber(index) or 0)
+        if numeric >= 1 and numeric <= HP_SlotRegistry.TARGET_COUNT then
+            return HP_SlotRegistry:indexToSlot(numeric)
+        end
+    end
+    return nil
 end
 
 local function isHiddenHelperName(name)

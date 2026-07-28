@@ -3,13 +3,13 @@
 
 -- ============================================================================
 -- FS25_HelperProfiles
--- ModVersion: 2.0.27.3
+-- ModVersion: 2.1.0.0
 -- Script:     HP_UI.lua
 -- BuildTag:   20260721-1
 -- ============================================================================
 
 do
-    local MOD_VERSION = "2.0.27.3"
+    local MOD_VERSION = "2.1.0.0"
     local SCRIPT_NAME = "HP_UI.lua"
     local BUILD_TAG = "20260728-1"
     local SCRIPT_VER = string.format("%s-%s+%s", MOD_VERSION, SCRIPT_NAME, BUILD_TAG)
@@ -285,8 +285,14 @@ local function refreshPayrollCache()
         return payrollCache
     end
 
-    for code = string.byte("A"), string.byte("J") do
-        local slot = string.char(code)
+    local profileCount = 0
+    if HelperProfiles ~= nil and HelperProfiles.getProfiles ~= nil then
+        local okProfiles, profiles = pcall(HelperProfiles.getProfiles, HelperProfiles)
+        if okProfiles and type(profiles) == "table" then profileCount = #profiles end
+    end
+    local slotCount = HP_SlotRegistry ~= nil and HP_SlotRegistry:getManagedCount(profileCount) or profileCount
+    for index = 1, slotCount do
+        local slot = HP_SlotRegistry ~= nil and HP_SlotRegistry:indexToSlot(index) or tostring(index)
         local ok, roleData = pcall(api.getRoleForSlot, api, slot)
         if ok and type(roleData) == "table" then
             local label = roleData.roleName or roleData.roleId
@@ -374,8 +380,9 @@ local function collectRows()
                 summary.availableCount = summary.availableCount + 1
             end
 
-            local slotLabel = helperName
-            if not slotLabel:match("^[A-J]$") then
+            local slotLabel = HP_SlotRegistry ~= nil
+                and HP_SlotRegistry:getSlotForHelper(helper, index) or helperName
+            if slotLabel == nil or slotLabel == "" then
                 slotLabel = string.format("%02d", index)
             end
 
@@ -408,6 +415,23 @@ local function collectRows()
     end
 
     return summary, rows
+end
+
+local function selectVisibleRows(rows, maximumRows)
+    local total = #(rows or {})
+    local pageSize = math.max(1, math.floor(tonumber(maximumRows) or 10))
+    if total <= pageSize then return rows, 1, total end
+
+    local selectedRow = 1
+    for index, row in ipairs(rows) do
+        if row.isSelected == true then selectedRow = index break end
+    end
+
+    local first = math.floor((selectedRow - 1) / pageSize) * pageSize + 1
+    local last = math.min(total, first + pageSize - 1)
+    local visible = {}
+    for index = first, last do visible[#visible + 1] = rows[index] end
+    return visible, first, last
 end
 
 -- ===== Layout ================================================================
@@ -452,12 +476,16 @@ local function getColumnHeaders()
 end
 
 local function buildSummaryLine(summary)
-    return string.format(
+    local line = string.format(
         "%s: %s   |   %s: %d   |   %s: %d",
         hpI18n("hp_overlay_label_mode", "Mode"), summary.mode,
         hpI18n("hp_overlay_label_available", "Available"), summary.availableCount,
         hpI18n("hp_overlay_label_active", "Active"), summary.activeCount
     )
+    if summary.visibleRange ~= nil then
+        line = line .. "   |   " .. hpI18n("hp_overlay_label_showing", "Showing") .. ": " .. tostring(summary.visibleRange)
+    end
+    return line
 end
 
 local function measureColumns(columnKeys, headers, rows, rowCount, fontSize, gap)
@@ -584,8 +612,12 @@ function HP_UI:render(dtMillis)
     if self.bindHud and not isBaseHudShown() then return end
     if not self.visible then return end
 
-    local summary, rows = collectRows()
-    local rowCount = math.min(#rows, self.maxRows)
+    local summary, allRows = collectRows()
+    local rows, visibleFirst, visibleLast = selectVisibleRows(allRows, self.maxRows)
+    local rowCount = #rows
+    if #allRows > rowCount and rowCount > 0 then
+        summary.visibleRange = tostring(rows[1].slot or visibleFirst) .. "-" .. tostring(rows[rowCount].slot or visibleLast)
+    end
     local headers = getColumnHeaders()
     local columnKeys = getColumnKeys(rows, rowCount)
     local summaryLine = buildSummaryLine(summary)

@@ -80,43 +80,31 @@ The next helper is the worker the current hiring logic expects to allocate. In `
 
 ### `preferSelected`
 
-This is the default mode.
-
-- The selected helper is used when free.
-- If the selected helper is unavailable, HelperProfiles falls back to the next free helper.
+- Tries the currently selected helper first.
+- Falls back to another free helper if the selected worker is already active.
 
 ### `firstFree`
 
-- The first free helper in roster order is used.
-- The selected preference does not override that ordering.
+- Uses the first available worker from the current helper ordering.
+- The selected row remains visible but does not force assignment.
 
-The full A–J roster remains visible. Workers already active on jobs are shown as in use and cannot be selected until released.
+## Main Overlay
 
-## Overlay
+The overlay is an autosizing roster table rather than a fixed text block. It can display:
 
-The overlay can display:
-
-- Helper slot and display name.
-- Selected and next markers.
-- `FREE` or `IN USE` status.
-- Bound AvatarSwitcher appearance.
+- Slot.
+- Worker name.
+- Selection marker.
+- Expected next worker.
+- Availability or active state.
+- Bound appearance.
 - HelperPayroll role.
-- Current HelperProfiles hiring mode.
 
-The appearance column is hidden when no appearance information is available. The role column appears only when HelperPayroll is detected; it can temporarily show `WAITING` while HelperPayroll publishes its API.
+The appearance column is hidden when no appearance data is available. The role column is hidden when HelperPayroll is absent.
 
-### Overlay configuration
+Overlay settings include:
 
-The default configuration file is:
-
-```text
-Documents/My Games/FarmingSimulator2025/modSettings/FS25_HelperProfiles/config.xml
-```
-
-Configurable properties include:
-
-- Position and anchor.
-- Scale and width.
+- Screen anchor and position.
 - Font size and row spacing.
 - Padding and maximum rows.
 - Background opacity and visibility.
@@ -230,118 +218,67 @@ Common legacy location:
 <Farming Simulator 25 install folder>/data/maps/maps_helpers.xml
 ```
 
-HelperProfiles does not automatically import custom definitions from an edited basegame file.
-
 ## Console Commands
 
-Open the in-game console and use the following commands.
+Run a command with `help` to see its available options.
 
-### Overlay
-
-| Command | Description |
+| Command | Purpose |
 |---|---|
-| `hpOverlay on` | Shows the overlay. |
-| `hpOverlay off` | Hides the overlay. |
-| `hpOverlay toggle` | Toggles overlay visibility. |
-| `hpOverlay status` | Prints overlay status and configuration. |
-| `hpOverlay pos <x> <y>` | Sets normalized screen position. |
-| `hpOverlay anchor TL\|TR\|BL\|BR` | Sets the anchor corner. |
-| `hpOverlay scale <0.5..2.0>` | Sets overlay scale. |
-| `hpOverlay width <0.15..0.90>` | Sets overlay width. |
-| `hpOverlay font <0.010..0.030>` | Sets font size. |
-| `hpOverlay rowgap <0.001..0.03>` | Sets row spacing. |
-| `hpOverlay maxrows <3..30>` | Sets maximum visible rows. |
-| `hpOverlay pad <0..0.05>` | Sets padding. |
-| `hpOverlay opacity <0..1>` | Sets background opacity. |
-| `hpOverlay bg on\|off` | Controls the background. |
-| `hpOverlay outline on\|off` | Controls the outline. |
-| `hpOverlay markers on\|off` | Controls selected/next markers. |
-| `hpOverlay bindhud on\|off` | Follows or ignores base-HUD visibility. |
-| `hpOverlay debounce <ms>` | Sets the worker-cycle debounce interval. |
-| `hpOverlay save [filename]` | Saves the current overlay configuration. |
-| `hpOverlay load [filename]` | Loads an overlay configuration. |
-| `hpOverlay reset` | Restores and saves the defaults. |
-
-### Selection and mode
-
-| Command | Description |
-|---|---|
-| `hpSelect <index>` | Selects a helper by index. |
-| `hpCycle [delta]` | Cycles selection; negative values cycle backwards. |
-| `hpNext` | Selects the next helper. |
-| `hpMode status` | Prints the current hiring mode. |
-| `hpMode preferSelected` | Prefers the selected free helper. |
-| `hpMode firstFree` | Uses the first free helper in roster order. |
-| `hpDump` | Prints helper state for diagnostics. |
-
-### Profiles and version
-
-| Command | Description |
-|---|---|
-| `hpAppearance menu` | Opens the Profiles screen. |
-| `hpAppearance status` | Prints appearance-binding status. |
-| `hpAppearance refresh` | Refreshes active worker appearances. |
-| `hpVersion` | Prints mod and script version information. |
+| `hpOverlay` | Configures the roster overlay. |
+| `hpPickMode` | Reads or changes the hiring mode. |
+| `hpSelect` | Selects a helper by name, index, or slot. |
+| `hpResetOrder` | Restores the cached default helper order when safe. |
+| `hpAppearance` | Opens, inspects, reloads, or manages appearance bindings. |
+| `hpPayroll` | Reports HelperPayroll integration status. |
+| `hpDiag` | Displays diagnostic information. |
+| `hpDiagLog` | Writes detailed diagnostic output to the log. |
 
 ## Troubleshooting
 
-### Overlay is not visible
+### The default keybind does not appear
 
-When `bindhud` is enabled, the overlay follows the base game HUD.
+Farming Simulator can retain previous control assignments in the user's input-binding file. Reassign the action manually or reset the relevant controls.
+
+### An active helper cannot be selected
+
+This is intentional. Active helpers remain visible but are excluded from the selectable free-helper cycle.
+
+### Appearance controls show no presets
+
+Confirm that AvatarSwitcher has at least one saved preset in `avatarPresets.xml`, then reload the Profiles screen.
+
+### Payroll-role controls are missing
+
+Confirm that HelperPayroll `0.4.1.1` or a compatible later build is enabled. Use:
 
 ```text
-hpOverlay bindhud off
-hpOverlay on
+hpPayroll status
 ```
 
-### Selection skips or advances twice
+If HelperPayroll is detected but still starting, the screen displays a waiting state and retries automatically.
 
-Increase the debounce value:
+### Assigned roles do not affect payroll
+
+Set HelperPayroll's payroll mode to:
 
 ```text
-hpOverlay debounce 300
+helperSlot
 ```
 
-### Appearance categories are missing
-
-Confirm that AvatarSwitcher is installed and enabled, at least one preset has been saved, `avatarPresets.xml` exists, and preset IDs, categories, and descriptions are valid.
-
-### Payroll role controls are missing
-
-Confirm that:
-
-- HelperPayroll is installed and enabled for the same savegame.
-- HelperPayroll is version `0.4.1.1` or a compatible later build.
-- Only one copy of each mod ZIP exists in the mods folder.
-- The game was fully restarted after replacing either mod.
-- `log.txt` contains the HelperPayroll API publication message.
-
-If HelperPayroll is detected before its API is ready, the screen and overlay should show a waiting state and retry automatically.
-
-### Requesting support
-
-Include the HelperProfiles version, companion-mod versions, relevant `log.txt` excerpt, savegame number, screenshots, and exact reproduction steps.
-
-## Version 2.0.27.2
-
-- Added optional HelperPayroll role selection to the Profiles screen.
-- Added staged per-helper role editing with save-specific persistence through HelperPayroll.
-- Added load-order-safe global and mission API discovery.
-- Added automatic retry and visible waiting states.
-- Added a live HelperPayroll **ROLE** column to the main overlay.
-- Compacted repeated appearance text so the additional column fits cleanly.
-- Retained operation when HelperPayroll or AvatarSwitcher is absent.
+In `roleType` mode, HelperPayroll intentionally uses the single globally selected role instead of individual helper assignments.
 
 ## Development Status
 
-This is a beta integration build. The next planned HelperProfiles development phase is an expanded helper roster beyond the vanilla A–J limit, followed by available/unavailable roster management.
+This is a beta build intended for continued testing.
 
-## Permissions
+Planned development includes:
 
-Copyright © 2026 SimGamerJen. All rights reserved.
+- Expanding the usable helper roster beyond the vanilla A–J limit.
+- Stable internal identities for a larger helper pool.
+- Compatibility handling for other helper-limit mods.
+- Available and unavailable roster status.
+- Further profile-management and companion-mod integration improvements.
 
-You may download and use this mod for personal use. You may not modify, redistribute, re-upload, or publish this mod, in whole or in part, or publish a derivative version without prior written permission from SimGamerJen.
+## Licence
 
-## Disclaimer
-
-FS25 HelperProfiles is an unofficial Farming Simulator 25 mod and is not affiliated with or endorsed by GIANTS Software.
+Copyright © SimGamerJen. All rights reserved unless otherwise stated in the repository licence.

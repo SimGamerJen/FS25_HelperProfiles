@@ -76,6 +76,7 @@
         <text name="hp_status_ready" text="Prêt"/>
         <text name="hp_status_unsaved_changes" text="Modifications non enregistrées"/>
         <text name="hp_title_appearance_bindings" text="Profils d'aides"/>
+        <text name="input_HP_CLEAR_ALL_BINDINGS" text="Effacer toutes les liaisons d’apparence des aides"/>
         <text name="input_HP_OPEN_APPEARANCE_MENU" text="Ouvrir les liaisons d’apparence des aides"/>
         <text name="input_HP_TOGGLE_MODE" text="Changer le mode HelperProfiles"/>
         <text name="input_HP_TOGGLE_OVERLAY" text="Activer/désactiver la superposition HelperProfiles"/>

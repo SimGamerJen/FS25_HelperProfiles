@@ -140,7 +140,13 @@ end
 -- ===== Public configuration setters =========================================
 
 function HP_UI:setVisible(value) self.visible = value and true or false end
-function HP_UI:toggle() self.visible = not self.visible end
+function HP_UI:toggle()
+    if HP_Compatibility ~= nil and HP_Compatibility:isBlocked() then
+        self.visible = false
+        return
+    end
+    self.visible = not self.visible
+end
 
 function HP_UI:setAnchor(anchor)
     anchor = string.upper(anchor or "")

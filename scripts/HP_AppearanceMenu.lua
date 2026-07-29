@@ -219,6 +219,10 @@ function HP_AppearanceMenu:syncSelectionFromDraft()
 end
 
 function HP_AppearanceMenu:open()
+    if HP_Compatibility ~= nil and HP_Compatibility:isBlocked() then
+        hpamPrint("Appearance menu unavailable: Hired Helper Tool is active and HelperProfiles is disabled.")
+        return false
+    end
     self:init()
     if HP_ASBridge ~= nil and HP_ASBridge.reload ~= nil then HP_ASBridge:reload() end
     self:buildDraftFromBridge()

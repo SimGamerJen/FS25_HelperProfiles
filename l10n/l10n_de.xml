@@ -52,6 +52,14 @@
         <text name="hp_overlay_mode_first_free" text="Erster verfügbarer"/>
         <text name="hp_overlay_mode_prefer_selected" text="Ausgewählten bevorzugen"/>
         <text name="hp_slot_label" text="Slot: %s"/>
+        <text name="hp_state_active_read_only" text="AKTIV / SCHREIBGESCHÜTZT"/>
+        <text name="hp_error_active_slot_read_only" text="Slot %s ist aktiv. Beende den Helfereinsatz, bevor du die Erscheinungsbindung änderst."/>
+        <text name="hp_detail_active_read_only" text="Slot %s ist aktiv und schreibgeschützt. Beende den Helfereinsatz vor einer neuen Bindung."/>
+        <text name="hp_status_draft_clear_all_skipped_active" text="%d verfügbare Bindung(en) gelöscht; %d aktive Slot(s) blieben unverändert. Zum Speichern Speichern drücken."/>
+        <text name="hp_status_clear_all_active_only" text="Keine verfügbaren Bindungen gelöscht; %d aktive Slot(s) bleiben schreibgeschützt."/>
+        <text name="hp_status_no_bindings_to_clear" text="Keine Bindungen zum Löschen vorhanden."/>
+        <text name="hp_status_active_changes_skipped" text="Erscheinungsänderungen für %d aktive Slot(s) wurden ignoriert. Beende diese Helfereinsätze vor einer neuen Bindung."/>
+        <text name="hp_incompatible_hired_helper_tool" text="HelperProfiles ist deaktiviert, weil Hired Helper Tool aktiv ist."/>
         <text name="hp_state_active" text="AKTIV"/>
         <text name="hp_state_available" text="VERFÜGBAR"/>
         <text name="hp_state_bound" text="GEBUNDEN"/>

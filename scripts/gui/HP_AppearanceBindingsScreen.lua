@@ -89,6 +89,8 @@ local function getPresetLabelById(presetId)
     return tostring(presetId)
 end
 
+local isHelperActive
+
 function HP_AppearanceBindingsScreen:getHelperBindingLabel(helperRow)
     if helperRow == nil then return nil end
 
@@ -106,6 +108,7 @@ function HP_AppearanceBindingsScreen:getHelperListLabel(helperRow)
 
     local link = self.draftLinks ~= nil and self.draftLinks[normalizeName(helperRow.name)] or nil
     local bindingLabel = self:getHelperBindingLabel(helperRow)
+    local label
 
     if link ~= nil and bindingLabel ~= nil and bindingLabel ~= "" then
         local displayName = link.displayName
@@ -118,14 +121,18 @@ function HP_AppearanceBindingsScreen:getHelperListLabel(helperRow)
             baseLabel = baseLabel .. " (" .. hpFormat("hp_slot_label", "slot: %s", tostring(helperRow.name)) .. ")"
         end
 
-        return baseLabel .. "  [" .. hpI18n("hp_state_bound", "BOUND") .. "]  " .. bindingLabel
+        label = baseLabel .. "  [" .. hpI18n("hp_state_bound", "BOUND") .. "]  " .. bindingLabel
+    else
+        -- Important: when a persisted binding is cleared in the draft, the visible
+        -- slot label must revert to the real HelperProfiles slot name immediately.
+        label = tostring(helperRow.name or helperRow.baseName or helperRow.label or "") .. "  [" .. hpI18n("hp_state_unbound", "UNBOUND") .. "]"
     end
 
-    -- Important: when a persisted binding is cleared in the draft, the visible
-    -- slot label must revert to the real HelperProfiles slot name immediately.
-    -- Do not reuse helperRow.displayName here, because that may have been
-    -- derived from the previously persisted AvatarSwitcher binding.
-    return tostring(helperRow.name or helperRow.baseName or helperRow.label or "") .. "  [" .. hpI18n("hp_state_unbound", "UNBOUND") .. "]"
+    if isHelperActive(helperRow.helper) then
+        label = label .. "  [" .. hpI18n("hp_state_active_read_only", "ACTIVE / READ-ONLY") .. "]"
+    end
+
+    return label
 end
 
 local function getHelperDisplayName(helper, idx)
@@ -137,6 +144,48 @@ local function getHelperDisplayName(helper, idx)
         end
     end
     return fallback, fallback
+end
+
+local function cloneLink(link)
+    if type(link) ~= "table" then return nil end
+    return {
+        name = link.name,
+        displayName = link.displayName,
+        presetId = link.presetId or link.selectedPresetId,
+        selectedPresetId = link.selectedPresetId or link.presetId,
+        category = link.category,
+        characterId = link.characterId,
+    }
+end
+
+local function linksEqual(a, b)
+    if a == nil or b == nil then return a == b end
+    return tostring(a.name or "") == tostring(b.name or "")
+        and tostring(a.displayName or "") == tostring(b.displayName or "")
+        and tostring(a.presetId or a.selectedPresetId or "") == tostring(b.presetId or b.selectedPresetId or "")
+        and tostring(a.category or "") == tostring(b.category or "")
+        and tostring(a.characterId or "") == tostring(b.characterId or "")
+end
+
+local function linkMapsEqual(a, b)
+    a = a or {}
+    b = b or {}
+    for key, value in pairs(a) do
+        if not linksEqual(value, b[key]) then return false end
+    end
+    for key, value in pairs(b) do
+        if not linksEqual(value, a[key]) then return false end
+    end
+    return true
+end
+
+isHelperActive = function(helper)
+    if helper == nil then return false end
+    if HelperProfiles ~= nil and HelperProfiles.isHelperActive ~= nil then
+        local ok, active = pcall(HelperProfiles.isHelperActive, HelperProfiles, helper)
+        if ok then return active == true end
+    end
+    return helper.inUse == true
 end
 
 local function getHelpers()
@@ -164,6 +213,7 @@ function HP_AppearanceBindingsScreen.new(target, customMt)
     self.categoryRows = {}
     self.presetRows = {}
     self.draftLinks = {}
+    self.originalLinks = {}
 
     self.selectedHelperIndex = 1
     self.selectedCategoryIndex = 1
@@ -177,6 +227,7 @@ end
 
 
 function HP_AppearanceBindingsScreen:refreshDirtyState()
+    self.appearanceDirty = not linkMapsEqual(self.draftLinks, self.originalLinks)
     self.dirty = self.appearanceDirty == true
 end
 
@@ -247,17 +298,12 @@ function HP_AppearanceBindingsScreen:reloadData(reloadBridge)
     end
 
     self.draftLinks = {}
+    self.originalLinks = {}
     if HP_ASBridge ~= nil and HP_ASBridge.getLinksSnapshot ~= nil then
         local snap = HP_ASBridge:getLinksSnapshot() or {}
         for k, link in pairs(snap) do
-            self.draftLinks[k] = {
-                name = link.name,
-                displayName = link.displayName,
-                presetId = link.presetId or link.selectedPresetId,
-                selectedPresetId = link.selectedPresetId or link.presetId,
-                category = link.category,
-                characterId = link.characterId,
-            }
+            self.draftLinks[k] = cloneLink(link)
+            self.originalLinks[k] = cloneLink(link)
         end
     end
 
@@ -405,6 +451,35 @@ function HP_AppearanceBindingsScreen:getSelectedPresetRow()
     return self.presetRows[clamp(self.selectedPresetIndex or 1, 1, #self.presetRows)]
 end
 
+function HP_AppearanceBindingsScreen:isHelperRowReadOnly(helperRow)
+    return helperRow ~= nil and isHelperActive(helperRow.helper)
+end
+
+function HP_AppearanceBindingsScreen:showActiveSlotReadOnly(helperRow)
+    local slot = helperRow ~= nil and (helperRow.slot or helperRow.name) or "?"
+    self:setStatus(hpFormat(
+        "hp_error_active_slot_read_only",
+        "Slot %s is active. Release the worker before changing its appearance binding.",
+        tostring(slot)
+    ))
+end
+
+function HP_AppearanceBindingsScreen:restoreActiveDraftLinks()
+    local restored = 0
+    for _, helperRow in ipairs(self.helperRows or {}) do
+        if self:isHelperRowReadOnly(helperRow) then
+            local key = normalizeName(helperRow.name)
+            local original = self.originalLinks ~= nil and self.originalLinks[key] or nil
+            local draft = self.draftLinks ~= nil and self.draftLinks[key] or nil
+            if not linksEqual(original, draft) then
+                self.draftLinks[key] = cloneLink(original)
+                restored = restored + 1
+            end
+        end
+    end
+    return restored
+end
+
 function HP_AppearanceBindingsScreen:updateDetailText()
     local helperRow = self:getSelectedHelperRow()
     local category = self:getSelectedCategoryId()
@@ -413,6 +488,14 @@ function HP_AppearanceBindingsScreen:updateDetailText()
     local detail = hpI18n("hp_detail_select", "Select a helper slot and appearance.")
     if helperRow ~= nil and presetRow ~= nil and presetRow.id ~= nil and presetRow.id ~= "" then
         detail = hpFormat("hp_detail_selected", "Selected: %s  |  %s  |  %s [%s]", tostring(helperRow.displayName or helperRow.name), tostring(category or "-"), tostring(presetRow.label or presetRow.id), tostring(presetRow.id))
+    end
+
+    if helperRow ~= nil and self:isHelperRowReadOnly(helperRow) then
+        detail = hpFormat(
+            "hp_detail_active_read_only",
+            "Slot %s is active and read-only. Release the worker before rebinding it.",
+            tostring(helperRow.slot or helperRow.name or "?")
+        )
     end
 
     if self.detailText ~= nil then self.detailText:setText(detail) end
@@ -441,6 +524,10 @@ function HP_AppearanceBindingsScreen:onClickBindAppearance(sender)
     local presetRow = self:getSelectedPresetRow()
     if helperRow == nil or helperRow.helper == nil then
         self:setStatus(hpI18n("hp_error_no_helper_selected", "Cannot bind: no helper selected"))
+        return
+    end
+    if self:isHelperRowReadOnly(helperRow) then
+        self:showActiveSlotReadOnly(helperRow)
         return
     end
     if presetRow == nil or presetRow.id == nil or presetRow.id == "" then
@@ -475,6 +562,10 @@ end
 function HP_AppearanceBindingsScreen:onClickClearBinding(sender)
     local helperRow = self:getSelectedHelperRow()
     if helperRow == nil then return end
+    if self:isHelperRowReadOnly(helperRow) then
+        self:showActiveSlotReadOnly(helperRow)
+        return
+    end
     self.draftLinks[normalizeName(helperRow.name)] = nil
     self.appearanceDirty = true
     self:refreshDirtyState()
@@ -484,10 +575,45 @@ function HP_AppearanceBindingsScreen:onClickClearBinding(sender)
 end
 
 function HP_AppearanceBindingsScreen:onClickClearAllBindings(sender)
-    self.draftLinks = {}
-    self.appearanceDirty = true
-    self:refreshDirtyState()
-    self.actionMessage = hpI18n("hp_status_draft_clear_all", "All draft bindings cleared. Press Save to persist.")
+    local activeKeys = {}
+    local activeCount = 0
+    for _, helperRow in ipairs(self.helperRows or {}) do
+        if self:isHelperRowReadOnly(helperRow) then
+            activeKeys[normalizeName(helperRow.name)] = true
+            activeCount = activeCount + 1
+        end
+    end
+
+    local clearedCount = 0
+    for key, _ in pairs(self.draftLinks or {}) do
+        if activeKeys[key] ~= true then
+            self.draftLinks[key] = nil
+            clearedCount = clearedCount + 1
+        end
+    end
+
+    if clearedCount > 0 then
+        self.appearanceDirty = true
+        self:refreshDirtyState()
+        if activeCount > 0 then
+            self.actionMessage = hpFormat(
+                "hp_status_draft_clear_all_skipped_active",
+                "Cleared %d available binding(s); %d active slot(s) were left unchanged. Press Save to persist.",
+                clearedCount, activeCount
+            )
+        else
+            self.actionMessage = hpI18n("hp_status_draft_clear_all", "All draft bindings cleared. Press Save to persist.")
+        end
+    elseif activeCount > 0 then
+        self.actionMessage = hpFormat(
+            "hp_status_clear_all_active_only",
+            "No available bindings were cleared; %d active slot(s) remain read-only.",
+            activeCount
+        )
+    else
+        self.actionMessage = hpI18n("hp_status_no_bindings_to_clear", "No bindings to clear.")
+    end
+
     if self.helperTable ~= nil then self.helperTable:reloadData() end
     self:updateDetailText()
 end
@@ -505,8 +631,23 @@ function HP_AppearanceBindingsScreen:onClickBack(sender)
 end
 
 function HP_AppearanceBindingsScreen:saveBindings(closeAfterSave)
+    local restoredActive = self:restoreActiveDraftLinks()
+    if restoredActive > 0 then
+        self.actionMessage = hpFormat(
+            "hp_status_active_changes_skipped",
+            "Ignored appearance changes for %d active slot(s). Release those workers before rebinding them.",
+            restoredActive
+        )
+        if self.helperTable ~= nil then self.helperTable:reloadData() end
+    end
+
+    self:refreshDirtyState()
     if self.dirty ~= true then
-        self:setStatus(hpI18n("hp_status_ready", "Ready"))
+        if restoredActive == 0 then
+            self:setStatus(hpI18n("hp_status_ready", "Ready"))
+        else
+            self:updateDetailText()
+        end
         if closeAfterSave == true then self:close() end
         return true
     end
@@ -522,7 +663,10 @@ function HP_AppearanceBindingsScreen:saveBindings(closeAfterSave)
         return false
     end
 
-    self.appearanceDirty = false
+    self.originalLinks = {}
+    for key, link in pairs(self.draftLinks or {}) do
+        self.originalLinks[key] = cloneLink(link)
+    end
     self:refreshDirtyState()
     if HP_WorkerAppearance ~= nil and HP_WorkerAppearance.refreshActiveWorkers ~= nil then
         HP_WorkerAppearance:refreshActiveWorkers()
@@ -591,6 +735,10 @@ function HP_AppearanceBindingsGui:loadDialog()
 end
 
 function HP_AppearanceBindingsGui:open()
+    if HP_Compatibility ~= nil and HP_Compatibility:isBlocked() then
+        hpPrint("Appearance binding UI unavailable: Hired Helper Tool is active and HelperProfiles is disabled.")
+        return false
+    end
     if not self.loaded then self:loadDialog() end
     if self.loaded and g_gui ~= nil then
         self.dialog = g_gui:showDialog("HP_AppearanceBindingsDialog")

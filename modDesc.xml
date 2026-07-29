@@ -11,9 +11,13 @@
         <en><![CDATA[
 Helper Profiles is a helper-management mod for Farming Simulator 25.
 
+2.1.0.0 Alpha 2 expands the managed roster to A-T.
+
 It adds an autosizing tabular helper overlay, configurable helper selection behaviour, helper hiring mode controls, console/debug tools, an optional AvatarSwitcher binding interface for assigning saved appearances, and optional read-only HelperPayroll role information in the roster overlay.
 
 This version is designed for single-player use.
+
+Known incompatibility: Do not use HelperProfiles with Hired Helper Tool. When that mod is detected, HelperProfiles disables itself for the current session to prevent conflicting helper rosters.
 
 Core features work without AvatarSwitcher:
 - Cycle through available helpers.
@@ -27,6 +31,7 @@ Optional AvatarSwitcher integration:
 - Bind appearances to helper slots through an FS25-style XML GUI.
 - Store bindings per savegame under modSettings/FS25_HelperProfiles/saves/savegameX/appearanceLinks.xml.
 - Bind, clear, clear all, and save appearance links from the in-game interface.
+- Active helper slots are read-only until their workers are released.
 
 Migration note:
 Older workflows that edited maps_helpers.xml in the Farming Simulator basegame install path are deprecated. Restore the original basegame file and recreate custom appearances as AvatarSwitcher presets before binding them in Helper Profiles.
@@ -44,6 +49,8 @@ Der Mod ergänzt ein automatisch skalierendes tabellarisches Helfer-Overlay, kon
 
 Diese Version ist für den Einzelspielermodus vorgesehen.
 
+Bekannte Inkompatibilität: HelperProfiles darf nicht zusammen mit Hired Helper Tool verwendet werden. Bei Erkennung wird HelperProfiles für die aktuelle Sitzung deaktiviert.
+
 Kernfunktionen funktionieren ohne AvatarSwitcher:
 - Durch verfügbare Helfer wechseln.
 - Das Helfer-Overlay ein- oder ausschalten.
@@ -56,6 +63,7 @@ Optionale AvatarSwitcher-Integration:
 - Erscheinungsbilder über eine XML-GUI im FS25-Stil an Helfer-Slots binden.
 - Bindungen pro Spielstand unter modSettings/FS25_HelperProfiles/saves/savegameX/appearanceLinks.xml speichern.
 - Erscheinungsbild-Bindungen im Spiel binden, löschen, alle löschen und speichern.
+- Aktive Helfer-Slots sind bis zum Beenden des Helfereinsatzes schreibgeschützt.
 
 Migrationshinweis:
 Ältere Arbeitsweisen, bei denen maps_helpers.xml im Farming-Simulator-Basisinstallationspfad bearbeitet wurde, sind veraltet. Stelle die originale Basisdatei wieder her und erstelle eigene Erscheinungsbilder als AvatarSwitcher-Presets neu, bevor du sie in Helferprofile bindest.
@@ -73,6 +81,8 @@ Il ajoute une superposition tabulaire à dimensionnement automatique, un comport
 
 Cette version est conçue pour le mode solo.
 
+Incompatibilité connue : n’utilisez pas HelperProfiles avec Hired Helper Tool. Lorsqu’il est détecté, HelperProfiles se désactive pour la session en cours.
+
 Les fonctions principales fonctionnent sans AvatarSwitcher :
 - Parcourir les aides disponibles.
 - Activer ou désactiver la superposition des aides.
@@ -84,6 +94,7 @@ Intégration optionnelle avec AvatarSwitcher :
 - Lier des apparences aux emplacements d'aides via une interface XML au style FS25.
 - Enregistrer les liaisons par sauvegarde dans modSettings/FS25_HelperProfiles/saves/savegameX/appearanceLinks.xml.
 - Lier, effacer, tout effacer et enregistrer les liaisons d'apparence depuis l'interface en jeu.
+- Les emplacements d’aides actifs restent en lecture seule jusqu’à la libération de l’aide.
 
 Note de migration :
 Les anciennes méthodes qui modifiaient maps_helpers.xml dans le dossier d'installation de base de Farming Simulator sont obsolètes. Restaurez le fichier d'origine du jeu, puis recréez vos apparences personnalisées comme presets AvatarSwitcher avant de les lier dans Profils d'aides.
@@ -98,7 +109,10 @@ RALT + ; active ou désactive la superposition.
 
     <changelog>
         <en><![CDATA[
-Version 2.1.0.0:
+Version 2.1.0.0 Alpha 2:
+- Active helper slots are now read-only in the appearance-binding screen; Bind, Clear, Clear All, and Save preserve active-worker bindings.
+- HelperProfiles now disables itself when Hired Helper Tool is detected, preventing competing roster ownership.
+- Replaced unsupported decorative action-registration symbols in log output with plain text.
 - Added an experimental twenty-helper roster by extending the standard A-J helpers with slots K-T.
 - Added stable helper01-helper20 canonical slot identities while retaining legacy A-J mapping compatibility.
 - Updated the Profiles screen, overlay, HelperProfiles API, appearance bindings, and HelperPayroll integration for twenty slots.
@@ -126,7 +140,10 @@ Version 2.0.26.0:
 - Set multiplayer support to false.
 ]]></en>
         <de><![CDATA[
-Version 2.1.0.0:
+Version 2.1.0.0 Alpha 2:
+- Aktive Helfer-Slots sind im Bindungsfenster jetzt schreibgeschützt; Binden, Löschen, Alle löschen und Speichern erhalten aktive Bindungen.
+- HelperProfiles deaktiviert sich bei erkanntem Hired Helper Tool, um konkurrierende Helferlisten zu verhindern.
+- Nicht unterstützte Symbole in den Registrierungsprotokollen wurden durch Klartext ersetzt.
 - Eine experimentelle Liste mit zwanzig Helfern wurde hinzugefügt; die Standardhelfer A-J werden um K-T erweitert.
 - Stabile kanonische Slot-Identitäten helper01-helper20 wurden ergänzt, wobei die Kompatibilität mit vorhandenen A-J-Zuordnungen erhalten bleibt.
 - Profilfenster, Overlay, HelperProfiles-API, Erscheinungsbildbindungen und HelperPayroll-Integration unterstützen nun zwanzig Slots.
@@ -155,7 +172,10 @@ Version 2.0.26.0:
 - Die Mehrspielerunterstützung wurde auf false gesetzt.
 ]]></de>
         <fr><![CDATA[
-Version 2.1.0.0 :
+Version 2.1.0.0 Alpha 2 :
+- Les emplacements actifs sont désormais en lecture seule dans l’écran de liaison ; les actions conservent les liaisons des aides actives.
+- HelperProfiles se désactive lorsqu’il détecte Hired Helper Tool afin d’éviter deux systèmes de liste concurrents.
+- Les symboles décoratifs non pris en charge dans le journal ont été remplacés par du texte simple.
 - Ajout expérimental d’une liste de vingt aides en complétant les aides standard A-J avec les emplacements K-T.
 - Ajout des identités canoniques stables helper01-helper20 tout en conservant la compatibilité avec les liaisons A-J existantes.
 - Mise à jour de l’écran des profils, de la superposition, de l’API HelperProfiles, des liaisons d’apparence et de l’intégration HelperPayroll pour vingt emplacements.
@@ -220,6 +240,7 @@ Version 2.0.26.0 :
 
     <extraSourceFiles>
         <sourceFile filename="scripts/HP_SlotRegistry.lua"/>
+        <sourceFile filename="scripts/HP_Compatibility.lua"/>
         <sourceFile filename="scripts/HP_Config.lua"/>
         <sourceFile filename="scripts/HP_UI.lua"/>
         <sourceFile filename="scripts/HP_Debug.lua"/>

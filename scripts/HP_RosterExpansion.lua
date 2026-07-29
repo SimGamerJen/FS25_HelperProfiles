@@ -67,22 +67,6 @@ local function getByIndex(manager, index)
     return manager.indexToHelper ~= nil and manager.indexToHelper[index] or nil
 end
 
-local function isKnownExternalExpansionLoaded()
-    local loaded = rawget(_G, "g_modIsLoaded")
-    if type(loaded) == "table" then
-        if loaded.FS25_HiredHelperTool == true or loaded.HiredHelperTool == true then return true end
-    end
-    if g_modManager ~= nil and type(g_modManager.getModByName) == "function" then
-        for _, name in ipairs({"FS25_HiredHelperTool", "HiredHelperTool"}) do
-            local ok, mod = pcall(g_modManager.getModByName, g_modManager, name)
-            if ok and type(mod) == "table" and (mod.isLoaded == true or mod.isActive == true or mod.isSelected == true) then
-                return true
-            end
-        end
-    end
-    return false
-end
-
 local function invalidateRosterCache()
     if HelperProfiles ~= nil then
         HelperProfiles._defaultOrderRefs = nil
@@ -110,11 +94,11 @@ function HP_RosterExpansion:tryExpand(reason)
     local manager = g_helperManager
     local before = getCount(manager)
 
-    if isKnownExternalExpansionLoaded() then
+    if HP_Compatibility ~= nil and HP_Compatibility:isBlocked() then
         self.completed = true
-        self.result = "external-expansion-mod"
+        self.result = "blocked-incompatible-mod"
         invalidateRosterCache()
-        log("Known external helper expansion detected; no helpers injected: reason=%s helpers=%d", tostring(reason), before)
+        log("HelperProfiles roster disabled because Hired Helper Tool is active: reason=%s helpers=%d", tostring(reason), before)
         return true
     end
 

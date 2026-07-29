@@ -52,6 +52,14 @@
         <text name="hp_overlay_mode_first_free" text="First available"/>
         <text name="hp_overlay_mode_prefer_selected" text="Prefer selected"/>
         <text name="hp_slot_label" text="slot: %s"/>
+        <text name="hp_state_active_read_only" text="ACTIVE / READ-ONLY"/>
+        <text name="hp_error_active_slot_read_only" text="Slot %s is active. Release the worker before changing its appearance binding."/>
+        <text name="hp_detail_active_read_only" text="Slot %s is active and read-only. Release the worker before rebinding it."/>
+        <text name="hp_status_draft_clear_all_skipped_active" text="Cleared %d available binding(s); %d active slot(s) were left unchanged. Press Save to persist."/>
+        <text name="hp_status_clear_all_active_only" text="No available bindings were cleared; %d active slot(s) remain read-only."/>
+        <text name="hp_status_no_bindings_to_clear" text="No bindings to clear."/>
+        <text name="hp_status_active_changes_skipped" text="Ignored appearance changes for %d active slot(s). Release those workers before rebinding them."/>
+        <text name="hp_incompatible_hired_helper_tool" text="HelperProfiles is disabled because Hired Helper Tool is active."/>
         <text name="hp_state_active" text="ACTIVE"/>
         <text name="hp_state_available" text="AVAILABLE"/>
         <text name="hp_state_bound" text="BOUND"/>

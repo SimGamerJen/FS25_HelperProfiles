@@ -52,6 +52,14 @@
         <text name="hp_overlay_mode_first_free" text="Premier disponible"/>
         <text name="hp_overlay_mode_prefer_selected" text="Préférer la sélection"/>
         <text name="hp_slot_label" text="emplacement : %s"/>
+        <text name="hp_state_active_read_only" text="ACTIF / LECTURE SEULE"/>
+        <text name="hp_error_active_slot_read_only" text="L’emplacement %s est actif. Libérez l’aide avant de modifier sa liaison d’apparence."/>
+        <text name="hp_detail_active_read_only" text="L’emplacement %s est actif et en lecture seule. Libérez l’aide avant de le relier à nouveau."/>
+        <text name="hp_status_draft_clear_all_skipped_active" text="%d liaison(s) disponible(s) effacée(s) ; %d emplacement(s) actif(s) sont restés inchangés. Appuyez sur Enregistrer."/>
+        <text name="hp_status_clear_all_active_only" text="Aucune liaison disponible n’a été effacée ; %d emplacement(s) actif(s) restent en lecture seule."/>
+        <text name="hp_status_no_bindings_to_clear" text="Aucune liaison à effacer."/>
+        <text name="hp_status_active_changes_skipped" text="Les modifications d’apparence de %d emplacement(s) actif(s) ont été ignorées. Libérez ces aides avant de les relier à nouveau."/>
+        <text name="hp_incompatible_hired_helper_tool" text="HelperProfiles est désactivé car Hired Helper Tool est actif."/>
         <text name="hp_state_active" text="ACTIVE"/>
         <text name="hp_state_available" text="DISPONIBLE"/>
         <text name="hp_state_bound" text="LIÉ"/>

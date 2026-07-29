@@ -45,61 +45,6 @@ local function hpFormat(key, fallback, ...)
 end
 
 
-local function getPayrollAPI()
-    -- Prefer the globally published companion API. This is independent of
-    -- g_currentMission creation order and remains available to GUI code.
-    local api = rawget(_G, "FS25_HelperPayroll_API")
-        or rawget(_G, "FS25_HelperPayrollAPI")
-
-    if api == nil and g_currentMission ~= nil then
-        api = g_currentMission.fs25HelperPayrollAPI or g_currentMission.helperPayrollAPI
-    end
-
-    -- Compatibility fallback for 0.4.1.0 builds that only retained the API on
-    -- the HelperPayroll owner table. We still consume the public API object,
-    -- never its internal role or persistence tables.
-    if api == nil then
-        local owner = rawget(_G, "HelperPayroll")
-        if type(owner) == "table" then
-            api = owner.integrationAPI
-        end
-    end
-
-    if type(api) ~= "table" or tonumber(api.apiVersion) == nil then
-        return nil
-    end
-    return api
-end
-
-local function isPayrollCompanionLoaded()
-    if getPayrollAPI() ~= nil or type(rawget(_G, "HelperPayroll")) == "table" then
-        return true
-    end
-
-    local loaded = rawget(_G, "g_modIsLoaded")
-    if type(loaded) == "table" then
-        return loaded.FS25_HelperPayroll == true
-            or loaded.HelperPayroll == true
-    end
-    return false
-end
-
-local function callPayrollAPI(methodName, ...)
-    local api = getPayrollAPI()
-    if api == nil then
-        return false, nil, "api-unavailable"
-    end
-    local fn = api[methodName]
-    if type(fn) ~= "function" then
-        return false, nil, "method-unavailable"
-    end
-    local ok, result, extra = pcall(fn, api, ...)
-    if not ok then
-        hpPrint("HelperPayroll API call failed: method=" .. tostring(methodName) .. " error=" .. tostring(result))
-        return false, nil, tostring(result)
-    end
-    return true, result, extra
-end
 
 local function slotForIndex(index)
     if HP_SlotRegistry ~= nil and HP_SlotRegistry.indexToSlot ~= nil then
@@ -218,25 +163,12 @@ function HP_AppearanceBindingsScreen.new(target, customMt)
     self.helperRows = {}
     self.categoryRows = {}
     self.presetRows = {}
-    self.payrollRoles = {}
     self.draftLinks = {}
-    self.draftPayrollRoles = {}
-    self.originalPayrollRoles = {}
-    self.payrollRoleChanges = {}
-    self.payrollRoleSources = {}
-    self.appearanceChangedSlots = {}
 
     self.selectedHelperIndex = 1
     self.selectedCategoryIndex = 1
     self.selectedPresetIndex = 1
-    self.selectedPayrollRoleIndex = 1
-    self.payrollAvailable = false
-    self.payrollDetected = false
-    self.payrollMode = nil
-    self.payrollRetryElapsedMs = 0
-    self.payrollRetryAttempts = 0
     self.appearanceDirty = false
-    self.payrollDirty = false
     self.dirty = false
     self.actionMessage = nil
 
@@ -245,172 +177,9 @@ end
 
 
 function HP_AppearanceBindingsScreen:refreshDirtyState()
-    self.dirty = self.appearanceDirty == true or self.payrollDirty == true
+    self.dirty = self.appearanceDirty == true
 end
 
-function HP_AppearanceBindingsScreen:setVisibleSafe(element, visible)
-    if element ~= nil and element.setVisible ~= nil then
-        element:setVisible(visible == true)
-    end
-end
-
-function HP_AppearanceBindingsScreen:setDisabledSafe(element, disabled)
-    if element ~= nil and element.setDisabled ~= nil then
-        element:setDisabled(disabled == true)
-    end
-end
-
-function HP_AppearanceBindingsScreen:loadPayrollData(isRetry)
-    self.payrollAvailable = false
-    self.payrollDetected = isPayrollCompanionLoaded()
-    self.payrollRoles = {}
-    self.draftPayrollRoles = {}
-    self.originalPayrollRoles = {}
-    self.payrollRoleChanges = {}
-    self.payrollRoleSources = {}
-    self.payrollMode = nil
-
-    local api = getPayrollAPI()
-    if api ~= nil then
-        self.payrollDetected = true
-    end
-
-    local statusOk, status = callPayrollAPI("getStatus")
-    if not statusOk or type(status) ~= "table" or status.available ~= true then
-        if isRetry ~= true then
-            hpPrint("HelperPayroll detected=" .. tostring(self.payrollDetected) .. " API ready=false; role controls will retry")
-        end
-        self:updatePayrollControls()
-        return
-    end
-
-    self.payrollMode = tostring(status.payrollMode or "roleType")
-
-    local rolesOk, roles = callPayrollAPI("getRoles")
-    if not rolesOk or type(roles) ~= "table" or #roles == 0 then
-        self:updatePayrollControls()
-        return
-    end
-
-    for _, role in ipairs(roles) do
-        if type(role) == "table" and role.id ~= nil and tostring(role.id) ~= "" then
-            table.insert(self.payrollRoles, {
-                id = tostring(role.id),
-                name = tostring(role.name or role.id),
-                payBasis = tostring(role.payBasis or "hourly"),
-                rate = tonumber(role.rate) or 0,
-                profileId = tostring(role.profileId or status.activePayrollProfile or "default")
-            })
-        end
-    end
-
-    self.payrollAvailable = #self.payrollRoles > 0
-    if self.payrollAvailable then
-        for _, helperRow in ipairs(self.helperRows or {}) do
-            if helperRow.slot ~= nil then
-                local roleOk, roleData = callPayrollAPI("getRoleForSlot", helperRow.slot)
-                local roleId = roleOk and type(roleData) == "table" and tostring(roleData.roleId or "") or ""
-                if roleId == "" then roleId = self.payrollRoles[1].id end
-                self.draftPayrollRoles[helperRow.slot] = roleId
-                self.originalPayrollRoles[helperRow.slot] = roleId
-                self.payrollRoleSources[helperRow.slot] = roleOk and type(roleData) == "table" and tostring(roleData.mappingSource or "unknown") or "unknown"
-            end
-        end
-    end
-
-    self:syncPayrollSelectionFromDraft()
-    self:updatePayrollControls()
-end
-
-function HP_AppearanceBindingsScreen:syncPayrollSelectionFromDraft()
-    self.selectedPayrollRoleIndex = 1
-    local helperRow = self:getSelectedHelperRow()
-    if helperRow == nil or helperRow.slot == nil then return end
-    local wanted = self.draftPayrollRoles[helperRow.slot]
-    for index, role in ipairs(self.payrollRoles or {}) do
-        if tostring(role.id) == tostring(wanted) then
-            self.selectedPayrollRoleIndex = index
-            return
-        end
-    end
-end
-
-function HP_AppearanceBindingsScreen:getSelectedPayrollRole()
-    if not self.payrollAvailable or #self.payrollRoles == 0 then return nil end
-    return self.payrollRoles[clamp(self.selectedPayrollRoleIndex or 1, 1, #self.payrollRoles)]
-end
-
-function HP_AppearanceBindingsScreen:updatePayrollControls()
-    local visible = self.payrollAvailable == true or self.payrollDetected == true
-    self:setVisibleSafe(self.payrollRoleControls, visible)
-    self:setDisabledSafe(self.payrollRolePrevButton, self.payrollAvailable ~= true or #self.payrollRoles < 2)
-    self:setDisabledSafe(self.payrollRoleNextButton, self.payrollAvailable ~= true or #self.payrollRoles < 2)
-
-    if not visible then return end
-
-    if self.payrollAvailable ~= true then
-        if self.payrollRoleValue ~= nil then
-            self.payrollRoleValue:setText(hpI18n("hp_payroll_waiting", "Waiting for HelperPayroll..."))
-        end
-        if self.payrollRoleSource ~= nil then
-            self.payrollRoleSource:setText(hpI18n("hp_payroll_retry_context", "API unavailable | Retrying"))
-        end
-        return
-    end
-
-    local helperRow = self:getSelectedHelperRow()
-    local role = self:getSelectedPayrollRole()
-    local roleText = role ~= nil and tostring(role.name or role.id) or hpI18n("hp_payroll_no_roles", "No payroll roles available")
-    if self.payrollRoleValue ~= nil then self.payrollRoleValue:setText(roleText) end
-
-    local source = helperRow ~= nil and helperRow.slot ~= nil and self.payrollRoleSources[helperRow.slot] or "unknown"
-    if self.payrollRoleSource ~= nil then
-        self.payrollRoleSource:setText(hpFormat(
-            "hp_payroll_context",
-            "Source: %s | Mode: %s",
-            tostring(source),
-            tostring(self.payrollMode or "roleType")
-        ))
-    end
-end
-
-function HP_AppearanceBindingsScreen:cyclePayrollRole(delta)
-    if not self.payrollAvailable or #self.payrollRoles == 0 then return end
-    local helperRow = self:getSelectedHelperRow()
-    if helperRow == nil or helperRow.slot == nil or helperRow.helper == nil then
-        self:setStatus(hpI18n("hp_error_no_helper_selected", "Cannot change role: no helper selected"))
-        return
-    end
-
-    local count = #self.payrollRoles
-    self.selectedPayrollRoleIndex = ((self.selectedPayrollRoleIndex - 1 + (delta or 1)) % count) + 1
-    local role = self:getSelectedPayrollRole()
-    self.draftPayrollRoles[helperRow.slot] = role.id
-    self.payrollRoleSources[helperRow.slot] = "draft"
-    if tostring(self.originalPayrollRoles[helperRow.slot] or "") == tostring(role.id) then
-        self.payrollRoleChanges[helperRow.slot] = nil
-    else
-        self.payrollRoleChanges[helperRow.slot] = role.id
-    end
-    self.payrollDirty = next(self.payrollRoleChanges) ~= nil
-    self:refreshDirtyState()
-    self.actionMessage = hpFormat(
-        "hp_status_draft_payroll_role",
-        "Draft payroll role: %s → %s. Press Save to persist.",
-        tostring(helperRow.displayName or helperRow.name),
-        tostring(role.name or role.id)
-    )
-    self:updatePayrollControls()
-    self:updateDetailText()
-end
-
-function HP_AppearanceBindingsScreen:onClickPayrollRolePrevious(sender)
-    self:cyclePayrollRole(-1)
-end
-
-function HP_AppearanceBindingsScreen:onClickPayrollRoleNext(sender)
-    self:cyclePayrollRole(1)
-end
 
 function HP_AppearanceBindingsScreen:onGuiSetupFinished()
     HP_AppearanceBindingsScreen:superClass().onGuiSetupFinished(self)
@@ -427,7 +196,6 @@ function HP_AppearanceBindingsScreen:onGuiSetupFinished()
         self.presetTable:setDataSource(self)
         self.presetTable:setDelegate(self)
     end
-    self:updatePayrollControls()
 end
 
 function HP_AppearanceBindingsScreen:onCreate()
@@ -436,8 +204,6 @@ end
 
 function HP_AppearanceBindingsScreen:onOpen()
     HP_AppearanceBindingsScreen:superClass().onOpen(self)
-    self.payrollRetryElapsedMs = 0
-    self.payrollRetryAttempts = 0
     self:reloadData(true)
 
     if FocusManager ~= nil and self.helperTable ~= nil then
@@ -448,30 +214,6 @@ function HP_AppearanceBindingsScreen:onOpen()
 end
 
 
-function HP_AppearanceBindingsScreen:update(dt)
-    local superClass = HP_AppearanceBindingsScreen:superClass()
-    if superClass ~= nil and superClass.update ~= nil then
-        superClass.update(self, dt)
-    end
-
-    if self.payrollAvailable == true then return end
-    if not isPayrollCompanionLoaded() and getPayrollAPI() == nil then return end
-
-    self.payrollDetected = true
-    self.payrollRetryElapsedMs = (self.payrollRetryElapsedMs or 0) + (tonumber(dt) or 0)
-    if self.payrollRetryElapsedMs < 500 then
-        self:updatePayrollControls()
-        return
-    end
-
-    self.payrollRetryElapsedMs = 0
-    self.payrollRetryAttempts = (self.payrollRetryAttempts or 0) + 1
-    self:loadPayrollData(true)
-    if self.payrollAvailable == true then
-        hpPrint("HelperPayroll API became ready after " .. tostring(self.payrollRetryAttempts) .. " UI retry attempt(s)")
-        self:updateDetailText()
-    end
-end
 
 function HP_AppearanceBindingsScreen:onClose()
     HP_AppearanceBindingsScreen:superClass().onClose(self)
@@ -521,12 +263,9 @@ function HP_AppearanceBindingsScreen:reloadData(reloadBridge)
 
     self.selectedHelperIndex = clamp(self.selectedHelperIndex or 1, 1, #self.helperRows)
     self.appearanceDirty = false
-    self.payrollDirty = false
-    self.appearanceChangedSlots = {}
     self:refreshDirtyState()
     self:syncSelectionFromDraft()
     self:rebuildPresetRows()
-    self:loadPayrollData()
     self:reloadLists()
     self:updateDetailText()
 end
@@ -638,9 +377,7 @@ function HP_AppearanceBindingsScreen:onListSelectionChanged(list, section, index
     if list == self.helperTable then
         self.selectedHelperIndex = clamp(index or 1, 1, #self.helperRows)
         self:syncSelectionFromDraft()
-        self:syncPayrollSelectionFromDraft()
         self:rebuildPresetRows()
-        self:updatePayrollControls()
         if self.categoryTable ~= nil then self.categoryTable:reloadData() end
         if self.presetTable ~= nil then self.presetTable:reloadData() end
     elseif list == self.categoryTable then
@@ -673,7 +410,7 @@ function HP_AppearanceBindingsScreen:updateDetailText()
     local category = self:getSelectedCategoryId()
     local presetRow = self:getSelectedPresetRow()
 
-    local detail = hpI18n("hp_detail_select", "Select a helper slot, appearance, and payroll role.")
+    local detail = hpI18n("hp_detail_select", "Select a helper slot and appearance.")
     if helperRow ~= nil and presetRow ~= nil and presetRow.id ~= nil and presetRow.id ~= "" then
         detail = hpFormat("hp_detail_selected", "Selected: %s  |  %s  |  %s [%s]", tostring(helperRow.displayName or helperRow.name), tostring(category or "-"), tostring(presetRow.label or presetRow.id), tostring(presetRow.id))
     end
@@ -720,7 +457,6 @@ function HP_AppearanceBindingsScreen:onClickBindAppearance(sender)
         characterId = presetRow.preset ~= nil and presetRow.preset.characterId or nil,
     }
     self.appearanceDirty = true
-    if helperRow.slot ~= nil then self.appearanceChangedSlots[helperRow.slot] = true end
     self:refreshDirtyState()
 
     local helperName = tostring(helperRow.displayName or helperRow.name)
@@ -741,7 +477,6 @@ function HP_AppearanceBindingsScreen:onClickClearBinding(sender)
     if helperRow == nil then return end
     self.draftLinks[normalizeName(helperRow.name)] = nil
     self.appearanceDirty = true
-    if helperRow.slot ~= nil then self.appearanceChangedSlots[helperRow.slot] = true end
     self:refreshDirtyState()
     self.actionMessage = hpFormat("hp_status_draft_clear", "Draft binding cleared for %s. Press Save to persist.", tostring(helperRow.displayName or helperRow.name))
     if self.helperTable ~= nil then self.helperTable:reloadData() end
@@ -751,9 +486,6 @@ end
 function HP_AppearanceBindingsScreen:onClickClearAllBindings(sender)
     self.draftLinks = {}
     self.appearanceDirty = true
-    for _, helperRow in ipairs(self.helperRows or {}) do
-        if helperRow.slot ~= nil then self.appearanceChangedSlots[helperRow.slot] = true end
-    end
     self:refreshDirtyState()
     self.actionMessage = hpI18n("hp_status_draft_clear_all", "All draft bindings cleared. Press Save to persist.")
     if self.helperTable ~= nil then self.helperTable:reloadData() end
@@ -779,70 +511,24 @@ function HP_AppearanceBindingsScreen:saveBindings(closeAfterSave)
         return true
     end
 
-    local appearanceSaved = false
-    if self.appearanceDirty == true then
-        if HP_ASBridge == nil or HP_ASBridge.replaceLinksSnapshot == nil then
-            self:setStatus(hpI18n("hp_error_as_bridge_unavailable", "Save failed: AS bridge unavailable"))
-            return false
-        end
-
-        local ok, err = HP_ASBridge:replaceLinksSnapshot(self.draftLinks or {})
-        if not ok then
-            self:setStatus(hpFormat("hp_error_save_failed", "Save failed: %s", tostring(err)))
-            return false
-        end
-
-        self.appearanceDirty = false
-        appearanceSaved = true
-        if HP_WorkerAppearance ~= nil and HP_WorkerAppearance.refreshActiveWorkers ~= nil then
-            HP_WorkerAppearance:refreshActiveWorkers()
-        end
+    if HP_ASBridge == nil or HP_ASBridge.replaceLinksSnapshot == nil then
+        self:setStatus(hpI18n("hp_error_as_bridge_unavailable", "Save failed: AS bridge unavailable"))
+        return false
     end
 
-    local payrollSaved = false
-    local roleMappingsToApply = {}
-    for slot, roleId in pairs(self.payrollRoleChanges or {}) do
-        roleMappingsToApply[slot] = roleId
-    end
-    -- Avatar bindings are part of a helper's stable identity. When an appearance
-    -- changes, re-save that helper's current role against the new identity even
-    -- when the visible role itself was not changed in this edit session.
-    if appearanceSaved and self.payrollAvailable == true then
-        for slot, changed in pairs(self.appearanceChangedSlots or {}) do
-            if changed == true and self.draftPayrollRoles[slot] ~= nil then
-                roleMappingsToApply[slot] = self.draftPayrollRoles[slot]
-            end
-        end
+    local ok, err = HP_ASBridge:replaceLinksSnapshot(self.draftLinks or {})
+    if not ok then
+        self:setStatus(hpFormat("hp_error_save_failed", "Save failed: %s", tostring(err)))
+        return false
     end
 
-    if next(roleMappingsToApply) ~= nil then
-        local api = getPayrollAPI()
-        if api == nil then
-            self:refreshDirtyState()
-            self:setStatus(hpI18n("hp_error_payroll_api_unavailable", "Payroll role save failed: HelperPayroll API unavailable"))
-            return false
-        end
-
-        local callOk, saved, result = callPayrollAPI("applyRoleMappings", roleMappingsToApply, "helperprofiles-profile-ui")
-        if not callOk or saved ~= true then
-            self:refreshDirtyState()
-            self:setStatus(hpFormat("hp_error_payroll_save_failed", "Payroll role save failed: %s", tostring(result or saved or "unknown")))
-            return false
-        end
-        self.payrollRoleChanges = {}
-        self.payrollDirty = false
-        payrollSaved = true
-    end
-
+    self.appearanceDirty = false
     self:refreshDirtyState()
-    if appearanceSaved and payrollSaved then
-        self.actionMessage = hpI18n("hp_status_profile_changes_saved", "Appearance bindings and payroll roles saved.")
-    elseif payrollSaved then
-        self.actionMessage = hpI18n("hp_status_payroll_roles_saved", "Payroll roles saved.")
-    else
-        self.actionMessage = hpI18n("hp_status_bindings_saved", "Bindings saved. Active workers refreshed.")
+    if HP_WorkerAppearance ~= nil and HP_WorkerAppearance.refreshActiveWorkers ~= nil then
+        HP_WorkerAppearance:refreshActiveWorkers()
     end
 
+    self.actionMessage = hpI18n("hp_status_bindings_saved", "Bindings saved. Active workers refreshed.")
     self:reloadData(true)
     if closeAfterSave == true then self:close() end
     return true

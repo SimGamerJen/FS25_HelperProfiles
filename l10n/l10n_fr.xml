@@ -6,7 +6,7 @@
         <text name="hp_button_clear_all" text="Tout effacer"/>
         <text name="hp_button_close" text="Fermer"/>
         <text name="hp_button_save" text="Enregistrer"/>
-        <text name="hp_detail_select" text="Sélectionnez un emplacement d'aide, une apparence et un rôle de paie."/>
+        <text name="hp_detail_select" text="Sélectionnez un emplacement d'aide et une apparence."/>
         <text name="hp_detail_selected" text="Sélection : %s  |  %s  |  %s [%s]"/>
         <text name="hp_error_as_bridge_unavailable" text="Échec de l’enregistrement : bridge AS indisponible"/>
         <text name="hp_error_no_appearance_selected" text="Liaison impossible : aucune apparence sélectionnée"/>
@@ -35,17 +35,6 @@
         <text name="hp_no_appearances" text="Aucune apparence trouvée"/>
         <text name="hp_no_categories" text="Aucune catégorie AvatarSwitcher trouvée"/>
         <text name="hp_no_helpers_available" text="Aucune aide disponible"/>
-        <text name="hp_payroll_role_label" text="Rôle de paie"/>
-        <text name="hp_payroll_no_roles" text="Aucun rôle de paie disponible"/>
-        <text name="hp_payroll_waiting" text="En attente de HelperPayroll..."/>
-        <text name="hp_payroll_retry_context" text="API indisponible | Nouvelle tentative"/>
-        <text name="hp_payroll_source" text="Source : %s"/>
-        <text name="hp_payroll_context" text="Source : %s | Mode : %s"/>
-        <text name="hp_status_draft_payroll_role" text="Brouillon du rôle de paie : %s → %s. Appuyez sur Enregistrer pour conserver."/>
-        <text name="hp_error_payroll_api_unavailable" text="Échec de l'enregistrement du rôle de paie : API HelperPayroll indisponible"/>
-        <text name="hp_error_payroll_save_failed" text="Échec de l'enregistrement du rôle de paie : %s"/>
-        <text name="hp_status_profile_changes_saved" text="Les liaisons d'apparence et les rôles de paie ont été enregistrés."/>
-        <text name="hp_status_payroll_roles_saved" text="Les rôles de paie ont été enregistrés."/>
         <text name="hp_overlay_header_appearance" text="APPARENCE"/>
         <text name="hp_overlay_header_role" text="RÔLE"/>
         <text name="hp_overlay_payroll_waiting" text="ATTENTE"/>

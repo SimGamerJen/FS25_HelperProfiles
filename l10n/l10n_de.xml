@@ -6,7 +6,7 @@
         <text name="hp_button_clear_all" text="Alle löschen"/>
         <text name="hp_button_close" text="Schließen"/>
         <text name="hp_button_save" text="Speichern"/>
-        <text name="hp_detail_select" text="Wähle einen Helfer-Slot, ein Erscheinungsbild und eine Lohnrolle."/>
+        <text name="hp_detail_select" text="Wähle einen Helfer-Slot und ein Erscheinungsbild."/>
         <text name="hp_detail_selected" text="Ausgewählt: %s  |  %s  |  %s [%s]"/>
         <text name="hp_error_as_bridge_unavailable" text="Speichern fehlgeschlagen: AS-Bridge nicht verfügbar"/>
         <text name="hp_error_no_appearance_selected" text="Binden nicht möglich: kein Erscheinungsbild ausgewählt"/>
@@ -35,17 +35,6 @@
         <text name="hp_no_appearances" text="Keine Erscheinungsbilder gefunden"/>
         <text name="hp_no_categories" text="Keine AvatarSwitcher-Kategorien gefunden"/>
         <text name="hp_no_helpers_available" text="Keine Helfer verfügbar"/>
-        <text name="hp_payroll_role_label" text="Lohnrolle"/>
-        <text name="hp_payroll_no_roles" text="Keine Lohnrollen verfügbar"/>
-        <text name="hp_payroll_waiting" text="Warte auf HelperPayroll..."/>
-        <text name="hp_payroll_retry_context" text="API nicht verfügbar | Neuer Versuch"/>
-        <text name="hp_payroll_source" text="Quelle: %s"/>
-        <text name="hp_payroll_context" text="Quelle: %s | Modus: %s"/>
-        <text name="hp_status_draft_payroll_role" text="Entwurf der Lohnrolle: %s → %s. Zum Speichern „Speichern“ wählen."/>
-        <text name="hp_error_payroll_api_unavailable" text="Lohnrolle konnte nicht gespeichert werden: HelperPayroll-API nicht verfügbar"/>
-        <text name="hp_error_payroll_save_failed" text="Lohnrolle konnte nicht gespeichert werden: %s"/>
-        <text name="hp_status_profile_changes_saved" text="Erscheinungsbindungen und Lohnrollen wurden gespeichert."/>
-        <text name="hp_status_payroll_roles_saved" text="Lohnrollen wurden gespeichert."/>
         <text name="hp_overlay_header_appearance" text="AUSSEHEN"/>
         <text name="hp_overlay_header_role" text="ROLLE"/>
         <text name="hp_overlay_payroll_waiting" text="WARTEN"/>

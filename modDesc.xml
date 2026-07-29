@@ -11,7 +11,7 @@
         <en><![CDATA[
 Helper Profiles is a helper-management mod for Farming Simulator 25.
 
-It adds an autosizing tabular helper overlay, configurable helper selection behaviour, helper hiring mode controls, console/debug tools, an optional AvatarSwitcher binding interface for assigning saved appearances, and optional HelperPayroll role assignment for each helper profile on a per-savegame basis.
+It adds an autosizing tabular helper overlay, configurable helper selection behaviour, helper hiring mode controls, console/debug tools, an optional AvatarSwitcher binding interface for assigning saved appearances, and optional read-only HelperPayroll role information in the roster overlay.
 
 This version is designed for single-player use.
 
@@ -40,7 +40,7 @@ RALT + ; toggles the overlay.
         <de><![CDATA[
 Helferprofile ist ein Helfer-Verwaltungsmod für Farming Simulator 25.
 
-Der Mod ergänzt ein automatisch skalierendes tabellarisches Helfer-Overlay, konfigurierbares Auswahlverhalten für Helfer, Steuerung der Helfer-Einstellungsmodi, Konsolen-/Debug-Werkzeuge eine optionale AvatarSwitcher-Bindungsoberfläche für gespeicherte Erscheinungsbilder und eine optionale HelperPayroll-Rollenzuweisung für jedes Helferprofil pro Spielstand.
+Der Mod ergänzt ein automatisch skalierendes tabellarisches Helfer-Overlay, konfigurierbares Auswahlverhalten für Helfer, Steuerung der Helfer-Einstellungsmodi, Konsolen-/Debug-Werkzeuge eine optionale AvatarSwitcher-Bindungsoberfläche für gespeicherte Erscheinungsbilder und optionale, schreibgeschützte HelperPayroll-Rolleninformationen im Helfer-Overlay.
 
 Diese Version ist für den Einzelspielermodus vorgesehen.
 
@@ -69,7 +69,7 @@ RALT + ; schaltet das Overlay ein oder aus.
         <fr><![CDATA[
 Profils d'aides est un mod de gestion des aides pour Farming Simulator 25.
 
-Il ajoute une superposition tabulaire à dimensionnement automatique, un comportement de sélection des aides configurable, des modes d'embauche des aides, des outils de console/débogage une interface optionnelle de liaison AvatarSwitcher pour les apparences enregistrées et l'attribution optionnelle de rôles HelperPayroll à chaque profil d'aide pour chaque sauvegarde.
+Il ajoute une superposition tabulaire à dimensionnement automatique, un comportement de sélection des aides configurable, des modes d'embauche des aides, des outils de console/débogage une interface optionnelle de liaison AvatarSwitcher pour les apparences enregistrées et l’affichage facultatif, en lecture seule, des rôles HelperPayroll dans la superposition des aides.
 
 Cette version est conçue pour le mode solo.
 
@@ -116,13 +116,8 @@ Version 2.0.27.2:
 - Displays WAITING in the role column while an enabled HelperPayroll instance is still publishing its API.
 
 Version 2.0.27.1:
-- Fixed HelperPayroll role controls remaining hidden when the companion API was published after the UI opened.
-- Added global API discovery, automatic UI retry, and a visible waiting status when HelperPayroll is detected.
 
 Version 2.0.27.0:
-- Added optional HelperPayroll role selection to the Helper Profiles screen.
-- Added staged per-helper role editing with savegame persistence through the HelperPayroll public API.
-- Kept HelperPayroll optional; role controls are hidden when its API is unavailable.
 
 Version 2.0.26.0:
 - Reworked the helper overlay into a clean, autosizing table.
@@ -149,13 +144,9 @@ Version 2.0.27.2:
 - Während die HelperPayroll-API noch bereitgestellt wird, zeigt die Rollenspalte WARTEN an.
 
 Version 2.0.27.1:
-- Behoben: HelperPayroll-Rollensteuerung blieb bei später API-Bereitstellung ausgeblendet.
 - Globale API-Erkennung, automatische Wiederholung und sichtbarer Wartestatus hinzugefügt.
 
 Version 2.0.27.0:
-- Optionale HelperPayroll-Lohnrollenauswahl zur Helferprofil-Oberfläche hinzugefügt.
-- Rollenänderungen pro Helfer werden vorgemerkt und über die öffentliche HelperPayroll-API im Spielstand gespeichert.
-- HelperPayroll bleibt optional; die Rollensteuerung wird ohne verfügbare API ausgeblendet.
 
 Version 2.0.26.0:
 - Das Helfer-Overlay wurde zu einer übersichtlichen, automatisch skalierenden Tabelle überarbeitet.
@@ -182,13 +173,9 @@ Version 2.0.27.2 :
 - La colonne de rôle affiche ATTENTE pendant la publication de l’API HelperPayroll.
 
 Version 2.0.27.1 :
-- Correction des commandes de rôle masquées lorsque l’API HelperPayroll était publiée après l’ouverture de l’interface.
 - Ajout de la détection globale, d’une nouvelle tentative automatique et d’un état d’attente visible.
 
 Version 2.0.27.0 :
-- Ajout de la sélection optionnelle du rôle HelperPayroll dans l'écran des profils d'aides.
-- Les changements de rôle par aide sont préparés puis enregistrés dans la sauvegarde via l'API publique HelperPayroll.
-- HelperPayroll reste optionnel ; les commandes de rôle sont masquées lorsque son API est indisponible.
 
 Version 2.0.26.0 :
 - La superposition des aides a été transformée en un tableau clair à dimensionnement automatique.

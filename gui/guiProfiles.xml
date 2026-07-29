@@ -59,6 +59,10 @@
         <textAlignment value="left" />
     </Profile>
 
+    <Profile name="hpPayrollRoleControls" extends="emptyPanel" with="anchorTopLeft pivotTopLeft">
+        <imageColor value="0 0 0 0" />
+    </Profile>
+
     <Profile name="hpButtonClear" extends="buttonExtra1">
         <inputAction value="MENU_EXTRA_2" />
     </Profile>

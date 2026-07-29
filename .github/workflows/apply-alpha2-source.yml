@@ -67,7 +67,7 @@ jobs:
 
           ! grep -R -n --binary-files=without-match -E '✅|❌' scripts/RegisterPlayerActionEvents.lua
           grep -q 'HiredHelperTool' scripts/HP_Compatibility.lua
-          grep -q 'isSelectedHelperActive' scripts/gui/HP_AppearanceBindingsScreen.lua
+          grep -q 'isHelperRowReadOnly' scripts/gui/HP_AppearanceBindingsScreen.lua
           grep -q 'ACTIVE / READ-ONLY' scripts/gui/HP_AppearanceBindingsScreen.lua
           grep -q 'HP_Compatibility.lua' modDesc.xml
 

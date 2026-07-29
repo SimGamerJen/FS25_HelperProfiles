@@ -23,13 +23,14 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          test "$(find .bootstrap/alpha2 -maxdepth 1 -name '*.part' -type f | wc -l)" -eq 10
+          test "$(find .bootstrap/alpha2 -maxdepth 1 -name '*.part' -type f | wc -l)" -eq 11
           cat > /tmp/hp-alpha2-parts.sha256 <<'EOF'
           cfd587aeacf75f2d64e15c0965d99e7b05ed37926d53d879b70130edca94d182  .bootstrap/alpha2/000.part
           5a20ef717f1b38da6754ea6e35d2b3d831a88473180956c4234a96e13b25fa7e  .bootstrap/alpha2/001.part
           e9923948b819cd04a3b15f1f3c2f4d839fbd4b8e27d093027c2acf24799aa8f0  .bootstrap/alpha2/002.part
           99b89d2a4c54f45b665fb00abc1cae2a6e547b281c20e729ccb7a8371c43ebaf  .bootstrap/alpha2/003a0.part
-          80a2e3fd809445eea1e703f377418e354d47b7ef73928e1f605f0773f8d8da36  .bootstrap/alpha2/003a1.part
+          5669cd73ad71a30d27067f9a851de8ea6dccb1734a843da6faed6c7130fac0d0  .bootstrap/alpha2/003a1x.part
+          d358ac7c189cf71e16c362805322976b57920e80f88716709ffe39448e6e9bd1  .bootstrap/alpha2/003a1y.part
           d39be013a2657781c1ff854a898810f08f303a1ad5b81850f0cafddc11adf0f8  .bootstrap/alpha2/003a2.part
           f23976d202006488ebbf61cadeef0e4892e168d0a4acd385b324b87f252d1b99  .bootstrap/alpha2/003a3.part
           7a86411fe0ffe0589e9d6133bfa93ce3970bdfac6d4d890327436f75bc516a11  .bootstrap/alpha2/003b.part

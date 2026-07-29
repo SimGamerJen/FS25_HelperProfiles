@@ -59,7 +59,7 @@
             <Bitmap profile="hpDetailBox" id="detailBox" position="45px -470px" size="1105px 145px">
                 <Text profile="hpMetaText" id="detailText" position="10px 8px" size="1085px 35px" text="$l10n_hp_detail_select" textLayoutMode="scrolling" />
                 <Text profile="hpMetaText" id="statusText" position="10px -38px" size="1085px 35px" text="$l10n_hp_status_ready" textLayoutMode="scrolling" />
-                <GuiElement id="payrollRoleControls" position="0px -82px" size="1105px 48px" visible="false">
+                <GuiElement profile="hpPayrollRoleControls" id="payrollRoleControls" position="0px -82px" size="1105px 48px" visible="false">
                     <ThreePartBitmap profile="fs25_lineSeparatorBottom" position="0px 8px" />
                     <Text profile="hpHeaderLeft" position="10px -2px" size="190px 40px" text="$l10n_hp_payroll_role_label" />
                     <Button profile="buttonExtra1" id="payrollRolePrevButton" position="220px 1px" size="55px 34px" text="&lt;" onClick="onClickPayrollRolePrevious" />

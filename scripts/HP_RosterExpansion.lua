@@ -6,7 +6,8 @@ HP_RosterExpansion = HP_RosterExpansion or {
     result = "pending",
     addedCount = 0,
     attempts = 0,
-    retryMs = 0
+    retryMs = 0,
+    startupDelayMs = 1000
 }
 
 local LOG = "[FS25_HelperProfiles/Roster] "
@@ -40,13 +41,34 @@ local function cloneStyle(sourceStyle)
     return sourceStyle, "shared-style"
 end
 
+local function countSequence(values)
+    if type(values) ~= "table" then return 0 end
+    local count = math.floor(tonumber(#values) or 0)
+    local sequential = 0
+    for _, value in ipairs(values) do
+        if value ~= nil then sequential = sequential + 1 end
+    end
+    count = math.max(count, sequential)
+    local keyed = 0
+    for _, value in pairs(values) do
+        if value ~= nil then keyed = keyed + 1 end
+    end
+    return math.max(count, keyed)
+end
+
 local function getCount(manager)
     if manager == nil then return 0 end
+    local count = 0
     if manager.getNumOfHelpers ~= nil then
         local ok, value = pcall(manager.getNumOfHelpers, manager)
-        if ok and tonumber(value) ~= nil then return math.floor(tonumber(value)) end
+        if ok and tonumber(value) ~= nil then
+            count = math.max(count, math.floor(tonumber(value)))
+        end
     end
-    return math.floor(tonumber(manager.numHelpers) or 0)
+    count = math.max(count, math.floor(tonumber(manager.numHelpers) or 0))
+    count = math.max(count, countSequence(manager.availableHelpers))
+    count = math.max(count, countSequence(manager.indexToHelper))
+    return count
 end
 
 local function getByName(manager, name)
@@ -102,7 +124,18 @@ function HP_RosterExpansion:tryExpand(reason)
         return true
     end
 
-    if before >= HP_SlotRegistry.TARGET_COUNT then
+    if before > HP_SlotRegistry.TARGET_COUNT then
+        if HP_Compatibility ~= nil and HP_Compatibility.setBlocked ~= nil then
+            HP_Compatibility:setBlocked("external-helper-roster-" .. tostring(before), "roster-expansion")
+        end
+        self.completed = true
+        self.result = "blocked-external-roster"
+        invalidateRosterCache()
+        log("HelperProfiles roster disabled because an external roster exceeds the managed target: reason=%s helpers=%d target=%d", tostring(reason), before, HP_SlotRegistry.TARGET_COUNT)
+        return true
+    end
+
+    if before == HP_SlotRegistry.TARGET_COUNT then
         self.completed = true
         self.result = "adopted-existing-roster"
         invalidateRosterCache()
@@ -189,20 +222,39 @@ end
 
 function HP_RosterExpansion:loadMap()
     self.completed = false
-    self.result = "pending"
+    self.result = "waiting-startup"
     self.addedCount = 0
     self.attempts = 0
-    self.retryMs = 0
-    self:tryExpand("loadMap")
+    self.retryMs = tonumber(self.startupDelayMs) or 1000
 
+    -- Do not mutate HelperManager during loadMap. Other roster mods can run later
+    -- in the same loadMap pass, so expansion is deferred until every mod has had
+    -- time to initialise and the incompatibility guard can observe the final owner.
+    if HP_Compatibility ~= nil and HP_Compatibility:isBlocked() then
+        self.completed = true
+        self.result = "blocked-incompatible-mod"
+        invalidateRosterCache()
+        log("Roster expansion cancelled during startup because an incompatible roster owner is active.")
+    else
+        log("Roster expansion deferred for %d ms while compatibility checks complete.", self.retryMs)
+    end
 end
 
 function HP_RosterExpansion:update(dt)
     if self.completed then return end
+
+    if HP_Compatibility ~= nil and HP_Compatibility:isBlocked() then
+        self.completed = true
+        self.result = "blocked-incompatible-mod"
+        invalidateRosterCache()
+        log("Roster expansion cancelled because an incompatible roster owner became active.")
+        return
+    end
+
     self.retryMs = (tonumber(self.retryMs) or 0) - (tonumber(dt) or 0)
     if self.retryMs <= 0 then
         self.retryMs = 500
-        self:tryExpand("update")
+        self:tryExpand("deferred-update")
     end
 end
 

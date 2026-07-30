@@ -49,6 +49,7 @@
         <text name="hp_overlay_label_mode" text="Mode"/>
         <text name="hp_overlay_label_next" text="Next"/>
         <text name="hp_overlay_label_selected" text="Selected"/>
+        <text name="hp_overlay_label_showing" text="Showing"/>
         <text name="hp_overlay_mode_first_free" text="First available"/>
         <text name="hp_overlay_mode_prefer_selected" text="Prefer selected"/>
         <text name="hp_slot_label" text="slot: %s"/>

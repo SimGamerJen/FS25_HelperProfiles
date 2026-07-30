@@ -14,6 +14,7 @@ HP_Compatibility = HP_Compatibility or {
 local LOG = "[FS25_HelperProfiles/Compatibility] "
 local CONFLICT_NAMES = {"FS25_HiredHelperTool", "HiredHelperTool", "HireHelperTool"}
 local CONFLICT_TOKENS = {"hiredhelpertool", "hirehelpertool"}
+local CONFLICT_GLOBALS = {"HiredHelperTool", "HiredHelperToolGUI", "g_hiredHelperTool"}
 
 local function normaliseToken(value)
     return string.lower(tostring(value or "")):gsub("[^%w]", "")
@@ -30,6 +31,10 @@ local function looksLikeConflict(value)
     return false
 end
 
+local function isTruthy(value)
+    return value ~= nil and value ~= false
+end
+
 local function getModLabel(mod, fallback)
     if type(mod) ~= "table" then return tostring(fallback or "unknown") end
     return tostring(mod.modName or mod.name or mod.title or mod.filename or mod.fileName or fallback or "unknown")
@@ -37,20 +42,43 @@ end
 
 local function modLooksActive(mod)
     if type(mod) ~= "table" then return false end
-    if mod.isLoaded ~= nil then return mod.isLoaded == true end
-    if mod.isActive ~= nil then return mod.isActive == true end
-    if mod.isSelected ~= nil then return mod.isSelected == true end
-    return false
+
+    local sawState = false
+    for _, field in ipairs({"isLoaded", "isActive", "isSelected", "loaded", "active", "selected"}) do
+        if mod[field] ~= nil then
+            sawState = true
+            if mod[field] == true then return true end
+        end
+    end
+
+    -- A mod-manager record with no explicit state is only metadata for an installed
+    -- mod and must not block HelperProfiles by itself.
+    return not sawState and false
 end
 
 local function scanLoadedModTable()
     local loaded = rawget(_G, "g_modIsLoaded")
     if type(loaded) ~= "table" then return nil end
 
+    -- Prefer exact known names. GIANTS treats any truthy entry as loaded; the value
+    -- is not guaranteed to be the literal boolean true.
+    for _, name in ipairs(CONFLICT_NAMES) do
+        if isTruthy(loaded[name]) then
+            return name
+        end
+    end
+
     for key, value in pairs(loaded) do
-        if value == true and looksLikeConflict(key) then
+        if isTruthy(value) and looksLikeConflict(key) then
             return tostring(key)
         end
+    end
+    return nil
+end
+
+local function scanRuntimeGlobals()
+    for _, name in ipairs(CONFLICT_GLOBALS) do
+        if rawget(_G, name) ~= nil then return name end
     end
     return nil
 end
@@ -78,20 +106,28 @@ local function scanModManager()
         end
     end
 
-    for _, field in ipairs({"mods", "modsByName", "nameToMod", "loadedMods", "activeMods"}) do
+    for _, field in ipairs({"loadedMods", "activeMods", "modsByName", "nameToMod", "mods"}) do
         local found = scanModCollection(g_modManager[field])
         if found ~= nil then return found end
     end
     return nil
 end
 
-local function countTableEntries(values)
+local function countSequence(values)
     if type(values) ~= "table" then return 0 end
-    local count = 0
-    for _, value in pairs(values) do
-        if value ~= nil then count = count + 1 end
+
+    local count = math.floor(tonumber(#values) or 0)
+    local sequential = 0
+    for _, value in ipairs(values) do
+        if value ~= nil then sequential = sequential + 1 end
     end
-    return count
+    count = math.max(count, sequential)
+
+    local keyed = 0
+    for _, value in pairs(values) do
+        if value ~= nil then keyed = keyed + 1 end
+    end
+    return math.max(count, keyed)
 end
 
 local function getManagerHelperCount()
@@ -101,12 +137,35 @@ local function getManagerHelperCount()
     local count = 0
     if type(manager.getNumOfHelpers) == "function" then
         local ok, value = pcall(manager.getNumOfHelpers, manager)
-        if ok and tonumber(value) ~= nil then count = math.max(count, math.floor(tonumber(value))) end
+        if ok and tonumber(value) ~= nil then
+            count = math.max(count, math.floor(tonumber(value)))
+        end
     end
+
     count = math.max(count, math.floor(tonumber(manager.numHelpers) or 0))
-    count = math.max(count, countTableEntries(manager.availableHelpers))
-    count = math.max(count, countTableEntries(manager.indexToHelper))
+    count = math.max(count, countSequence(manager.availableHelpers))
+    count = math.max(count, countSequence(manager.indexToHelper))
     return count
+end
+
+local function removeRegisteredPlayerActions()
+    if HelperProfiles == nil or g_inputBinding == nil or g_inputBinding.removeActionEvent == nil then return end
+    for _, field in ipairs({
+        "_playerCycleId",
+        "_playerToggleId",
+        "_playerModeId",
+        "_playerAppearanceMenuId"
+    }) do
+        local id = HelperProfiles[field]
+        if id ~= nil then
+            pcall(g_inputBinding.removeActionEvent, g_inputBinding, id)
+            HelperProfiles[field] = nil
+        end
+    end
+end
+
+function HP_Compatibility:getLiveHelperCount()
+    return getManagerHelperCount()
 end
 
 function HP_Compatibility:setBlocked(conflict, source)
@@ -127,6 +186,12 @@ function HP_Compatibility:setBlocked(conflict, source)
         HelperProfiles.selectedIdx = 1
     end
 
+    removeRegisteredPlayerActions()
+
+    if HP_IntegrationAPI ~= nil and HP_IntegrationAPI.unpublish ~= nil then
+        pcall(HP_IntegrationAPI.unpublish, HP_IntegrationAPI)
+    end
+
     if not self.warningLogged then
         self.warningLogged = true
         print(LOG .. "HelperProfiles disabled for this session: incompatible helper-roster owner detected (" .. self.conflictMod .. ", source=" .. self.conflictSource .. "). Disable either HelperProfiles or Hired Helper Tool and reload the save.")
@@ -138,7 +203,7 @@ function HP_Compatibility:detect()
     if self.blocked == true then return true end
     self.checked = true
 
-    local conflict = scanLoadedModTable() or scanModManager()
+    local conflict = scanLoadedModTable() or scanRuntimeGlobals() or scanModManager()
     if conflict ~= nil then
         return self:setBlocked(conflict, "loaded-mod")
     end
@@ -171,7 +236,11 @@ function HP_Compatibility:loadMap()
     self.conflictSource = nil
     self.warningLogged = false
     self.checkAccumulatorMs = 0
-    self:detect()
+
+    local blocked = self:detect()
+    if not blocked then
+        print(LOG .. "Guard initialized: Hired Helper Tool not active at HelperProfiles loadMap; continuing startup checks.")
+    end
 end
 
 function HP_Compatibility:update(dt)

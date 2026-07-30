@@ -112,12 +112,14 @@ RALT + ; active ou désactive la superposition.
 Version 2.1.0.0 Alpha 2:
 - Active helper slots are now read-only in the appearance-binding screen; Bind, Clear, Clear All, and Save preserve active-worker bindings.
 - HelperProfiles now disables itself when Hired Helper Tool is detected, preventing competing roster ownership.
+- Roster expansion is deferred until other mods complete startup so Hired Helper Tool can claim the helper manager first.
 - Replaced unsupported decorative action-registration symbols in log output with plain text.
 - Added an experimental twenty-helper roster by extending the standard A-J helpers with slots K-T.
 - Added stable helper01-helper20 canonical slot identities while retaining legacy A-J mapping compatibility.
 - Updated the Profiles screen, overlay, HelperProfiles API, appearance bindings, and HelperPayroll integration for twenty slots.
 - Added external-roster detection so HelperProfiles does not stack its expansion on another helper-roster mod or custom map roster.
 - Added hpRoster diagnostics and automatic overlay paging between A-J and K-T.
+- Added the missing localised overlay range label.
 
 Version 2.0.27.3:
 - Fixed duplicate shortcut prompts in the Profiles screen button bar.
@@ -143,12 +145,14 @@ Version 2.0.26.0:
 Version 2.1.0.0 Alpha 2:
 - Aktive Helfer-Slots sind im Bindungsfenster jetzt schreibgeschützt; Binden, Löschen, Alle löschen und Speichern erhalten aktive Bindungen.
 - HelperProfiles deaktiviert sich bei erkanntem Hired Helper Tool, um konkurrierende Helferlisten zu verhindern.
+- Die Listenerweiterung wird verzögert, bis andere Mods ihren Start abgeschlossen haben, damit Hired Helper Tool den Helfer-Manager zuerst übernehmen kann.
 - Nicht unterstützte Symbole in den Registrierungsprotokollen wurden durch Klartext ersetzt.
 - Eine experimentelle Liste mit zwanzig Helfern wurde hinzugefügt; die Standardhelfer A-J werden um K-T erweitert.
 - Stabile kanonische Slot-Identitäten helper01-helper20 wurden ergänzt, wobei die Kompatibilität mit vorhandenen A-J-Zuordnungen erhalten bleibt.
 - Profilfenster, Overlay, HelperProfiles-API, Erscheinungsbildbindungen und HelperPayroll-Integration unterstützen nun zwanzig Slots.
 - Eine Erkennung externer Helferlisten verhindert, dass HelperProfiles eine andere Mod- oder Karten-Erweiterung doppelt ergänzt.
 - hpRoster-Diagnose und automatische Overlay-Seiten A-J/K-T wurden hinzugefügt.
+- Die fehlende lokalisierte Bereichsbeschriftung des Overlays wurde ergänzt.
 
 Version 2.0.27.3:
 - Doppelte Tastenkürzel in der Schaltflächenleiste des Profilfensters wurden behoben.
@@ -175,12 +179,14 @@ Version 2.0.26.0:
 Version 2.1.0.0 Alpha 2 :
 - Les emplacements actifs sont désormais en lecture seule dans l’écran de liaison ; les actions conservent les liaisons des aides actives.
 - HelperProfiles se désactive lorsqu’il détecte Hired Helper Tool afin d’éviter deux systèmes de liste concurrents.
+- L’extension de la liste est différée jusqu’à la fin du démarrage des autres mods afin que Hired Helper Tool puisse prendre possession du gestionnaire d’aides en premier.
 - Les symboles décoratifs non pris en charge dans le journal ont été remplacés par du texte simple.
 - Ajout expérimental d’une liste de vingt aides en complétant les aides standard A-J avec les emplacements K-T.
 - Ajout des identités canoniques stables helper01-helper20 tout en conservant la compatibilité avec les liaisons A-J existantes.
 - Mise à jour de l’écran des profils, de la superposition, de l’API HelperProfiles, des liaisons d’apparence et de l’intégration HelperPayroll pour vingt emplacements.
 - Ajout de la détection des listes externes afin d’éviter une double extension avec un autre mod ou une carte personnalisée.
 - Ajout du diagnostic hpRoster et de pages automatiques A-J/K-T dans la superposition.
+- Ajout du libellé localisé manquant pour la plage affichée dans la superposition.
 
 Version 2.0.27.3 :
 - Correction des raccourcis en double dans la barre de boutons de l'écran des profils.

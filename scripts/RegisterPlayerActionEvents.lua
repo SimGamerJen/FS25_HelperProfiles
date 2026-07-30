@@ -44,8 +44,13 @@ local function _isHpModifierDown()
         or _isPhysicalKeyPressed("KEY_ralt")
 end
 
+local function _isCompatibilityBlocked()
+    return HP_Compatibility ~= nil and HP_Compatibility:isBlocked()
+end
+
 local function _onCycle(_, actionName, inputValue, callbackState, isAnalog)
     if not _isPress(inputValue, callbackState) then return end
+    if _isCompatibilityBlocked() then return end
 
     -- GIANTS action bindings are not exclusive: KEY_semicolon can still fire
     -- when KEY_shift/KEY_ctrl/KEY_alt + KEY_semicolon is pressed.
@@ -63,6 +68,7 @@ local function _onCycle(_, actionName, inputValue, callbackState, isAnalog)
 end
 
 local function _onToggle(_, actionName, inputValue, callbackState, isAnalog)
+    if _isCompatibilityBlocked() then return end
     if HP_UI and HP_UI.onToggleAction then
         HP_UI:onToggleAction(actionName, inputValue, callbackState, isAnalog)
     end
@@ -70,6 +76,7 @@ end
 
 local function _onMode(_, actionName, inputValue, callbackState, isAnalog)
     if not _isPress(inputValue, callbackState) then return end
+    if _isCompatibilityBlocked() then return end
     if HelperProfiles and HelperProfiles.togglePickMode then
         HelperProfiles:togglePickMode()
     end
@@ -77,6 +84,7 @@ end
 
 local function _onAppearanceMenu(_, actionName, inputValue, callbackState, isAnalog)
     if not _isPress(inputValue, callbackState) then return end
+    if _isCompatibilityBlocked() then return end
     if HP_AppearanceBindingsGui ~= nil and HP_AppearanceBindingsGui.open ~= nil then
         HP_AppearanceBindingsGui:open()
     elseif HP_AppearanceMenu ~= nil and HP_AppearanceMenu.toggle ~= nil then
@@ -120,6 +128,7 @@ local function _unregisterPlayerAction(field, label)
 end
 
 local function _registerPlayerActions()
+    if _isCompatibilityBlocked() then return end
     _registerPlayerAction("_playerCycleId", InputAction.OPEN_HELPER_MENU, HelperProfiles, _onCycle, "OPEN_HELPER_MENU")
     _registerPlayerAction("_playerToggleId", InputAction.HP_TOGGLE_OVERLAY, HP_UI, _onToggle, "HP_TOGGLE_OVERLAY")
     _registerPlayerAction("_playerModeId", InputAction.HP_TOGGLE_MODE, HelperProfiles, _onMode, "HP_TOGGLE_MODE")
@@ -186,6 +195,7 @@ local function _addVehicleAction(vehicle, spec, inputAction, target, callback, l
 end
 
 local function _registerVehicleActions(vehicle, isActiveForInput)
+    if _isCompatibilityBlocked() then return end
     if not isActiveForInput or vehicle == nil or vehicle.addActionEvent == nil then return end
     local spec = _ensureVehicleSpec(vehicle)
 

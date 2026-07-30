@@ -604,6 +604,13 @@ end
 -- ===== Render ================================================================
 
 function HP_UI:render(dtMillis)
+    if HP_Compatibility ~= nil and HP_Compatibility:isBlocked() then
+        self.visible = false
+        self.flashText = nil
+        self.flashTime = 0
+        return
+    end
+
     if self.flashTime ~= nil and self.flashTime > 0 then
         local dt = tonumber(dtMillis) or 16
         self.flashTime = math.max(0, self.flashTime - dt * 0.001)
@@ -720,6 +727,11 @@ end
 -- ===== Engine hooks ==========================================================
 
 function HP_UI:loadMap()
+    if HP_Compatibility ~= nil and HP_Compatibility:isBlocked() then
+        self.visible = false
+        return
+    end
+
     if HP_Config ~= nil and HP_Config.read ~= nil and HP_Config.applyToUI ~= nil and HP_Config.init ~= nil then
         HP_Config:init()
         local config = HP_Config:read()

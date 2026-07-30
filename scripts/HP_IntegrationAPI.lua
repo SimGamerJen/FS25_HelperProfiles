@@ -15,6 +15,10 @@ local function hpApiPrint(message)
     print(LOG .. tostring(message))
 end
 
+local function isCompatibilityBlocked()
+    return HP_Compatibility ~= nil and HP_Compatibility:isBlocked()
+end
+
 local function normalizeSlot(slot)
     if HP_SlotRegistry ~= nil and HP_SlotRegistry.normalise ~= nil then
         return HP_SlotRegistry:normalise(slot, HP_SlotRegistry.TARGET_COUNT)
@@ -23,6 +27,7 @@ local function normalizeSlot(slot)
 end
 
 local function getProfiles()
+    if isCompatibilityBlocked() then return {} end
     if HelperProfiles == nil or type(HelperProfiles.getProfiles) ~= "function" then return {} end
     local ok, profiles = pcall(HelperProfiles.getProfiles, HelperProfiles)
     return ok and type(profiles) == "table" and profiles or {}
@@ -194,7 +199,8 @@ local function buildApi()
             and HP_RosterExpansion:getStatus() or nil
 
         return {
-            available = true,
+            available = not isCompatibilityBlocked(),
+            disabledReason = isCompatibilityBlocked() and HP_Compatibility:getReason() or nil,
             apiVersion = self.apiVersion,
             modName = self.modName,
             modVersion = self.modVersion,
@@ -256,6 +262,7 @@ local function buildApi()
     end
 
     function api:getSlots()
+        if isCompatibilityBlocked() then return {} end
         local profiles = getProfiles()
         local slots = {}
         for index = 1, getManagedSlotCount(profiles) do
@@ -267,7 +274,21 @@ local function buildApi()
     return api
 end
 
+function HP_IntegrationAPI:unpublish()
+    if g_currentMission ~= nil then
+        if g_currentMission.helperProfilesAPI == self.api then g_currentMission.helperProfilesAPI = nil end
+        if g_currentMission.fs25HelperProfilesAPI == self.api then g_currentMission.fs25HelperProfilesAPI = nil end
+    end
+    if rawget(_G, "FS25_HelperProfiles_API") == self.api then _G.FS25_HelperProfiles_API = nil end
+    if rawget(_G, "FS25_HelperProfilesAPI") == self.api then _G.FS25_HelperProfilesAPI = nil end
+    self.published = false
+end
+
 function HP_IntegrationAPI:publish(reason)
+    if isCompatibilityBlocked() then
+        self:unpublish()
+        return false
+    end
     if g_currentMission == nil then return false end
     self.api = self.api or buildApi()
     self.api.modVersion = self.modVersion
@@ -294,6 +315,10 @@ end
 function HP_IntegrationAPI:loadMap() self:publish("loadMap") end
 
 function HP_IntegrationAPI:update()
+    if isCompatibilityBlocked() then
+        self:unpublish()
+        return
+    end
     if not self.published or g_currentMission == nil
         or g_currentMission.helperProfilesAPI ~= self.api
         or g_currentMission.fs25HelperProfilesAPI ~= self.api then
@@ -302,13 +327,7 @@ function HP_IntegrationAPI:update()
 end
 
 function HP_IntegrationAPI:deleteMap()
-    if g_currentMission ~= nil then
-        if g_currentMission.helperProfilesAPI == self.api then g_currentMission.helperProfilesAPI = nil end
-        if g_currentMission.fs25HelperProfilesAPI == self.api then g_currentMission.fs25HelperProfilesAPI = nil end
-    end
-    if rawget(_G, "FS25_HelperProfiles_API") == self.api then _G.FS25_HelperProfiles_API = nil end
-    if rawget(_G, "FS25_HelperProfilesAPI") == self.api then _G.FS25_HelperProfilesAPI = nil end
-    self.published = false
+    self:unpublish()
 end
 
 addModEventListener(HP_IntegrationAPI)

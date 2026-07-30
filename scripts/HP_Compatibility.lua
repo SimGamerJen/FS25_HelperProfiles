@@ -40,7 +40,7 @@ local function modLooksActive(mod)
     if mod.isLoaded ~= nil then return mod.isLoaded == true end
     if mod.isActive ~= nil then return mod.isActive == true end
     if mod.isSelected ~= nil then return mod.isSelected == true end
-    return true
+    return false
 end
 
 local function scanLoadedModTable()

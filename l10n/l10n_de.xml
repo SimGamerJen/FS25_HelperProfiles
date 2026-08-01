@@ -93,11 +93,14 @@
         <text name="hp_roster_button_appearances" text="Erscheinungsbilder"/>
         <text name="hp_roster_button_toggle" text="Ein/Aus umschalten"/>
         <text name="hp_roster_button_enable_all" text="Alle aktivieren"/>
+        <text name="hp_roster_button_disable_others" text="Andere deaktivieren"/>
         <text name="hp_roster_error_active" text="Slot %s ist aktiv. Beende den Helfereinsatz, bevor du ihn aus der Liste entfernst."/>
         <text name="hp_roster_error_became_active" text="Slot %s wurde aktiv. Beende den Helfereinsatz, bevor du ihn aus der Liste entfernst."/>
         <text name="hp_roster_error_minimum" text="Mindestens ein Helfer muss in der Liste bleiben."/>
         <text name="hp_roster_status_draft" text="%s wurde auf %s gesetzt. Zum Speichern Speichern drücken."/>
         <text name="hp_roster_status_enable_all" text="Alle Helfer wurden in die Liste aufgenommen. Zum Speichern Speichern drücken."/>
+        <text name="hp_roster_status_disable_others" text="%d Helfer wurden aus der Liste entfernt; %d geschützte Helfer bleiben in der Liste. Zum Speichern Speichern drücken."/>
+        <text name="hp_roster_status_disable_none" text="Keine geeigneten freien Helfer konnten aus der Liste entfernt werden."/>
         <text name="hp_roster_error_service" text="Der Dienst für den Listenstatus ist nicht verfügbar."/>
         <text name="hp_roster_error_save" text="Speichern der Helferliste fehlgeschlagen: %s"/>
         <text name="hp_roster_status_saved" text="Helferliste gespeichert. %d Helfer sind in der Liste."/>

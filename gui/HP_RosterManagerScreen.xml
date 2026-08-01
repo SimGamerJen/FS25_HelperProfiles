@@ -43,9 +43,9 @@
 
         <BoxLayout profile="fs25_dialogButtonBox" size="1170px 60px">
             <Button profile="buttonBack" text="$l10n_hp_button_close" onClick="onClickBack" />
-            <Button profile="buttonExtra1" text="$l10n_hp_roster_button_appearances" onClick="onClickAppearances" />
-            <Button profile="hpButtonClear" text="$l10n_hp_roster_button_toggle" onClick="onClickToggleRoster" />
-            <Button profile="hpButtonRosterEnableAll" text="$l10n_hp_roster_button_enable_all" onClick="onClickEnableAll" />
+            <Button profile="hpRosterButtonAppearances" text="$l10n_hp_roster_button_appearances" onClick="onClickAppearances" />
+            <Button profile="hpRosterButtonToggle" text="$l10n_hp_roster_button_toggle" onClick="onClickToggleRoster" />
+            <Button profile="hpRosterButtonBulk" id="bulkRosterButton" text="$l10n_hp_roster_button_enable_all" onClick="onClickBulkRoster" />
             <Button profile="hpButtonSave" text="$l10n_hp_button_save" onClick="onClickSave" />
         </BoxLayout>
     </GuiElement>

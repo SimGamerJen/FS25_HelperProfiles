@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8" standalone="no" ?>
+<GUI onOpen="onOpen" onClose="onClose" onCreate="onCreate">
+    <Bitmap profile="dialogFullscreenBg" id="dialogBg" />
+    <GuiElement profile="fs25_dialogBg" id="dialogElement" size="1220px 700px">
+        <ThreePartBitmap profile="fs25_dialogBgMiddle" />
+        <ThreePartBitmap profile="fs25_dialogBgTop" />
+        <ThreePartBitmap profile="fs25_dialogBgBottom" />
+
+        <GuiElement profile="fs25_dialogContentContainer">
+            <Text profile="dialogTitle" text="Helper Roster" id="dialogTitleElement" position="0px -30px" />
+
+            <Bitmap profile="hpHeaderBox" id="rosterHeaderBox" position="45px -90px" size="1105px 50px">
+                <Text profile="hpHeaderLeft" position="10px 0px" size="55px 40.77px" text="SLOT" />
+                <Text profile="hpHeaderLeft" position="75px 0px" size="210px 40.77px" text="WORKER" />
+                <Text profile="hpHeaderLeft" position="295px 0px" size="270px 40.77px" text="APPEARANCE" />
+                <Text profile="hpHeaderLeft" position="575px 0px" size="170px 40.77px" text="PAYROLL ROLE" />
+                <Text profile="hpHeaderLeft" position="755px 0px" size="140px 40.77px" text="WORK STATE" />
+                <Text profile="hpHeaderLeft" position="905px 0px" size="185px 40.77px" text="ROSTER" />
+                <ThreePartBitmap profile="fs25_lineSeparatorBottom" position="0px 2px" />
+            </Bitmap>
+
+            <SmoothList profile="hpList" id="rosterTable" position="50px -145px" size="1095px 390px" focusInit="onOpen" focusChangeTop="nil" focusChangeBottom="nil">
+                <ListItem profile="hpListItem" name="rosterRowTemplate" size="1095px 40.77px">
+                    <Text profile="hpRowCellLeft" position="12px 0px" size="50px 40.77px" name="Slot" />
+                    <Text profile="hpRowCellLeft" position="77px 0px" size="205px 40.77px" name="Worker" textLayoutMode="scrolling" />
+                    <Text profile="hpRowCellLeft" position="297px 0px" size="265px 40.77px" name="Appearance" textLayoutMode="scrolling" />
+                    <Text profile="hpRowCellLeft" position="577px 0px" size="165px 40.77px" name="Role" textLayoutMode="scrolling" />
+                    <Text profile="hpRowCellLeft" position="757px 0px" size="135px 40.77px" name="WorkState" />
+                    <Text profile="hpRowCellLeft" position="907px 0px" size="175px 40.77px" name="RosterState" />
+                </ListItem>
+            </SmoothList>
+
+            <ThreePartBitmap profile="fs25_listSliderBox" position="1155px -145px" size="12px 390px">
+                <Slider profile="fs25_listSlider" size="6px 382px" dataElementId="rosterTable" id="rosterSlider" />
+            </ThreePartBitmap>
+
+            <Bitmap profile="hpDetailBox" id="detailBox" position="45px -545px" size="1105px 110px">
+                <Text profile="hpMetaText" id="detailText" position="10px 8px" size="1085px 35px" text="Choose which permanent helper identities are available to the farm." textLayoutMode="scrolling" />
+                <Text profile="hpMetaText" id="statusText" position="10px -38px" size="1085px 35px" text="Ready" textLayoutMode="scrolling" />
+                <ThreePartBitmap profile="fs25_lineSeparatorBottom" position="0px 2px" />
+            </Bitmap>
+        </GuiElement>
+
+        <BoxLayout profile="fs25_dialogButtonBox" size="1170px 60px">
+            <Button profile="buttonBack" text="Close" onClick="onClickBack" />
+            <Button profile="buttonExtra1" text="Appearances" onClick="onClickAppearances" />
+            <Button profile="buttonExtra1" text="Toggle ON/OFF" onClick="onClickToggleRoster" />
+            <Button profile="buttonExtra1" text="Enable All" onClick="onClickEnableAll" />
+            <Button profile="hpButtonSave" text="Save" onClick="onClickSave" />
+        </BoxLayout>
+    </GuiElement>
+</GUI>

@@ -79,5 +79,27 @@
         <text name="input_HP_TOGGLE_MODE" text="Changer le mode HelperProfiles"/>
         <text name="input_HP_TOGGLE_OVERLAY" text="Activer/désactiver la superposition HelperProfiles"/>
         <text name="input_OPEN_HELPER_MENU" text="Parcourir les aides"/>
+        <text name="hp_title_roster_manager" text="Liste des aides"/>
+        <text name="hp_roster_header_slot" text="EMPL."/>
+        <text name="hp_roster_header_worker" text="AIDE"/>
+        <text name="hp_roster_header_appearance" text="APPARENCE"/>
+        <text name="hp_roster_header_role" text="RÔLE PAIE"/>
+        <text name="hp_roster_header_work_state" text="ÉTAT DE TRAVAIL"/>
+        <text name="hp_roster_header_roster" text="LISTE"/>
+        <text name="hp_roster_on" text="DANS LA LISTE"/>
+        <text name="hp_roster_off" text="HORS LISTE"/>
+        <text name="hp_roster_detail" text="Choisissez les identités permanentes d’aides disponibles pour l’exploitation."/>
+        <text name="hp_roster_status_summary" text="Aides dans la liste : %d sur %d | Hors liste : %d"/>
+        <text name="hp_roster_button_appearances" text="Apparences"/>
+        <text name="hp_roster_button_toggle" text="Activer/Désactiver"/>
+        <text name="hp_roster_button_enable_all" text="Tout activer"/>
+        <text name="hp_roster_error_active" text="L’emplacement %s est actif. Libérez l’aide avant de la retirer de la liste."/>
+        <text name="hp_roster_error_became_active" text="L’emplacement %s est devenu actif. Libérez l’aide avant de la retirer de la liste."/>
+        <text name="hp_roster_error_minimum" text="Au moins une aide doit rester dans la liste."/>
+        <text name="hp_roster_status_draft" text="%s est défini sur %s. Appuyez sur Enregistrer pour conserver la modification."/>
+        <text name="hp_roster_status_enable_all" text="Toutes les aides sont dans la liste. Appuyez sur Enregistrer pour conserver la modification."/>
+        <text name="hp_roster_error_service" text="Le service d’état de la liste est indisponible."/>
+        <text name="hp_roster_error_save" text="Échec de l’enregistrement de la liste : %s"/>
+        <text name="hp_roster_status_saved" text="Liste enregistrée. %d aide(s) sont dans la liste."/>
     </texts>
 </l10n>

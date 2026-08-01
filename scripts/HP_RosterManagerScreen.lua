@@ -25,6 +25,26 @@ local function clamp(value, minimum, maximum)
     return value
 end
 
+local function isPress(inputValue, callbackState)
+    if type(inputValue) == "number" then
+        return inputValue > 0
+    elseif type(inputValue) == "boolean" then
+        return inputValue == true
+    end
+    local value = tonumber(callbackState)
+    return value ~= nil and value > 0
+end
+
+local function setActionEventLowPriority(id, visible)
+    if id == nil or g_inputBinding == nil then return end
+    if g_inputBinding.setActionEventTextPriority ~= nil then
+        g_inputBinding:setActionEventTextPriority(id, GS_PRIO_VERY_LOW)
+    end
+    if g_inputBinding.setActionEventTextVisibility ~= nil then
+        g_inputBinding:setActionEventTextVisibility(id, visible ~= false)
+    end
+end
+
 local function getPayrollAPI()
     local api = rawget(_G, "FS25_HelperPayroll_API") or rawget(_G, "FS25_HelperPayrollAPI")
     if type(api) == "table" then return api end
@@ -87,6 +107,11 @@ local function mapsEqual(a, b)
     return true
 end
 
+local function onBulkRosterAction(screen, actionName, inputValue, callbackState, isAnalog)
+    if screen == nil or not isPress(inputValue, callbackState) then return end
+    if screen.onClickBulkRoster ~= nil then screen:onClickBulkRoster(nil) end
+end
+
 function HP_RosterManagerScreen.new(target, customMt)
     local self = MessageDialog.new(target, customMt or HP_RosterManagerScreen_mt)
     self.rows = {}
@@ -95,6 +120,7 @@ function HP_RosterManagerScreen.new(target, customMt)
     self.selectedIndex = 1
     self.actionMessage = nil
     self.dirty = false
+    self._bulkRosterActionEventId = nil
     return self
 end
 
@@ -110,6 +136,47 @@ function HP_RosterManagerScreen:onCreate()
     HP_RosterManagerScreen:superClass().onCreate(self)
 end
 
+function HP_RosterManagerScreen:removeBulkRosterAction()
+    local id = self._bulkRosterActionEventId
+    if id ~= nil and g_inputBinding ~= nil and g_inputBinding.removeActionEvent ~= nil then
+        pcall(function() g_inputBinding:removeActionEvent(id) end)
+    end
+    self._bulkRosterActionEventId = nil
+end
+
+function HP_RosterManagerScreen:registerBulkRosterAction()
+    self:removeBulkRosterAction()
+
+    local inputAction = InputAction ~= nil and InputAction.HP_CLEAR_ALL_BINDINGS or nil
+    if g_inputBinding == nil or g_inputBinding.registerActionEvent == nil or inputAction == nil then
+        hpPrint("Failed to register roster bulk action: input action unavailable")
+        return
+    end
+
+    local callOk, registered, id = pcall(function()
+        return g_inputBinding:registerActionEvent(
+            inputAction,
+            self,
+            onBulkRosterAction,
+            false,
+            true,
+            false,
+            true
+        )
+    end)
+
+    if callOk and registered == true and id ~= nil then
+        self._bulkRosterActionEventId = id
+        setActionEventLowPriority(id, false)
+        if g_inputBinding.setActionEventActive ~= nil then
+            g_inputBinding:setActionEventActive(id, true)
+        end
+        hpPrint("Registered roster bulk action")
+    else
+        hpPrint("Failed to register roster bulk action")
+    end
+end
+
 function HP_RosterManagerScreen:onOpen()
     HP_RosterManagerScreen:superClass().onOpen(self)
     self:reloadData()
@@ -118,9 +185,11 @@ function HP_RosterManagerScreen:onOpen()
         FocusManager:setFocus(self.rosterTable)
         self:setSoundSuppressed(false)
     end
+    self:registerBulkRosterAction()
 end
 
 function HP_RosterManagerScreen:onClose()
+    self:removeBulkRosterAction()
     HP_RosterManagerScreen:superClass().onClose(self)
     if HP_RosterManagerGui ~= nil then HP_RosterManagerGui.dialog = nil end
 end
@@ -183,6 +252,7 @@ function HP_RosterManagerScreen:populateCellForItemInSection(list, section, inde
     local row = self.rows[index]
     if row == nil or cell == nil then return end
 
+    row.active = isActive(row.helper)
     local enabled = self.draftEnabled[row.canonicalId] ~= false
     cell:getAttribute("Slot"):setText(tostring(row.slot or "?"))
     cell:getAttribute("Worker"):setText(tostring(row.displayName or "-"))
@@ -197,6 +267,15 @@ function HP_RosterManagerScreen:onListSelectionChanged(list, section, index)
     self:updateDetailText()
 end
 
+function HP_RosterManagerScreen:updateBulkActionButton()
+    if self.bulkRosterButton == nil then return end
+    local total = #(self.rows or {})
+    local enableAll = total > 0 and self:getEnabledCount() < total
+    self.bulkRosterButton:setText(enableAll
+        and hpI18n("hp_roster_button_enable_all", "Enable All")
+        or hpI18n("hp_roster_button_disable_others", "Disable Others"))
+end
+
 function HP_RosterManagerScreen:updateDetailText()
     local row = self:getSelectedRow()
     local enabledCount = self:getEnabledCount()
@@ -204,6 +283,7 @@ function HP_RosterManagerScreen:updateDetailText()
     local detail = hpI18n("hp_roster_detail", "Choose which permanent helper identities are available to the farm.")
 
     if row ~= nil then
+        row.active = isActive(row.helper)
         local enabled = self.draftEnabled[row.canonicalId] ~= false
         detail = string.format("%s (%s / %s) | %s | %s",
             tostring(row.displayName), tostring(row.slot), tostring(row.canonicalId),
@@ -218,6 +298,7 @@ function HP_RosterManagerScreen:updateDetailText()
     )
     if self.dirty then status = status .. " | " .. hpI18n("hp_status_unsaved_changes", "Unsaved changes") end
     if self.statusText ~= nil then self.statusText:setText(status) end
+    self:updateBulkActionButton()
 end
 
 function HP_RosterManagerScreen:setStatus(message)
@@ -229,6 +310,7 @@ function HP_RosterManagerScreen:onClickToggleRoster(sender)
     local row = self:getSelectedRow()
     if row == nil then return end
 
+    row.active = isActive(row.helper)
     local currentlyEnabled = self.draftEnabled[row.canonicalId] ~= false
     if currentlyEnabled then
         if row.active then
@@ -255,12 +337,49 @@ function HP_RosterManagerScreen:onClickToggleRoster(sender)
     self:updateDetailText()
 end
 
-function HP_RosterManagerScreen:onClickEnableAll(sender)
-    for _, row in ipairs(self.rows or {}) do self.draftEnabled[row.canonicalId] = true end
-    self.actionMessage = hpI18n("hp_roster_status_enable_all", "All workers set ON roster. Press Save to persist.")
+function HP_RosterManagerScreen:onClickBulkRoster(sender)
+    local total = #(self.rows or {})
+    if total == 0 then return end
+
+    if self:getEnabledCount() < total then
+        for _, row in ipairs(self.rows or {}) do self.draftEnabled[row.canonicalId] = true end
+        self.actionMessage = hpI18n("hp_roster_status_enable_all", "All workers set ON roster. Press Save to persist.")
+    else
+        local selected = self:getSelectedRow() or self.rows[1]
+        local protectedId = selected ~= nil and selected.canonicalId or nil
+        local disabledCount = 0
+        local protectedCount = 0
+
+        for _, row in ipairs(self.rows or {}) do
+            row.active = isActive(row.helper)
+            local keepEnabled = row.active or row.canonicalId == protectedId
+            self.draftEnabled[row.canonicalId] = keepEnabled
+            if keepEnabled then
+                protectedCount = protectedCount + 1
+            else
+                disabledCount = disabledCount + 1
+            end
+        end
+
+        if disabledCount > 0 then
+            self.actionMessage = string.format(
+                hpI18n("hp_roster_status_disable_others", "%d worker(s) set OFF roster; %d protected worker(s) remain ON. Press Save to persist."),
+                disabledCount,
+                protectedCount
+            )
+        else
+            self.actionMessage = hpI18n("hp_roster_status_disable_none", "No eligible idle workers could be removed from the roster.")
+        end
+    end
+
     self:refreshDirtyState()
     if self.rosterTable ~= nil then self.rosterTable:reloadData() end
     self:updateDetailText()
+end
+
+function HP_RosterManagerScreen:onClickEnableAll(sender)
+    -- Compatibility callback for earlier roster XML builds.
+    return self:onClickBulkRoster(sender)
 end
 
 function HP_RosterManagerScreen:onClickSave(sender)

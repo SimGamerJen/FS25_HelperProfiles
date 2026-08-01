@@ -1,23 +1,26 @@
 # FS25 HelperProfiles
 
-**FS25 HelperProfiles** is a single-player helper-management mod for Farming Simulator 25. It provides a clean, autosizing helper roster, deterministic helper selection controls, save-specific appearance bindings through AvatarSwitcher, and optional payroll-role integration with HelperPayroll.
+**FS25 HelperProfiles** is a single-player helper-management mod for Farming Simulator 25. It expands the standard helper roster to 20 workers, provides deterministic helper selection, displays an autosizing roster overlay, and supports save-specific AvatarSwitcher appearance bindings.
 
-> **Current version:** `2.0.27.3` beta  
+> **Current version:** `2.1.0.0` Alpha 2  
 > **Game:** Farming Simulator 25  
 > **Multiplayer:** Not supported
 
 ## Main Features
 
-- Displays the complete vanilla A–J helper roster in an autosizing table.
-- Shows each helper's selected, next, free, and in-use state.
-- Keeps active workers visible but greyed and unavailable for selection.
-- Cycles the preferred helper before starting a new AI job.
+- Expands the standard A–J helper roster to **A–T**, for 20 managed helper slots.
+- Adds K–T only when the game still has the untouched standard ten-helper roster.
+- Preserves existing A–J identities and accepts canonical identities `helper01` through `helper20`.
+- Displays the complete managed roster in an autosizing table.
+- Automatically pages the compact overlay between A–J and K–T according to the selected worker.
+- Shows selected, next, available, and active worker state.
+- Keeps active workers visible but unavailable for selection.
 - Supports `preferSelected` and `firstFree` hiring modes.
 - Stores overlay configuration under `modSettings/FS25_HelperProfiles`.
-- Optionally binds AvatarSwitcher appearances to helper profiles per savegame.
-- Optionally assigns HelperPayroll roles to helper profiles per savegame.
-- Displays a live HelperPayroll **ROLE** column when the companion API is available.
-- Provides console commands for configuration, diagnostics, selection, and integration support.
+- Binds AvatarSwitcher appearances to helper slots per savegame.
+- Makes active appearance bindings read-only until the worker is released.
+- Displays a read-only HelperPayroll **ROLE** column when the companion API is available.
+- Provides console commands for roster status, configuration, diagnostics, selection, and integration support.
 
 ## Screenshots
 
@@ -25,7 +28,7 @@
 
 <img width="1920" height="1080" alt="HelperProfiles_UI_1920" src="https://github.com/user-attachments/assets/40897fad-807a-483d-8049-f513b6f44c54" />
 
-## Mode options
+### Mode options
 
 <img width="1920" height="1080" alt="HelperProfiles_mode_toggle_First_available_1920" src="https://github.com/user-attachments/assets/4ff0ecf5-9c4f-472a-a16a-966fe67d9599" />
 
@@ -51,11 +54,29 @@ Documents/My Games/FarmingSimulator2025/mods
 ```
 
 3. Enable **Helper Profiles** for the intended savegame.
-4. Enable the optional companion mods only when their features are required:
+4. Enable optional companion mods only when their features are required:
    - [FS25_AvatarSwitcher](https://github.com/SimGamerJen/FS25_AvatarSwitcher) for custom appearance bindings.
-   - [FS25_HelperPayroll](https://github.com/SimGamerJen/FS25_HelperPayroll) for payroll-role assignment and the overlay role column.
+   - [FS25_HelperPayroll](https://github.com/SimGamerJen/FS25_HelperPayroll) for payroll management and the read-only overlay role column.
 
-Test beta builds on a copied savegame before using them in an important playthrough.
+Alpha builds should be tested on a copied savegame before being used in an important playthrough.
+
+## Important Compatibility Notice
+
+### Hired Helper Tool
+
+**HelperProfiles is not compatible with Hired Helper Tool (`FS25_HiredHelperTool`).**
+
+Both mods own and expand the available helper roster. When HelperProfiles detects Hired Helper Tool or an externally owned roster above its 20-slot target, HelperProfiles disables itself for that session rather than adopting or replacing the external roster.
+
+When blocked:
+
+- The HelperProfiles overlay is hidden.
+- HelperProfiles selection and mode controls are disabled.
+- The appearance-binding screen cannot be opened through HelperProfiles.
+- The HelperProfiles shared roster API is withdrawn.
+- Hired Helper Tool retains ownership of its own roster.
+
+Use **HelperProfiles or Hired Helper Tool, not both**.
 
 ## Default Controls
 
@@ -67,14 +88,32 @@ Options → Controls → Helper Profiles
 
 | Action | Default binding | Description |
 |---|---:|---|
-| Cycle workers | `;` | Cycles through selectable free helpers. |
+| Cycle workers | `;` | Cycles through selectable available helpers. |
 | Toggle HelperProfiles mode | `SHIFT + ;` | Switches between `preferSelected` and `firstFree`. |
-| Open Profiles screen | `RCTRL + ;` | Opens appearance bindings and optional HelperPayroll role controls. |
+| Open Profiles screen | `RCTRL + ;` | Opens AvatarSwitcher appearance bindings. |
 | Toggle overlay | `RALT + ;` | Shows or hides the HelperProfiles overlay. |
 
 Plain `;` cycling is suppressed while Shift, Ctrl, or Alt is held so the modifier bindings remain independent.
 
 Farming Simulator may retain older local key assignments after an update. Reset or manually reassign the controls if the defaults do not appear.
+
+## Twenty-Slot Roster
+
+HelperProfiles manages slots **A–T**.
+
+- A–J remain the original helper slots.
+- K–T are added only when the standard A–J roster is intact.
+- Canonical identities are `helper01` through `helper20`.
+- Existing A–J save mappings remain accepted.
+- The extra workers initially reuse valid base styles from A–J; AvatarSwitcher bindings can then give each slot an independent appearance.
+
+Run the following console command to inspect roster ownership and expansion status:
+
+```text
+hpRoster
+```
+
+A normal HelperProfiles startup should report 20 helpers and an `expanded-to-20` result.
 
 ## Helper Selection and Hiring Modes
 
@@ -84,21 +123,21 @@ The selected helper is the worker HelperProfiles will prefer for the next AI job
 
 ### Next
 
-The next helper is the worker the current hiring logic expects to allocate. In `preferSelected` mode, **Selected** and **Next** can legitimately show the same worker when the selected worker is free.
+The next helper is the worker the current hiring logic expects to allocate. In `preferSelected` mode, **Selected** and **Next** can legitimately show the same worker when the selected worker is available.
 
 ### `preferSelected`
 
 This is the default mode.
 
-- The selected helper is used when free.
-- If the selected helper is unavailable, HelperProfiles falls back to the next free helper.
+- The selected helper is used when available.
+- If the selected helper is unavailable, HelperProfiles falls back to the next available helper.
 
 ### `firstFree`
 
-- The first free helper in roster order is used.
+- The first available helper in roster order is used.
 - The selected preference does not override that ordering.
 
-The full A–J roster remains visible. Workers already active on jobs are shown as in use and cannot be selected until released.
+Active workers remain visible but cannot be selected again until released.
 
 ## Overlay
 
@@ -106,12 +145,14 @@ The overlay can display:
 
 - Helper slot and display name.
 - Selected and next markers.
-- `FREE` or `IN USE` status.
+- `AVAILABLE` or `ACTIVE` status.
 - Bound AvatarSwitcher appearance.
-- HelperPayroll role.
+- HelperPayroll role when the companion API is available.
 - Current HelperProfiles hiring mode.
 
-The appearance column is hidden when no appearance information is available. The role column appears only when HelperPayroll is detected; it can temporarily show `WAITING` while HelperPayroll publishes its API.
+The compact default view displays ten rows. When a worker in K–T is selected, the overlay automatically shows the K–T page; selecting A–J returns it to the first page.
+
+The appearance column is hidden when no appearance information is available. The role column appears only when HelperPayroll is detected and is read-only in HelperProfiles.
 
 ### Overlay configuration
 
@@ -146,18 +187,26 @@ or:
 hpAppearance menu
 ```
 
-The screen combines helper-profile management with optional companion-mod controls.
-
-### AvatarSwitcher appearance bindings
+The Profiles screen is exclusively for **AvatarSwitcher appearance bindings**. Payroll roles, rates, overrides, and worker compensation are managed from the HelperPayroll UI.
 
 When AvatarSwitcher is installed and has saved presets, the screen can:
 
-- Select a helper profile.
+- Select any helper slot from A–T.
 - Filter presets by category.
 - Select a saved appearance.
 - Stage a binding.
-- Clear one binding or all bindings.
-- Save the staged changes for the active savegame.
+- Clear one inactive binding.
+- Clear all inactive bindings while preserving active slots.
+- Save staged changes for the active savegame.
+
+### Active-slot protection
+
+An active worker slot is displayed as **ACTIVE / READ-ONLY**.
+
+- Bind and Clear are refused while the worker is active.
+- Clear All leaves active bindings unchanged.
+- If a slot becomes active while the screen is open, Save preserves its original binding.
+- Release the worker before changing its appearance binding.
 
 AvatarSwitcher presets are read from:
 
@@ -173,27 +222,11 @@ Documents/My Games/FarmingSimulator2025/modSettings/FS25_HelperProfiles/saves/sa
 
 HelperProfiles uses preset IDs internally while displaying readable categories and descriptions in the UI.
 
-### HelperPayroll role assignment
-
-When HelperPayroll `0.4.1.1` or a compatible later build is active, the Profiles screen also displays the selected helper's payroll role.
-
-- Role definitions are supplied by HelperPayroll.
-- Role changes are staged in the HelperProfiles screen.
-- **Save** writes the assignment through the HelperPayroll API.
-- Set HelperPayroll's payroll mode to `helperSlot` for individual worker assignments to control payroll calculations; `roleType` continues to use one globally selected role.
-- HelperPayroll owns the compensation rules and persistence.
-- HelperProfiles owns helper identity and presentation.
-- Assignments are save-specific.
-- The controls remain hidden when HelperPayroll is not installed.
-- A visible waiting state is used if HelperPayroll is loaded but its API is not ready yet.
-
-Changing a worker's role does not alter the payroll terms already captured by an active job.
-
 ## Optional Companion Mods
 
 ### AvatarSwitcher
 
-AvatarSwitcher is not a hard dependency. Without it, HelperProfiles still provides worker cycling, hiring-mode control, the roster overlay, helper status, console tools, diagnostics, and HelperPayroll integration.
+AvatarSwitcher is not a hard dependency. Without it, HelperProfiles still provides roster expansion, worker cycling, hiring-mode control, the overlay, helper status, console tools, and diagnostics.
 
 Only custom appearance binding requires AvatarSwitcher.
 
@@ -201,12 +234,14 @@ Only custom appearance binding requires AvatarSwitcher.
 
 HelperPayroll is not a hard dependency. Without it, HelperProfiles still provides all non-payroll features.
 
-With a compatible HelperPayroll build:
+With HelperPayroll `0.4.2.0` or a compatible later build:
 
-- The overlay gains a **ROLE** column.
-- Roles can be assigned from the Profiles screen.
-- Stable helper identities are supplied to HelperPayroll.
-- HelperPayroll stores the mapping and calculates compensation.
+- HelperProfiles supplies stable A–T slot identities and display names.
+- HelperPayroll manages role assignment, rates, worker overrides, settlement, and ledger persistence.
+- The HelperProfiles overlay gains a read-only **ROLE** column.
+- Payroll roles are edited from the HelperPayroll management screen, not the HelperProfiles binding screen.
+
+Changing a role while a job is active does not alter the payroll terms already captured when that job started.
 
 ## Save Data and Migration
 
@@ -226,6 +261,10 @@ Documents/My Games/FarmingSimulator2025/modSettings/FS25_HelperProfiles/appearan
 
 HelperProfiles includes migration support for the older global file. Back up the existing `modSettings/FS25_HelperProfiles` folder before upgrading.
 
+### Existing A–J data
+
+Existing A–J bindings and identity mappings remain supported. K–T use the same save-specific binding system and canonical identity model as the original slots.
+
 ### Legacy `maps_helpers.xml` workflow
 
 Editing the basegame `maps_helpers.xml` file is deprecated and is not required by the current HelperProfiles workflow.
@@ -242,7 +281,32 @@ HelperProfiles does not automatically import custom definitions from an edited b
 
 ## Console Commands
 
-Open the in-game console and use the following commands.
+### Roster and diagnostics
+
+| Command | Description |
+|---|---|
+| `hpRoster` | Prints roster expansion, ownership, target, and helper-count status. |
+| `hpDump` | Prints helper state for diagnostics. |
+| `hpVersion` | Prints mod and script version information. |
+
+### Selection and mode
+
+| Command | Description |
+|---|---|
+| `hpSelect <index>` | Selects a helper by index. |
+| `hpCycle [delta]` | Cycles selection; negative values cycle backwards. |
+| `hpNext` | Selects the next helper. |
+| `hpMode status` | Prints the current hiring mode. |
+| `hpMode preferSelected` | Prefers the selected available helper. |
+| `hpMode firstFree` | Uses the first available helper in roster order. |
+
+### Profiles
+
+| Command | Description |
+|---|---|
+| `hpAppearance menu` | Opens the appearance-binding screen. |
+| `hpAppearance status` | Prints appearance-binding status. |
+| `hpAppearance refresh` | Refreshes active worker appearances. |
 
 ### Overlay
 
@@ -270,28 +334,27 @@ Open the in-game console and use the following commands.
 | `hpOverlay load [filename]` | Loads an overlay configuration. |
 | `hpOverlay reset` | Restores and saves the defaults. |
 
-### Selection and mode
-
-| Command | Description |
-|---|---|
-| `hpSelect <index>` | Selects a helper by index. |
-| `hpCycle [delta]` | Cycles selection; negative values cycle backwards. |
-| `hpNext` | Selects the next helper. |
-| `hpMode status` | Prints the current hiring mode. |
-| `hpMode preferSelected` | Prefers the selected free helper. |
-| `hpMode firstFree` | Uses the first free helper in roster order. |
-| `hpDump` | Prints helper state for diagnostics. |
-
-### Profiles and version
-
-| Command | Description |
-|---|---|
-| `hpAppearance menu` | Opens the Profiles screen. |
-| `hpAppearance status` | Prints appearance-binding status. |
-| `hpAppearance refresh` | Refreshes active worker appearances. |
-| `hpVersion` | Prints mod and script version information. |
-
 ## Troubleshooting
+
+### Only ten workers appear
+
+Run:
+
+```text
+hpRoster
+```
+
+HelperProfiles adds K–T only when it detects the untouched standard A–J roster. Another map or mod that owns the helper roster can prevent expansion.
+
+### HelperProfiles disables itself
+
+Check `log.txt` for a message from:
+
+```text
+[FS25_HelperProfiles/Compatibility]
+```
+
+Disable Hired Helper Tool or the conflicting external helper-roster mod, then fully restart the game and reload the save.
 
 ### Overlay is not visible
 
@@ -314,41 +377,43 @@ hpOverlay debounce 300
 
 Confirm that AvatarSwitcher is installed and enabled, at least one preset has been saved, `avatarPresets.xml` exists, and preset IDs, categories, and descriptions are valid.
 
-### Payroll role controls are missing
+### A binding cannot be changed
 
-Confirm that:
+Active slots are intentionally read-only. Release the worker, reopen or refresh the Profiles screen, then change the binding.
 
-- HelperPayroll is installed and enabled for the same savegame.
-- HelperPayroll is version `0.4.1.1` or a compatible later build.
-- Only one copy of each mod ZIP exists in the mods folder.
-- The game was fully restarted after replacing either mod.
-- `log.txt` contains the HelperPayroll API publication message.
+### HelperPayroll role column is missing
 
-If HelperPayroll is detected before its API is ready, the screen and overlay should show a waiting state and retry automatically.
+Confirm that HelperPayroll `0.4.2.0` or a compatible later build is enabled for the same savegame and that only one copy of each mod ZIP exists. Role management remains in the HelperPayroll UI.
 
 ### Requesting support
 
 Include the HelperProfiles version, companion-mod versions, relevant `log.txt` excerpt, savegame number, screenshots, and exact reproduction steps.
 
-## Version 2.0.27.3
+## Version History
+
+### Version 2.1.0.0 Alpha 2
+
+- Expanded the managed helper roster from A–J to A–T.
+- Added canonical identities `helper01` through `helper20`.
+- Added K–T by cloning valid base helper styles when the standard roster is intact.
+- Added automatic A–J/K–T overlay paging.
+- Extended AvatarSwitcher bindings and HelperPayroll identity integration to 20 slots.
+- Made active appearance bindings read-only.
+- Added Clear All protection for active slots.
+- Kept payroll editing exclusively in the HelperPayroll UI.
+- Added Hired Helper Tool incompatibility detection and session blocking.
+- Added the `hpRoster` diagnostic command.
+- Removed unsupported decorative log characters and corrected missing overlay localisation.
+
+### Version 2.0.27.3 Beta
 
 - Corrected duplicate button-bar shortcuts in the Profiles screen.
 - Added distinct keyboard actions: **ESC** Close, **X** Bind, **C** Clear, **A** Clear All, and **Enter** Save.
-- Added dialog-specific registration and cleanup for the custom Clear All action so the A shortcut executes reliably.
-
-## Version 2.0.27.2
-
-- Added optional HelperPayroll role selection to the Profiles screen.
-- Added staged per-helper role editing with save-specific persistence through HelperPayroll.
-- Added load-order-safe global and mission API discovery.
-- Added automatic retry and visible waiting states.
-- Added a live HelperPayroll **ROLE** column to the main overlay.
-- Compacted repeated appearance text so the additional column fits cleanly.
-- Retained operation when HelperPayroll or AvatarSwitcher is absent.
+- Added dialog-specific registration and cleanup for the Clear All action.
 
 ## Development Status
 
-This is a beta integration build. The next planned HelperProfiles development phase is an expanded helper roster beyond the vanilla A–J limit, followed by available/unavailable roster management.
+This is an alpha integration build. The next planned HelperProfiles phase is available/unavailable roster management, followed by further worker-state and in-world helper exploration.
 
 ## Permissions
 

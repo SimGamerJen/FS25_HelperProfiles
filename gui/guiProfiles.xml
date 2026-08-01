@@ -67,15 +67,7 @@
         <inputAction value="HP_CLEAR_ALL_BINDINGS" />
     </Profile>
 
-    <Profile name="hpRosterButtonAppearances" extends="buttonExtra1">
-        <inputAction value="MENU_EXTRA_1" />
-    </Profile>
-
-    <Profile name="hpRosterButtonToggle" extends="buttonExtra1">
-        <inputAction value="MENU_EXTRA_2" />
-    </Profile>
-
-    <Profile name="hpRosterButtonBulk" extends="buttonExtra1">
+    <Profile name="hpButtonRosterEnableAll" extends="buttonExtra1">
         <inputAction value="HP_CLEAR_ALL_BINDINGS" />
     </Profile>
 

@@ -56,7 +56,15 @@ end
 local function getAppearanceLabel(helper, stableIndex)
     if HelperProfiles ~= nil and HelperProfiles.getAppearanceLabelForHelper ~= nil then
         local ok, label = pcall(HelperProfiles.getAppearanceLabelForHelper, HelperProfiles, helper, stableIndex)
-        if ok and label ~= nil and tostring(label) ~= "" then return tostring(label) end
+        if ok and label ~= nil and tostring(label) ~= "" then
+            local text = tostring(label)
+            local lower = string.lower(text)
+            if string.find(lower, "no as preset", 1, true) == 1
+                or string.find(lower, "as presets unavailable", 1, true) == 1 then
+                return "-"
+            end
+            return text
+        end
     end
     return "-"
 end
@@ -204,7 +212,10 @@ function HP_RosterManagerScreen:updateDetailText()
     end
     if self.detailText ~= nil then self.detailText:setText(detail) end
 
-    local status = self.actionMessage or string.format("Rostered workers: %d of %d | Off roster: %d", enabledCount, total, total - enabledCount)
+    local status = self.actionMessage or string.format(
+        hpI18n("hp_roster_status_summary", "Rostered workers: %d of %d | Off roster: %d"),
+        enabledCount, total, total - enabledCount
+    )
     if self.dirty then status = status .. " | " .. hpI18n("hp_status_unsaved_changes", "Unsaved changes") end
     if self.statusText ~= nil then self.statusText:setText(status) end
 end
@@ -221,18 +232,24 @@ function HP_RosterManagerScreen:onClickToggleRoster(sender)
     local currentlyEnabled = self.draftEnabled[row.canonicalId] ~= false
     if currentlyEnabled then
         if row.active then
-            self:setStatus(string.format("Slot %s is active. Release the worker before removing them from the roster.", tostring(row.slot)))
+            self:setStatus(string.format(
+                hpI18n("hp_roster_error_active", "Slot %s is active. Release the worker before removing them from the roster."),
+                tostring(row.slot)
+            ))
             return
         end
         if self:getEnabledCount() <= 1 then
-            self:setStatus("At least one worker must remain ON roster.")
+            self:setStatus(hpI18n("hp_roster_error_minimum", "At least one worker must remain ON roster."))
             return
         end
     end
 
     self.draftEnabled[row.canonicalId] = not currentlyEnabled
-    self.actionMessage = string.format("%s set %s. Press Save to persist.", tostring(row.displayName),
-        self.draftEnabled[row.canonicalId] and hpI18n("hp_roster_on", "ON ROSTER") or hpI18n("hp_roster_off", "OFF ROSTER"))
+    self.actionMessage = string.format(
+        hpI18n("hp_roster_status_draft", "%s set %s. Press Save to persist."),
+        tostring(row.displayName),
+        self.draftEnabled[row.canonicalId] and hpI18n("hp_roster_on", "ON ROSTER") or hpI18n("hp_roster_off", "OFF ROSTER")
+    )
     self:refreshDirtyState()
     if self.rosterTable ~= nil then self.rosterTable:reloadData() end
     self:updateDetailText()
@@ -240,7 +257,7 @@ end
 
 function HP_RosterManagerScreen:onClickEnableAll(sender)
     for _, row in ipairs(self.rows or {}) do self.draftEnabled[row.canonicalId] = true end
-    self.actionMessage = "All workers set ON roster. Press Save to persist."
+    self.actionMessage = hpI18n("hp_roster_status_enable_all", "All workers set ON roster. Press Save to persist.")
     self:refreshDirtyState()
     if self.rosterTable ~= nil then self.rosterTable:reloadData() end
     self:updateDetailText()
@@ -253,18 +270,24 @@ function HP_RosterManagerScreen:onClickSave(sender)
         return
     end
     if HP_RosterState == nil then
-        self:setStatus("Roster state service unavailable.")
+        self:setStatus(hpI18n("hp_roster_error_service", "Roster state service unavailable."))
         return
     end
 
     local ok, err, detail = HP_RosterState:replaceSnapshot(self.draftEnabled)
     if not ok then
         if err == "active-slot" then
-            self:setStatus(string.format("Slot %s became active. Release the worker before removing them from the roster.", tostring(detail or "?")))
+            self:setStatus(string.format(
+                hpI18n("hp_roster_error_became_active", "Slot %s became active. Release the worker before removing them from the roster."),
+                tostring(detail or "?")
+            ))
         elseif err == "at-least-one-required" then
-            self:setStatus("At least one worker must remain ON roster.")
+            self:setStatus(hpI18n("hp_roster_error_minimum", "At least one worker must remain ON roster."))
         else
-            self:setStatus("Roster save failed: " .. tostring(err or "unknown"))
+            self:setStatus(string.format(
+                hpI18n("hp_roster_error_save", "Roster save failed: %s"),
+                tostring(err or "unknown")
+            ))
         end
         return
     end
@@ -272,7 +295,10 @@ function HP_RosterManagerScreen:onClickSave(sender)
     self.originalEnabled = HP_RosterState:getSnapshot()
     self.draftEnabled = HP_RosterState:getSnapshot()
     self:refreshDirtyState()
-    self.actionMessage = string.format("Roster saved. %d worker(s) are ON roster.", HP_RosterState:getEnabledCount())
+    self.actionMessage = string.format(
+        hpI18n("hp_roster_status_saved", "Roster saved. %d worker(s) are ON roster."),
+        HP_RosterState:getEnabledCount()
+    )
     if self.rosterTable ~= nil then self.rosterTable:reloadData() end
     self:updateDetailText()
 end

@@ -131,3 +131,9 @@ function HP_SlotRegistry:getSlots(count)
     for index = 1, count do slots[index] = self:indexToSlot(index) end
     return slots
 end
+
+-- Load the per-save roster-state service before any operational UI or helper
+-- selection code asks whether a permanent A-T identity is ON or OFF roster.
+if HP_RosterState == nil and source ~= nil then
+    source((g_currentModDirectory or "") .. "scripts/HP_RosterState.lua")
+end

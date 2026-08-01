@@ -93,11 +93,14 @@
         <text name="hp_roster_button_appearances" text="Appearances"/>
         <text name="hp_roster_button_toggle" text="Toggle ON/OFF"/>
         <text name="hp_roster_button_enable_all" text="Enable All"/>
+        <text name="hp_roster_button_disable_others" text="Disable Others"/>
         <text name="hp_roster_error_active" text="Slot %s is active. Release the worker before removing them from the roster."/>
         <text name="hp_roster_error_became_active" text="Slot %s became active. Release the worker before removing them from the roster."/>
         <text name="hp_roster_error_minimum" text="At least one worker must remain ON roster."/>
         <text name="hp_roster_status_draft" text="%s set %s. Press Save to persist."/>
         <text name="hp_roster_status_enable_all" text="All workers set ON roster. Press Save to persist."/>
+        <text name="hp_roster_status_disable_others" text="%d worker(s) set OFF roster; %d protected worker(s) remain ON. Press Save to persist."/>
+        <text name="hp_roster_status_disable_none" text="No eligible idle workers could be removed from the roster."/>
         <text name="hp_roster_error_service" text="Roster state service unavailable."/>
         <text name="hp_roster_error_save" text="Roster save failed: %s"/>
         <text name="hp_roster_status_saved" text="Roster saved. %d worker(s) are ON roster."/>

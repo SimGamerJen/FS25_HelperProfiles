@@ -320,6 +320,7 @@ function HP_WorkerAppearance:installHooks()
 end
 
 function HP_WorkerAppearance:update(dt)
+    if HP_Compatibility ~= nil and HP_Compatibility:isBlocked() then return end
     self.scanTimer = (self.scanTimer or 0) + (dt or 0)
     if self.scanTimer >= 1000 then
         self.scanTimer = 0
@@ -329,6 +330,10 @@ function HP_WorkerAppearance:update(dt)
 end
 
 function HP_WorkerAppearance:loadMap()
+    if HP_Compatibility ~= nil and HP_Compatibility:isBlocked() then
+        hpwaPrint("Disabled because Hired Helper Tool is active.")
+        return
+    end
     self:installHooks()
     self:patchLoadedVehicles()
 end

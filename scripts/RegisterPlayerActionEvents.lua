@@ -44,8 +44,13 @@ local function _isHpModifierDown()
         or _isPhysicalKeyPressed("KEY_ralt")
 end
 
+local function _isCompatibilityBlocked()
+    return HP_Compatibility ~= nil and HP_Compatibility:isBlocked()
+end
+
 local function _onCycle(_, actionName, inputValue, callbackState, isAnalog)
     if not _isPress(inputValue, callbackState) then return end
+    if _isCompatibilityBlocked() then return end
 
     -- GIANTS action bindings are not exclusive: KEY_semicolon can still fire
     -- when KEY_shift/KEY_ctrl/KEY_alt + KEY_semicolon is pressed.
@@ -63,6 +68,7 @@ local function _onCycle(_, actionName, inputValue, callbackState, isAnalog)
 end
 
 local function _onToggle(_, actionName, inputValue, callbackState, isAnalog)
+    if _isCompatibilityBlocked() then return end
     if HP_UI and HP_UI.onToggleAction then
         HP_UI:onToggleAction(actionName, inputValue, callbackState, isAnalog)
     end
@@ -70,6 +76,7 @@ end
 
 local function _onMode(_, actionName, inputValue, callbackState, isAnalog)
     if not _isPress(inputValue, callbackState) then return end
+    if _isCompatibilityBlocked() then return end
     if HelperProfiles and HelperProfiles.togglePickMode then
         HelperProfiles:togglePickMode()
     end
@@ -77,6 +84,7 @@ end
 
 local function _onAppearanceMenu(_, actionName, inputValue, callbackState, isAnalog)
     if not _isPress(inputValue, callbackState) then return end
+    if _isCompatibilityBlocked() then return end
     if HP_AppearanceBindingsGui ~= nil and HP_AppearanceBindingsGui.open ~= nil then
         HP_AppearanceBindingsGui:open()
     elseif HP_AppearanceMenu ~= nil and HP_AppearanceMenu.toggle ~= nil then
@@ -97,16 +105,16 @@ end
 local function _registerPlayerAction(field, inputAction, target, callback, label)
     if HelperProfiles[field] ~= nil then return end
     if g_inputBinding == nil or inputAction == nil then
-        print(LOG .. "❌ Failed to register " .. tostring(label) .. " (player): input action unavailable")
+        print(LOG .. "Failed to register " .. tostring(label) .. " (player): input action unavailable")
         return
     end
     local ok, id = g_inputBinding:registerActionEvent(inputAction, target, callback, false, true, false, true)
     if ok and id then
         HelperProfiles[field] = id
         _setActionEventLowPriority(id, true)
-        print(LOG .. "✅ Registered " .. tostring(label) .. " (player)")
+        print(LOG .. "Registered " .. tostring(label) .. " (player)")
     else
-        print(LOG .. "❌ Failed to register " .. tostring(label) .. " (player)")
+        print(LOG .. "Failed to register " .. tostring(label) .. " (player)")
     end
 end
 
@@ -120,6 +128,7 @@ local function _unregisterPlayerAction(field, label)
 end
 
 local function _registerPlayerActions()
+    if _isCompatibilityBlocked() then return end
     _registerPlayerAction("_playerCycleId", InputAction.OPEN_HELPER_MENU, HelperProfiles, _onCycle, "OPEN_HELPER_MENU")
     _registerPlayerAction("_playerToggleId", InputAction.HP_TOGGLE_OVERLAY, HP_UI, _onToggle, "HP_TOGGLE_OVERLAY")
     _registerPlayerAction("_playerModeId", InputAction.HP_TOGGLE_MODE, HelperProfiles, _onMode, "HP_TOGGLE_MODE")
@@ -160,32 +169,33 @@ end
 
 local function _addVehicleAction(vehicle, spec, inputAction, target, callback, label, loggedFlagName)
     if inputAction == nil then
-        print(LOG .. "❌ Failed to register " .. tostring(label) .. " (vehicle): input action unavailable")
+        print(LOG .. "Failed to register " .. tostring(label) .. " (vehicle): input action unavailable")
         return nil
     end
     local _, id = vehicle:addActionEvent(spec.actionEvents, inputAction, target, callback, false, true, false, true)
     if id ~= nil then
         _setActionEventLowPriority(id, true)
         if loggedFlagName == "cycle" and not _loggedVehicleCycle then
-            print(LOG .. "✅ Registered " .. tostring(label) .. " (vehicle)")
+            print(LOG .. "Registered " .. tostring(label) .. " (vehicle)")
             _loggedVehicleCycle = true
         elseif loggedFlagName == "toggle" and not _loggedVehicleToggle then
-            print(LOG .. "✅ Registered " .. tostring(label) .. " (vehicle)")
+            print(LOG .. "Registered " .. tostring(label) .. " (vehicle)")
             _loggedVehicleToggle = true
         elseif loggedFlagName == "mode" and not _loggedVehicleMode then
-            print(LOG .. "✅ Registered " .. tostring(label) .. " (vehicle)")
+            print(LOG .. "Registered " .. tostring(label) .. " (vehicle)")
             _loggedVehicleMode = true
         elseif loggedFlagName == "appearance" and not _loggedVehicleAppearanceMenu then
-            print(LOG .. "✅ Registered " .. tostring(label) .. " (vehicle)")
+            print(LOG .. "Registered " .. tostring(label) .. " (vehicle)")
             _loggedVehicleAppearanceMenu = true
         end
     else
-        print(LOG .. "❌ Failed to register " .. tostring(label) .. " (vehicle)")
+        print(LOG .. "Failed to register " .. tostring(label) .. " (vehicle)")
     end
     return id
 end
 
 local function _registerVehicleActions(vehicle, isActiveForInput)
+    if _isCompatibilityBlocked() then return end
     if not isActiveForInput or vehicle == nil or vehicle.addActionEvent == nil then return end
     local spec = _ensureVehicleSpec(vehicle)
 
@@ -260,7 +270,7 @@ if HP_AppearanceBindingsScreen ~= nil then
 
         local inputAction = InputAction ~= nil and InputAction.HP_CLEAR_ALL_BINDINGS or nil
         if screen == nil or g_inputBinding == nil or g_inputBinding.registerActionEvent == nil or inputAction == nil then
-            print(LOG .. "❌ Failed to register HP_CLEAR_ALL_BINDINGS (appearance dialog): input action unavailable")
+            print(LOG .. "Failed to register HP_CLEAR_ALL_BINDINGS (appearance dialog): input action unavailable")
             return
         end
 
@@ -282,9 +292,9 @@ if HP_AppearanceBindingsScreen ~= nil then
             if g_inputBinding.setActionEventActive ~= nil then
                 g_inputBinding:setActionEventActive(id, true)
             end
-            print(LOG .. "✅ Registered HP_CLEAR_ALL_BINDINGS (appearance dialog)")
+            print(LOG .. "Registered HP_CLEAR_ALL_BINDINGS (appearance dialog)")
         else
-            print(LOG .. "❌ Failed to register HP_CLEAR_ALL_BINDINGS (appearance dialog)")
+            print(LOG .. "Failed to register HP_CLEAR_ALL_BINDINGS (appearance dialog)")
         end
     end
 

@@ -59,14 +59,6 @@
             <Bitmap profile="hpDetailBox" id="detailBox" position="45px -470px" size="1105px 145px">
                 <Text profile="hpMetaText" id="detailText" position="10px 8px" size="1085px 35px" text="$l10n_hp_detail_select" textLayoutMode="scrolling" />
                 <Text profile="hpMetaText" id="statusText" position="10px -38px" size="1085px 35px" text="$l10n_hp_status_ready" textLayoutMode="scrolling" />
-                <GuiElement id="payrollRoleControls" position="0px -82px" size="1105px 48px" visible="false">
-                    <ThreePartBitmap profile="fs25_lineSeparatorBottom" position="0px 8px" />
-                    <Text profile="hpHeaderLeft" position="10px -2px" size="190px 40px" text="$l10n_hp_payroll_role_label" />
-                    <Button profile="buttonExtra1" id="payrollRolePrevButton" position="220px 1px" size="55px 34px" text="&lt;" onClick="onClickPayrollRolePrevious" />
-                    <Text profile="hpMetaText" id="payrollRoleValue" position="295px -1px" size="470px 38px" text="$l10n_hp_payroll_no_roles" textLayoutMode="scrolling" />
-                    <Button profile="buttonExtra1" id="payrollRoleNextButton" position="785px 1px" size="55px 34px" text="&gt;" onClick="onClickPayrollRoleNext" />
-                    <Text profile="hpMetaText" id="payrollRoleSource" position="860px -1px" size="230px 38px" text="" textLayoutMode="scrolling" />
-                </GuiElement>
                 <ThreePartBitmap profile="fs25_lineSeparatorBottom" position="0px 2px" />
             </Bitmap>
 

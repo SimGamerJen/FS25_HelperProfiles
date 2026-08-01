@@ -3,13 +3,13 @@
 
 -- ============================================================================
 -- FS25_HelperProfiles
--- ModVersion: 2.0.27.3
+-- ModVersion: 2.1.0.0
 -- Script:     HelperProfiles.lua
 -- BuildTag:   20260105-1
 -- ============================================================================
 
 do
-    local MOD_VERSION   = "2.0.27.3"
+    local MOD_VERSION   = "2.1.0.0"
     local SCRIPT_NAME   = "HelperProfiles.lua"
     local BUILD_TAG     = "20260513-2"
     local SCRIPT_VER    = string.format("%s-%s+%s", MOD_VERSION, SCRIPT_NAME, BUILD_TAG)
@@ -122,12 +122,13 @@ local function _containsHelper(list, wanted)
 end
 
 -- Public roster accessor used by UI + selection logic.
--- Once the idle A-J order has been cached, keep returning that complete roster
+-- Once the idle managed roster order has been cached, keep returning that complete roster
 -- even while GIANTS removes active workers from availableHelpers.
 function HelperProfiles:getProfiles()
+    if HP_Compatibility ~= nil and HP_Compatibility:isBlocked() then return {} end
     local available = _getHelpersRaw()
 
-    -- Only establish the stable A-J roster while every helper is idle.
+    -- Only establish the stable managed roster while every helper is idle.
     self:_cacheDefaultOrderIfReady(available)
 
     if self._defaultOrderRefs ~= nil and #self._defaultOrderRefs > 0 then
@@ -203,7 +204,7 @@ function HelperProfiles:ensureValidSelection()
     end
 
     -- The selected worker became active (or disappeared). Move to the next free
-    -- stable roster entry, wrapping A-J. If all are active, keep no selection.
+    -- stable roster entry, wrapping the managed roster. If all are active, keep no selection.
     for offset = 0, #profiles - 1 do
         local index = ((startIndex - 1 + offset) % #profiles) + 1
         local helper = profiles[index]
@@ -429,6 +430,10 @@ end
 -- Expecting FS25 style callback with key status (1 on press).
 function HelperProfiles:onCycleAction(actionName, keyStatus)
     if keyStatus ~= 1 then return end  -- press only
+    if HP_Compatibility ~= nil and HP_Compatibility:isBlocked() then
+        self:_flash(hpI18n("hp_incompatible_hired_helper_tool", "HelperProfiles is disabled because Hired Helper Tool is active."), 2.5)
+        return
+    end
     self:cycleSelectionDebounced(1)
 end
 
@@ -511,6 +516,7 @@ end
 -- FS lifecycle
 ----------------------------------------------------------------------
 function HelperProfiles:update(dt)
+    if HP_Compatibility ~= nil and HP_Compatibility:isBlocked() then return end
     if not HelperProfiles._hooksDone then
         hookOnce()
     end

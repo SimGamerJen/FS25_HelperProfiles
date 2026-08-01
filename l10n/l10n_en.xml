@@ -79,5 +79,27 @@
         <text name="input_HP_TOGGLE_MODE" text="Toggle HelperProfiles Mode"/>
         <text name="input_HP_TOGGLE_OVERLAY" text="Toggle HelperProfiles Overlay"/>
         <text name="input_OPEN_HELPER_MENU" text="Cycle Helper"/>
+        <text name="hp_title_roster_manager" text="Helper Roster"/>
+        <text name="hp_roster_header_slot" text="SLOT"/>
+        <text name="hp_roster_header_worker" text="WORKER"/>
+        <text name="hp_roster_header_appearance" text="APPEARANCE"/>
+        <text name="hp_roster_header_role" text="PAYROLL ROLE"/>
+        <text name="hp_roster_header_work_state" text="WORK STATE"/>
+        <text name="hp_roster_header_roster" text="ROSTER"/>
+        <text name="hp_roster_on" text="ON ROSTER"/>
+        <text name="hp_roster_off" text="OFF ROSTER"/>
+        <text name="hp_roster_detail" text="Choose which permanent helper identities are available to the farm."/>
+        <text name="hp_roster_status_summary" text="Rostered workers: %d of %d | Off roster: %d"/>
+        <text name="hp_roster_button_appearances" text="Appearances"/>
+        <text name="hp_roster_button_toggle" text="Toggle ON/OFF"/>
+        <text name="hp_roster_button_enable_all" text="Enable All"/>
+        <text name="hp_roster_error_active" text="Slot %s is active. Release the worker before removing them from the roster."/>
+        <text name="hp_roster_error_became_active" text="Slot %s became active. Release the worker before removing them from the roster."/>
+        <text name="hp_roster_error_minimum" text="At least one worker must remain ON roster."/>
+        <text name="hp_roster_status_draft" text="%s set %s. Press Save to persist."/>
+        <text name="hp_roster_status_enable_all" text="All workers set ON roster. Press Save to persist."/>
+        <text name="hp_roster_error_service" text="Roster state service unavailable."/>
+        <text name="hp_roster_error_save" text="Roster save failed: %s"/>
+        <text name="hp_roster_status_saved" text="Roster saved. %d worker(s) are ON roster."/>
     </texts>
 </l10n>

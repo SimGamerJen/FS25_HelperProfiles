@@ -2,6 +2,13 @@
 
 This feature is under active Alpha testing.
 
+## Performance gate
+
+- Compare normal gameplay FPS with HelperProfiles 2.0.27.3 beta and the current 2.1.0.0 roster branch under the same savegame, location, camera and overlay state.
+- Confirm the current branch no longer causes the severe FPS loss reported in the earlier 2.1.0.0 alpha build.
+- Test once with the HelperProfiles overlay visible and once with it hidden.
+- Do not continue functional approval testing if the performance regression remains.
+
 ## Core checks
 
 - Open the roster manager from the appearance screen.

@@ -7,9 +7,19 @@
         <ThreePartBitmap profile="fs25_dialogBgBottom" />
 
         <GuiElement profile="fs25_dialogContentContainer">
-            <Text profile="dialogTitle" text="$l10n_hp_title_roster_manager" id="dialogTitleElement" position="0px -30px" />
+            <Text profile="dialogTitle" text="$l10n_hp_title_appearance_bindings" id="dialogTitleElement" position="0px -30px" />
 
-            <Bitmap profile="hpHeaderBox" id="rosterHeaderBox" position="45px -90px" size="1105px 50px">
+            <BoxLayout profile="fs25_subCategorySelectorTabbedBox" id="managementTabBox" position="45px -72px" size="1105px 46px">
+                <Button profile="fs25_subCategorySelectorTabbedTab" id="managementTabs[1]" text="$l10n_hp_roster_button_appearances" onClick="onClickAppearances">
+                    <ThreePartBitmap profile="fs25_subCategorySelectorTabbedTabBg" name="background" />
+                </Button>
+                <Button profile="fs25_subCategorySelectorTabbedTab" id="managementTabs[2]" text="$l10n_hp_title_roster_manager" onClick="onClickRosterTab">
+                    <ThreePartBitmap profile="fs25_subCategorySelectorTabbedTabBg" name="background" />
+                </Button>
+            </BoxLayout>
+            <ThreePartBitmap profile="fs25_lineSeparatorTopHighlighted" position="45px -119px" size="1105px 2px" />
+
+            <Bitmap profile="hpHeaderBox" id="rosterHeaderBox" position="45px -135px" size="1105px 50px">
                 <Text profile="hpHeaderLeft" position="10px 0px" size="55px 40.77px" text="$l10n_hp_roster_header_slot" />
                 <Text profile="hpHeaderLeft" position="75px 0px" size="210px 40.77px" text="$l10n_hp_roster_header_worker" />
                 <Text profile="hpHeaderLeft" position="295px 0px" size="270px 40.77px" text="$l10n_hp_roster_header_appearance" />
@@ -19,7 +29,7 @@
                 <ThreePartBitmap profile="fs25_lineSeparatorBottom" position="0px 2px" />
             </Bitmap>
 
-            <SmoothList profile="hpList" id="rosterTable" position="50px -145px" size="1095px 390px" focusInit="onOpen" focusChangeTop="nil" focusChangeBottom="nil">
+            <SmoothList profile="hpList" id="rosterTable" position="50px -190px" size="1095px 345px" focusInit="onOpen" focusChangeTop="nil" focusChangeBottom="nil">
                 <ListItem profile="hpListItem" name="rosterRowTemplate" size="1095px 40.77px">
                     <Text profile="hpRowCellLeft" position="12px 0px" size="50px 40.77px" name="Slot" />
                     <Text profile="hpRowCellLeft" position="77px 0px" size="205px 40.77px" name="Worker" textLayoutMode="scrolling" />
@@ -30,8 +40,8 @@
                 </ListItem>
             </SmoothList>
 
-            <ThreePartBitmap profile="fs25_listSliderBox" position="1155px -145px" size="12px 390px">
-                <Slider profile="fs25_listSlider" size="6px 382px" dataElementId="rosterTable" id="rosterSlider" />
+            <ThreePartBitmap profile="fs25_listSliderBox" position="1155px -190px" size="12px 345px">
+                <Slider profile="fs25_listSlider" size="6px 337px" dataElementId="rosterTable" id="rosterSlider" />
             </ThreePartBitmap>
 
             <Bitmap profile="hpDetailBox" id="detailBox" position="45px -545px" size="1105px 110px">
@@ -43,7 +53,6 @@
 
         <BoxLayout profile="fs25_dialogButtonBox" size="1170px 60px">
             <Button profile="buttonBack" text="$l10n_hp_button_close" onClick="onClickBack" />
-            <Button profile="buttonExtra1" text="$l10n_hp_roster_button_appearances" onClick="onClickAppearances" />
             <Button profile="hpButtonClear" text="$l10n_hp_roster_button_toggle" onClick="onClickToggleRoster" />
             <Button profile="hpButtonRosterEnableAll" id="bulkRosterButton" text="$l10n_hp_roster_button_enable_all" onClick="onClickEnableAll" />
             <Button profile="hpButtonSave" text="$l10n_hp_button_save" onClick="onClickSave" />

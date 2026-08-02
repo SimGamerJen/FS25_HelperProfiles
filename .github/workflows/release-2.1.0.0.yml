@@ -1,0 +1,80 @@
+name: Release HelperProfiles 2.1.0.0
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - .github/workflows/release-2.1.0.0.yml
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Validate release metadata
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -q '<version>2.1.0.0</version>' modDesc.xml
+          test -f docs/releases/2.1.0.0.md
+
+      - name: Build Farming Simulator mod package
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -f FS25_HelperProfiles.zip
+          zip -r FS25_HelperProfiles.zip \
+            modDesc.xml \
+            icon_helperProfiles.dds \
+            gui \
+            l10n \
+            scripts \
+            -x '*.DS_Store' '*__MACOSX*'
+
+          python - <<'PY'
+          import zipfile
+          import xml.etree.ElementTree as ET
+
+          package = 'FS25_HelperProfiles.zip'
+          with zipfile.ZipFile(package, 'r') as archive:
+              names = set(archive.namelist())
+              required = {
+                  'modDesc.xml',
+                  'icon_helperProfiles.dds',
+                  'gui/HP_AppearanceBindingsScreen.xml',
+                  'gui/HP_RosterManagerScreen.xml',
+                  'scripts/HelperProfiles.lua',
+                  'scripts/HP_RosterState.lua',
+                  'scripts/HP_RosterFilter.lua',
+                  'scripts/HP_RosterManagerScreen.lua',
+                  'scripts/HP_TabbedManagement.lua',
+              }
+              missing = sorted(required - names)
+              if missing:
+                  raise SystemExit(f'Missing required package files: {missing}')
+              ET.fromstring(archive.read('modDesc.xml'))
+          PY
+
+      - name: Publish GitHub release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          TAG='2.1.0.0'
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            echo "Release $TAG already exists; no duplicate release created."
+            exit 0
+          fi
+
+          gh release create "$TAG" \
+            FS25_HelperProfiles.zip \
+            --target "$GITHUB_SHA" \
+            --title 'HelperProfiles 2.1.0.0' \
+            --notes-file docs/releases/2.1.0.0.md

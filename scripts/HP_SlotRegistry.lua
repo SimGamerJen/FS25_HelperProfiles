@@ -142,3 +142,9 @@ end
 if HP_RosterState == nil and source ~= nil then
     source((g_currentModDirectory or "") .. "scripts/HP_RosterState.lua")
 end
+
+-- Install the shared two-tab management controller early. It waits until both
+-- GUI screen classes are available before applying its lightweight wrappers.
+if HP_TabbedManagement == nil and source ~= nil then
+    source((g_currentModDirectory or "") .. "scripts/HP_TabbedManagement.lua")
+end

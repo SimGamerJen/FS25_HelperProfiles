@@ -8,7 +8,9 @@ HP_Compatibility = HP_Compatibility or {
     conflictSource = nil,
     warningLogged = false,
     checkAccumulatorMs = 0,
-    checkIntervalMs = 250
+    checkIntervalMs = 250,
+    startupCheckWindowMs = 5000,
+    startupCheckRemainingMs = 0
 }
 
 local LOG = "[FS25_HelperProfiles/Compatibility] "
@@ -175,6 +177,7 @@ function HP_Compatibility:setBlocked(conflict, source)
     self.blocked = true
     self.conflictMod = tostring(conflict or "unknown")
     self.conflictSource = tostring(source or "unknown")
+    self.startupCheckRemainingMs = 0
 
     if HP_UI ~= nil then
         HP_UI.visible = false
@@ -218,9 +221,9 @@ function HP_Compatibility:detect()
 end
 
 function HP_Compatibility:isBlocked()
-    if self.blocked ~= true then
-        self:detect()
-    end
+    -- This accessor is used by render, input and helper-selection hot paths.
+    -- It must remain a cached state lookup: performing a full mod-manager scan
+    -- here caused the 2.1.0.0 alpha to scan every loaded mod on every frame.
     return self.blocked == true
 end
 
@@ -236,16 +239,25 @@ function HP_Compatibility:loadMap()
     self.conflictSource = nil
     self.warningLogged = false
     self.checkAccumulatorMs = 0
+    self.startupCheckRemainingMs = tonumber(self.startupCheckWindowMs) or 5000
 
     local blocked = self:detect()
     if not blocked then
-        print(LOG .. "Guard initialized: Hired Helper Tool not active at HelperProfiles loadMap; continuing startup checks.")
+        print(LOG .. "Guard initialized: Hired Helper Tool not active at HelperProfiles loadMap; checking late startup for " .. tostring(self.startupCheckRemainingMs) .. " ms.")
     end
 end
 
 function HP_Compatibility:update(dt)
     if self.blocked == true then return end
-    self.checkAccumulatorMs = (tonumber(self.checkAccumulatorMs) or 0) + (tonumber(dt) or 0)
+
+    local remaining = tonumber(self.startupCheckRemainingMs) or 0
+    if remaining <= 0 then return end
+
+    local elapsed = tonumber(dt) or 0
+    remaining = math.max(0, remaining - elapsed)
+    self.startupCheckRemainingMs = remaining
+    self.checkAccumulatorMs = (tonumber(self.checkAccumulatorMs) or 0) + elapsed
+
     if self.checkAccumulatorMs >= (tonumber(self.checkIntervalMs) or 250) then
         self.checkAccumulatorMs = 0
         self:detect()
@@ -259,6 +271,7 @@ function HP_Compatibility:deleteMap()
     self.conflictSource = nil
     self.warningLogged = false
     self.checkAccumulatorMs = 0
+    self.startupCheckRemainingMs = 0
 end
 
 addModEventListener(HP_Compatibility)

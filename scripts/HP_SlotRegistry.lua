@@ -120,8 +120,13 @@ function HP_SlotRegistry:getManagerCount()
 end
 
 function HP_SlotRegistry:getManagedCount(profileCount)
-    local count = math.floor(tonumber(profileCount) or 0)
-    if count <= 0 then count = self:getManagerCount() end
+    local profileTotal = math.floor(tonumber(profileCount) or 0)
+    local managerTotal = self:getManagerCount()
+
+    -- profileCount may represent the filtered ON-roster list. Never let that
+    -- shrink the permanent A-T identity range used by integrations such as
+    -- HelperPayroll; use the larger permanent manager/profile count instead.
+    local count = math.max(profileTotal, managerTotal)
     return math.max(0, math.min(count, self.TARGET_COUNT))
 end
 
@@ -130,4 +135,16 @@ function HP_SlotRegistry:getSlots(count)
     local slots = {}
     for index = 1, count do slots[index] = self:indexToSlot(index) end
     return slots
+end
+
+-- Load the per-save roster-state service before any operational UI or helper
+-- selection code asks whether a permanent A-T identity is ON or OFF roster.
+if HP_RosterState == nil and source ~= nil then
+    source((g_currentModDirectory or "") .. "scripts/HP_RosterState.lua")
+end
+
+-- Install the shared two-tab management controller early. It waits until both
+-- GUI screen classes are available before applying its lightweight wrappers.
+if HP_TabbedManagement == nil and source ~= nil then
+    source((g_currentModDirectory or "") .. "scripts/HP_TabbedManagement.lua")
 end

@@ -67,6 +67,10 @@
         <inputAction value="HP_CLEAR_ALL_BINDINGS" />
     </Profile>
 
+    <Profile name="hpButtonRosterEnableAll" extends="buttonExtra1">
+        <inputAction value="HP_CLEAR_ALL_BINDINGS" />
+    </Profile>
+
     <Profile name="hpButtonSave" extends="buttonExtra1">
         <inputAction value="MENU_ACCEPT" />
     </Profile>

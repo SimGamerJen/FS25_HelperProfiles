@@ -48,7 +48,15 @@
 
 ### Appearance bindings
 
-<img width="1920" height="1080" alt="Helper appearance bindings" src="https://github.com/user-attachments/assets/ea6def70-4c20-41b3-a371-88a62b3fe318" />
+<img width="3840" height="2160" alt="HelperProfiles_appearance_binding_v2 1 0 0" src="https://github.com/user-attachments/assets/b691afde-548c-42d6-9907-e2bcfa8713e3" />
+
+### Roster management
+
+<img width="3840" height="2160" alt="HelperProfiles_roster_management_v2 1 0 0" src="https://github.com/user-attachments/assets/6fa61f24-825a-4aa7-88ea-7e072f0ee95f" />
+
+### Helper roster overlay with worker slots toggled off
+
+<img width="1920" height="1080" alt="HelperProfiles_roster_overlay_v2 1 0 0_1920" src="https://github.com/user-attachments/assets/20485d9f-3368-4fc1-992b-d85eea2c3d8e" />
 
 ## Installation
 

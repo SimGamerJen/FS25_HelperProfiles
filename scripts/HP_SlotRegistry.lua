@@ -148,3 +148,14 @@ end
 if HP_TabbedManagement == nil and source ~= nil then
     source((g_currentModDirectory or "") .. "scripts/HP_TabbedManagement.lua")
 end
+
+-- Alpha world-worker services are deliberately sourced from the stable slot
+-- registry so the permanent A-T identity model is available before they load.
+-- The runtime manager waits until the helper roster and appearance bridge are
+-- ready before it restores any persisted world representations.
+if HP_WorldState == nil and source ~= nil then
+    source((g_currentModDirectory or "") .. "scripts/HP_WorldState.lua")
+end
+if HP_WorldWorkerManager == nil and source ~= nil then
+    source((g_currentModDirectory or "") .. "scripts/HP_WorldWorkerManager.lua")
+end

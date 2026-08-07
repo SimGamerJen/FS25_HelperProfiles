@@ -131,8 +131,7 @@ local function createStyleForHelper(helper, index)
 end
 
 local function applyIdleNpcAnimation(graphics)
-    if graphics == nil or graphics.animation == nil or graphics.animationParameters == nil then return end
-    if graphics.animation.setParameter == nil then return end
+    if graphics == nil or graphics.animationParameters == nil then return end
 
     local parameters = graphics.animationParameters
     local values = {
@@ -161,9 +160,13 @@ local function applyIdleNpcAnimation(graphics)
     }
 
     for name, value in pairs(values) do
-        local parameterId = parameters[name]
-        if parameterId ~= nil then
-            pcall(graphics.animation.setParameter, graphics.animation, parameterId, value)
+        local parameter = parameters[name]
+        if parameter ~= nil then
+            if type(parameter) == "table" and parameter.setValue ~= nil then
+                pcall(parameter.setValue, parameter, value)
+            elseif graphics.animation ~= nil and graphics.animation.setParameter ~= nil then
+                pcall(graphics.animation.setParameter, graphics.animation, parameter, value)
+            end
         end
     end
 end
@@ -471,7 +474,7 @@ function Manager:update(dt)
     end
 
     for _, instance in pairs(self.instancesByCanonicalId) do
-        if instance.graphics ~= nil then
+        if instance.graphics ~= nil and instance.loading ~= true then
             applyIdleNpcAnimation(instance.graphics)
             if instance.graphics.update ~= nil then pcall(instance.graphics.update, instance.graphics, dt) end
         end

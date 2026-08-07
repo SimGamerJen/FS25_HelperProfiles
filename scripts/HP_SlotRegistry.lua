@@ -159,3 +159,6 @@ end
 if HP_WorldWorkerManager == nil and source ~= nil then
     source((g_currentModDirectory or "") .. "scripts/HP_WorldWorkerManager.lua")
 end
+if HP_WorldWorkerPlayerAccess == nil and source ~= nil then
+    source((g_currentModDirectory or "") .. "scripts/HP_WorldWorkerPlayerAccess.lua")
+end

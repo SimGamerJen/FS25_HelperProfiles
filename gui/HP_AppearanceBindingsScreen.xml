@@ -16,6 +16,9 @@
                 <Button profile="fs25_subCategorySelectorTabbedTab" id="managementTabs[2]" text="$l10n_hp_title_roster_manager" onClick="onClickOpenRosterManager">
                     <ThreePartBitmap profile="fs25_subCategorySelectorTabbedTabBg" name="background" />
                 </Button>
+                <Button profile="fs25_subCategorySelectorTabbedTab" id="managementTabs[3]" text="WORLD" onClick="onClickOpenWorldManager">
+                    <ThreePartBitmap profile="fs25_subCategorySelectorTabbedTabBg" name="background" />
+                </Button>
             </BoxLayout>
             <ThreePartBitmap profile="fs25_lineSeparatorTopHighlighted" position="45px -119px" size="1105px 2px" />
 

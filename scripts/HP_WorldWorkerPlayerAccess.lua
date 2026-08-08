@@ -4,6 +4,10 @@
 
 if HP_WorldWorkerManager == nil then return end
 
+HP_WorldWorkerPlayerAccess = HP_WorldWorkerPlayerAccess or {
+    version = "2.2.0.0-alpha1-player-access-2"
+}
+
 local Manager = HP_WorldWorkerManager
 local LOG = "[FS25_HelperProfiles/WorldWorkers] "
 
@@ -39,6 +43,12 @@ local function findLocalPlayer()
     if playerSystem.getPlayerByIndex ~= nil then
         local ok, player = pcall(playerSystem.getPlayerByIndex, playerSystem, 1)
         if ok and player ~= nil then return player, "playerSystem.index1" end
+    end
+
+    -- Final single-player fallback: use the first concrete Player object in the
+    -- PlayerSystem table even if owner/local flags are unavailable at runtime.
+    for _, player in pairs(playerSystem.players or {}) do
+        if player ~= nil then return player, "playerSystem.first" end
     end
 
     return nil, "local-player-not-found"
@@ -100,10 +110,16 @@ end
 
 function Manager:getPlacementInFrontOfPlayer()
     local player, playerSource = findLocalPlayer()
-    if player == nil then return nil, "local-player-unavailable:" .. tostring(playerSource) end
+    if player == nil then
+        log("Player access failed: %s", tostring(playerSource))
+        return nil, "local-player-unavailable:" .. tostring(playerSource)
+    end
 
     local current, positionErr = getPlayerPositionAndYaw(player)
-    if current == nil then return nil, positionErr or "player-position-unavailable" end
+    if current == nil then
+        log("Player position failed via %s: %s", tostring(playerSource), tostring(positionErr))
+        return nil, positionErr or "player-position-unavailable"
+    end
 
     local dirX, dirZ
     if MathUtil ~= nil and MathUtil.getDirectionFromYRotation ~= nil then
@@ -130,3 +146,5 @@ function Manager:getPlacementInFrontOfPlayer()
     -- toward the player.
     return {x=x, y=y, z=z, yaw=current.yaw + math.pi}, nil
 end
+
+log("PlayerSystem access override installed (%s)", tostring(HP_WorldWorkerPlayerAccess.version))

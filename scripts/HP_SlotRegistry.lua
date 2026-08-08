@@ -163,3 +163,6 @@ end
 if HP_WorldWorkerScreen == nil and source ~= nil then
     source((g_currentModDirectory or "") .. "scripts/HP_WorldWorkerScreen.lua")
 end
+if HP_WorldWorkerInput == nil and source ~= nil then
+    source((g_currentModDirectory or "") .. "scripts/HP_WorldWorkerInput.lua")
+end

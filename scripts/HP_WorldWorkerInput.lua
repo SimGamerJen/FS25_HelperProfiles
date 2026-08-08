@@ -1,5 +1,5 @@
 -- HP_WorldWorkerInput.lua (FS25_HelperProfiles)
--- 2.2.0.0-alpha2: register the custom A-key menu action while the World dialog is open.
+-- 2.2.0.0-alpha3: register the custom A-key FACE ME action while the World dialog is open.
 
 if HP_WorldWorkerInput ~= nil then return end
 HP_WorldWorkerInput = { installed = false }
@@ -16,25 +16,25 @@ local function isPress(inputValue, callbackState)
     return value ~= nil and value > 0
 end
 
-local function removeMoveAction(screen)
-    local id = screen ~= nil and screen._hpWorldMoveActionEventId or nil
+local function removeFaceAction(screen)
+    local id = screen ~= nil and screen._hpWorldFaceActionEventId or nil
     if id ~= nil and g_inputBinding ~= nil and g_inputBinding.removeActionEvent ~= nil then
         pcall(function() g_inputBinding:removeActionEvent(id) end)
     end
-    if screen ~= nil then screen._hpWorldMoveActionEventId = nil end
+    if screen ~= nil then screen._hpWorldFaceActionEventId = nil end
 end
 
-local function onMoveAction(screen, actionName, inputValue, callbackState, isAnalog)
+local function onFaceAction(screen, actionName, inputValue, callbackState, isAnalog)
     if screen == nil or not isPress(inputValue, callbackState) then return end
-    if screen.onClickMoveHere ~= nil then screen:onClickMoveHere(nil) end
+    if screen.onClickFaceMe ~= nil then screen:onClickFaceMe(nil) end
 end
 
-local function registerMoveAction(screen)
-    removeMoveAction(screen)
+local function registerFaceAction(screen)
+    removeFaceAction(screen)
 
     local inputAction = InputAction ~= nil and InputAction.HP_CLEAR_ALL_BINDINGS or nil
     if screen == nil or g_inputBinding == nil or g_inputBinding.registerActionEvent == nil or inputAction == nil then
-        print(LOG .. "Failed to register MOVE HERE action: input action unavailable")
+        print(LOG .. "Failed to register FACE ME action: input action unavailable")
         return
     end
 
@@ -42,7 +42,7 @@ local function registerMoveAction(screen)
         return g_inputBinding:registerActionEvent(
             inputAction,
             screen,
-            onMoveAction,
+            onFaceAction,
             false,
             true,
             false,
@@ -51,7 +51,7 @@ local function registerMoveAction(screen)
     end)
 
     if callOk and registered == true and id ~= nil then
-        screen._hpWorldMoveActionEventId = id
+        screen._hpWorldFaceActionEventId = id
         if g_inputBinding.setActionEventTextPriority ~= nil then
             g_inputBinding:setActionEventTextPriority(id, GS_PRIO_VERY_LOW)
         end
@@ -61,27 +61,27 @@ local function registerMoveAction(screen)
         if g_inputBinding.setActionEventActive ~= nil then
             g_inputBinding:setActionEventActive(id, true)
         end
-        print(LOG .. "Registered A -> MOVE HERE (World dialog)")
+        print(LOG .. "Registered A -> FACE ME (World dialog)")
     else
-        print(LOG .. "Failed to register A -> MOVE HERE (World dialog)")
+        print(LOG .. "Failed to register A -> FACE ME (World dialog)")
     end
 end
 
-if HP_WorldWorkerScreen ~= nil and HP_WorldWorkerScreen._hpWorldMoveInputPatched ~= true then
+if HP_WorldWorkerScreen ~= nil and HP_WorldWorkerScreen._hpWorldFaceInputPatched ~= true then
     local originalOpen = HP_WorldWorkerScreen.onOpen
     local originalClose = HP_WorldWorkerScreen.onClose
 
     function HP_WorldWorkerScreen:onOpen(...)
         originalOpen(self, ...)
-        registerMoveAction(self)
+        registerFaceAction(self)
     end
 
     function HP_WorldWorkerScreen:onClose(...)
-        removeMoveAction(self)
+        removeFaceAction(self)
         return originalClose(self, ...)
     end
 
-    HP_WorldWorkerScreen._hpWorldMoveInputPatched = true
+    HP_WorldWorkerScreen._hpWorldFaceInputPatched = true
     HP_WorldWorkerInput.installed = true
-    print(LOG .. "World MOVE HERE input wrapper installed")
+    print(LOG .. "World FACE ME input wrapper installed")
 end

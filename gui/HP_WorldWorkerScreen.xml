@@ -57,7 +57,7 @@
         <BoxLayout profile="fs25_dialogButtonBox" size="1170px 60px">
             <Button profile="buttonBack" text="CLOSE" onClick="onClickBack" />
             <Button profile="buttonExtra1" text="PLACE HERE" onClick="onClickPlaceHere" />
-            <Button profile="buttonExtra1" text="MOVE HERE" onClick="onClickMoveHere" />
+            <Button profile="hpButtonClearAll" text="MOVE HERE" onClick="onClickMoveHere" />
             <Button profile="hpButtonClear" text="REMOVE" onClick="onClickRemove" />
         </BoxLayout>
     </GuiElement>

@@ -48,7 +48,7 @@ function HP_SlotRegistry:slotToIndex(slot, maximum)
         return nil
     end
 
-    local helperLabel = text:match("^HELPER%s+([A-Z]+)")
+    local helperLabel = text:match("^HELPER%s+([A-Z]+)$")
     if helperLabel ~= nil then text = helperLabel end
 
     if text == "" or text:match("^[A-Z]+$") == nil then return nil end

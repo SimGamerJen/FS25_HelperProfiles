@@ -172,6 +172,9 @@ end
 if HP_WorldMovementProbe == nil and source ~= nil then
     source((g_currentModDirectory or "") .. "scripts/HP_WorldMovementProbe.lua")
 end
+if HP_WorldMovementProbeDelta == nil and source ~= nil then
+    source((g_currentModDirectory or "") .. "scripts/HP_WorldMovementProbeDelta.lua")
+end
 if HP_WorldWorkerInput == nil and source ~= nil then
     source((g_currentModDirectory or "") .. "scripts/HP_WorldWorkerInput.lua")
 end

@@ -166,6 +166,9 @@ end
 if HP_WorldPresence == nil and source ~= nil then
     source((g_currentModDirectory or "") .. "scripts/HP_WorldPresence.lua")
 end
+if HP_WorldPresenceSmoothing == nil and source ~= nil then
+    source((g_currentModDirectory or "") .. "scripts/HP_WorldPresenceSmoothing.lua")
+end
 if HP_WorldWorkerInput == nil and source ~= nil then
     source((g_currentModDirectory or "") .. "scripts/HP_WorldWorkerInput.lua")
 end

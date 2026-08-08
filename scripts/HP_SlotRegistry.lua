@@ -175,6 +175,9 @@ end
 if HP_WorldLocomotionCurved == nil and source ~= nil then
     source((g_currentModDirectory or "") .. "scripts/HP_WorldLocomotionCurved.lua")
 end
+if HP_WorldTargetNavigation == nil and source ~= nil then
+    source((g_currentModDirectory or "") .. "scripts/HP_WorldTargetNavigation.lua")
+end
 if HP_WorldMovementProbe == nil and source ~= nil then
     source((g_currentModDirectory or "") .. "scripts/HP_WorldMovementProbe.lua")
 end

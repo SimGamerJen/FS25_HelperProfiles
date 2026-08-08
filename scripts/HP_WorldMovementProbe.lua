@@ -5,7 +5,7 @@
 if HP_WorldMovementProbe ~= nil then return end
 
 HP_WorldMovementProbe = {
-    version = "2.2.0.0-alpha4-movement-probe-1",
+    version = "2.2.0.0-alpha4-movement-probe-2",
     initialized = false,
     commandsRegistered = false,
     watchActive = false,
@@ -91,11 +91,9 @@ local function resolveIndex(value)
 
     if HelperProfiles ~= nil and HelperProfiles.getSelectedHelper ~= nil then
         local ok, helper = pcall(HelperProfiles.getSelectedHelper, HelperProfiles)
-        if ok and helper ~= nil then
-            if HelperProfiles.getStableIndexForHelper ~= nil then
-                local okIndex, index = pcall(HelperProfiles.getStableIndexForHelper, HelperProfiles, helper)
-                if okIndex and tonumber(index) ~= nil then return math.floor(tonumber(index)) end
-            end
+        if ok and helper ~= nil and HelperProfiles.getStableIndexForHelper ~= nil then
+            local okIndex, index = pcall(HelperProfiles.getStableIndexForHelper, HelperProfiles, helper)
+            if okIndex and tonumber(index) ~= nil then return math.floor(tonumber(index)) end
         end
     end
     return nil
@@ -120,8 +118,13 @@ local function getWorldWorker(indexOrSlot)
     return instance, index
 end
 
-local function readParameter(parameter)
-    if parameter == nil then return nil end
+local function readParameter(graphics, parameter)
+    if graphics ~= nil and graphics.animation ~= nil and graphics.animation.getParameter ~= nil and parameter ~= nil then
+        local ok, value = pcall(graphics.animation.getParameter, graphics.animation, parameter)
+        if ok and (type(value) == "number" or type(value) == "boolean" or type(value) == "string") then
+            return value
+        end
+    end
 
     if type(parameter) == "table" then
         local methods = { "getValue", "getCurrentValue" }
@@ -151,8 +154,9 @@ local function collectAnimationParameters(graphics)
     local result = {}
     if graphics == nil or graphics.animationParameters == nil then return result end
     for name, parameter in pairs(graphics.animationParameters) do
-        local value = readParameter(parameter)
-        result[tostring(name)] = value ~= nil and value or "?"
+        local value = readParameter(graphics, parameter)
+        if value == nil then value = "?" end
+        result[tostring(name)] = value
     end
     return result
 end
@@ -180,7 +184,7 @@ end
 
 local MOVEMENT_PATTERNS = {
     "speed", "velocity", "force", "yaw", "ground", "move", "walk", "run",
-    "idle", "crouch", "strafe", "swim", "water", "fall", "rotation"
+    "idle", "crouch", "strafe", "swim", "water", "fall", "rotation", "positiondelta"
 }
 
 local function printSortedScalars(label, values)
@@ -300,19 +304,22 @@ function Probe:samplePlayer()
     local mover = player.mover
     local graphics = player.graphicsComponent
     local anim = collectAnimationParameters(graphics)
-    local state = collectMatchingScalars(player.graphicsState, MOVEMENT_PATTERNS)
 
     return {
         x = x, y = y, z = z,
         graphicalYaw = getGraphicalYaw(player),
         movementYaw = getMovementYaw(mover),
         speed = getMoverSpeed(mover),
+        moverRotationVelocity = mover ~= nil and tonumber(mover.currentRotationVelocity) or nil,
         forceX = mover ~= nil and tonumber(mover.currentForceX) or nil,
         forceZ = mover ~= nil and tonumber(mover.currentForceZ) or nil,
         velocityX = mover ~= nil and tonumber(mover.currentVelocityX) or nil,
         velocityY = mover ~= nil and tonumber(mover.currentVelocityY) or nil,
         velocityZ = mover ~= nil and tonumber(mover.currentVelocityZ) or nil,
+        deltaX = mover ~= nil and tonumber(mover.positionDeltaX) or nil,
+        deltaZ = mover ~= nil and tonumber(mover.positionDeltaZ) or nil,
         grounded = mover ~= nil and mover.isGrounded or nil,
+        closeToGround = mover ~= nil and mover.isCloseToGround or nil,
         groundDistance = mover ~= nil and tonumber(mover.currentGroundDistance) or nil,
         absSpeed = getAnimValue(anim, "absSpeed"),
         rotationVelocity = getAnimValue(anim, "rotationVelocity"),
@@ -323,8 +330,7 @@ function Probe:samplePlayer()
         isIdling = getAnimValue(anim, "isIdling"),
         isWalking = getAnimValue(anim, "isWalking"),
         isRunning = getAnimValue(anim, "isRunning"),
-        isGrounded = getAnimValue(anim, "isGrounded"),
-        graphicsState = state
+        isGrounded = getAnimValue(anim, "isGrounded")
     }
 end
 
@@ -374,13 +380,14 @@ function Probe:printWatchSample()
 
     self.sampleIndex = self.sampleIndex + 1
     local elapsed = self.sampleIndex * (tonumber(self.watchIntervalMs) or 250) * 0.001
-    log("WATCH t=%.2f pos=(%s,%s,%s) yaw[g=%s m=%s] speed=%s force=(%s,%s) vel=(%s,%s,%s) ground=%s dist=%s anim[abs=%s rot=%s rel=(%s,%s) dir=(%s,%s) idle=%s walk=%s run=%s]",
+    log("WATCH t=%.2f pos=(%s,%s,%s) yaw[g=%s m=%s] speed=%s moverRot=%s force=(%s,%s) vel=(%s,%s,%s) delta=(%s,%s) ground=%s close=%s dist=%s anim[abs=%s rot=%s rel=(%s,%s) dir=(%s,%s) idle=%s walk=%s run=%s]",
         elapsed,
         compact(p.x), compact(p.y), compact(p.z),
-        compact(p.graphicalYaw), compact(p.movementYaw), compact(p.speed),
+        compact(p.graphicalYaw), compact(p.movementYaw), compact(p.speed), compact(p.moverRotationVelocity),
         compact(p.forceX), compact(p.forceZ),
         compact(p.velocityX), compact(p.velocityY), compact(p.velocityZ),
-        compact(p.grounded), compact(p.groundDistance),
+        compact(p.deltaX), compact(p.deltaZ),
+        compact(p.grounded), compact(p.closeToGround), compact(p.groundDistance),
         compact(p.absSpeed), compact(p.rotationVelocity), compact(p.relativeVelocityX), compact(p.relativeVelocityZ),
         compact(p.movementDirX), compact(p.movementDirZ),
         compact(p.isIdling), compact(p.isWalking), compact(p.isRunning))

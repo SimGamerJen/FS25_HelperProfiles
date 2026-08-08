@@ -240,11 +240,13 @@ HP_WorldWorkerGui = HP_WorldWorkerGui or {
     dialog = nil,
     loaded = false,
     failed = false,
-    modDirectory = MOD_DIR
+    modDirectory = MOD_DIR,
+    version = "2.2.0.0-alpha2-world-ui-1"
 }
 
 function HP_WorldWorkerGui:loadMap()
     self.modDirectory = MOD_DIR ~= "" and MOD_DIR or (g_currentModDirectory or self.modDirectory or "")
+    hpPrint("Loaded " .. tostring(self.version))
 end
 
 function HP_WorldWorkerGui:deleteMap()

@@ -16,7 +16,7 @@ if HP_WorldWorkerManager == nil then return end
 if HP_WorldObstacleTurnEscape ~= nil then return end
 
 HP_WorldObstacleTurnEscape = {
-    version = "2.2.0.0-alpha4-obstacle-turn-escape-2",
+    version = "2.2.0.0-alpha4-obstacle-turn-escape-3",
     alignmentToleranceRad = math.rad(5),
     installed = false
 }
@@ -148,18 +148,17 @@ function Escape:handleMotion(motion, dt, originalUpdateMotion, locoSelf, ...)
     local desiredYaw = yawFromDirection(dx, dz)
     local yawDiff = angleDifference(desiredYaw, currentYaw)
 
-    -- The blocked-state route-clear check intentionally uses a stationary
-    -- corridor. For the CURRENT facing, however, ask the question that matters
-    -- immediately before locomotion starts: would the normal obstacle wrapper
-    -- see an obstruction at walking speed? Using the same prospective speed
-    -- prevents a false stationary CLEAR followed by an instant moving BLOCKED.
+    -- Make both decisions with the corridor FOLLOW will actually need when it
+    -- starts walking. A short stationary target probe can report CLEAR even
+    -- though the full walking look-ahead still intersects the obstruction,
+    -- causing TURN COMPLETE -> immediate OBSTACLE STOP loops.
     local prospectiveWalkSpeed = math.max(
         tonumber(motion.speed) or 0,
         tonumber(Loco.walkSpeed) or 1.35)
     local currentBlocked, currentResult = Awareness:scan(
         motion.index, motion.id, x, y, z, currentYaw, prospectiveWalkSpeed)
     local targetBlocked = Awareness:scan(
-        motion.index, motion.id, x, y, z, desiredYaw, 0)
+        motion.index, motion.id, x, y, z, desiredYaw, prospectiveWalkSpeed)
 
     local wasTurning = motion.hpObstacleTurnEscape == true
     local tolerance = math.max(math.rad(1), tonumber(self.alignmentToleranceRad) or math.rad(5))
@@ -197,15 +196,15 @@ function Escape:handleMotion(motion, dt, originalUpdateMotion, locoSelf, ...)
     if wasTurning and targetBlocked ~= true and math.abs(yawDiff) <= tolerance then
         motion.hpObstacleTurnEscape = nil
         motion.speed = 0
-        log("OBSTACLE TURN COMPLETE %s yaw=%.3f targetYaw=%.3f; forward route clear",
-            tostring(getSlot(motion.index)), currentYaw, desiredYaw)
+        log("OBSTACLE TURN COMPLETE %s yaw=%.3f targetYaw=%.3f probeSpeed=%.2f; walking corridor clear",
+            tostring(getSlot(motion.index)), currentYaw, desiredYaw, prospectiveWalkSpeed)
         -- Continue into the normal obstacle + curved-locomotion pipeline on
-        -- this frame. The current yaw is now aligned with the clear route.
+        -- this frame. Both current and target walking corridors are now clear.
     elseif wasTurning and targetBlocked == true then
         -- The player may have moved again while we were rotating. Give control
         -- back to the normal obstacle wrapper so FOLLOW returns to blocked/hold.
         motion.hpObstacleTurnEscape = nil
-        log("OBSTACLE TURN ABORT %s target corridor blocked again", tostring(getSlot(motion.index)))
+        log("OBSTACLE TURN ABORT %s target walking corridor blocked again", tostring(getSlot(motion.index)))
     end
 
     return originalUpdateMotion(locoSelf, motion, dt, ...)
@@ -223,7 +222,7 @@ function Escape:install()
     end
 
     self.installed = true
-    log("Loaded %s (walking-lookahead turn-before-walk escape)", tostring(self.version))
+    log("Loaded %s (matched walking-corridor turn-before-walk escape)", tostring(self.version))
     return true
 end
 

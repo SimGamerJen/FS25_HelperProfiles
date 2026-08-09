@@ -9,6 +9,8 @@
 --
 -- The validated obstacle stop/hold + local waypoint planner remain available
 -- as fallback only when no safe anticipatory steering corridor can be found.
+-- Once fallback owns an escape episode, anticipatory steering stays suppressed
+-- until the worker has returned to sustained, genuinely clear long-range space.
 
 if HP_WorldObstacleAwareness == nil then return end
 if HP_WorldFollow == nil then return end
@@ -17,12 +19,13 @@ if HP_WorldLocalAvoidance == nil then return end
 if HP_WorldAnticipatorySteering ~= nil then return end
 
 HP_WorldAnticipatorySteering = {
-    version = "2.2.0.0-alpha4-anticipatory-steering-1",
+    version = "2.2.0.0-alpha4-anticipatory-steering-2",
     lookAhead = 3.80,
     virtualTargetDistance = 4.50,
     engageRateRadPerSec = 0.72,
     recoverRateRadPerSec = 0.52,
     directClearHoldMs = 300,
+    fallbackClearReleaseMs = 1500,
     logIntervalMs = 700,
     candidateOffsetsDeg = {30, -30, 45, -45, 60, -60, 72, -72},
     installed = false
@@ -37,13 +40,6 @@ local TWO_PI = math.pi * 2
 
 local function log(message, ...)
     print(LOG .. string.format(tostring(message), ...))
-end
-
-local function clamp(value, minimum, maximum)
-    value = tonumber(value) or 0
-    if value < minimum then return minimum end
-    if value > maximum then return maximum end
-    return value
 end
 
 local function normalizeAngle(value)
@@ -131,6 +127,74 @@ local function clearState(state, silent)
     end
 end
 
+function Steer:suppressFallback(state, reason)
+    if state == nil then return end
+    local wasSuppressed = state.hpSteerFallbackSuppressed == true
+    clearState(state, true)
+    state.hpSteerFallbackSuppressed = true
+    state.hpSteerFallbackClearMs = 0
+    state.hpSteerFallbackReason = tostring(reason or "local-fallback")
+    if not wasSuppressed then
+        log("STEER SUPPRESS %s reason=%s; local escape owns navigation until sustained clear space",
+            tostring(getSlot(state.index)), tostring(state.hpSteerFallbackReason))
+    end
+end
+
+function Steer:tryReleaseFallback(state, motion, dt)
+    if state == nil or state.hpSteerFallbackSuppressed ~= true then return true end
+    if motion == nil or state.obstacleBlocked == true or state.hpAvoidance ~= nil
+        or motion.hpAvoidanceWaypoint == true or motion.navigationKind ~= "follow" then
+        state.hpSteerFallbackClearMs = 0
+        return false
+    end
+
+    local x = tonumber(motion.x)
+    local y = tonumber(motion.y)
+    local z = tonumber(motion.z)
+    local targetX = tonumber(motion.targetX)
+    local targetZ = tonumber(motion.targetZ)
+    if x == nil or y == nil or z == nil or targetX == nil or targetZ == nil then
+        state.hpSteerFallbackClearMs = 0
+        return false
+    end
+
+    local dx = targetX - x
+    local dz = targetZ - z
+    local distance = math.sqrt(dx * dx + dz * dz)
+    if distance <= 0.35 then
+        state.hpSteerFallbackClearMs = 0
+        return false
+    end
+
+    local directYaw = yawFromDirection(dx, dz)
+    local blocked = scanLong(state.index, state.id, x, y, z, directYaw, self.lookAhead)
+    if blocked == true then
+        state.hpSteerFallbackClearMs = 0
+        return false
+    end
+
+    state.hpSteerFallbackClearMs = (tonumber(state.hpSteerFallbackClearMs) or 0)
+        + math.max(0, tonumber(dt) or 0)
+
+    -- The local planner deliberately retains its chain state for a period of
+    -- normal direct following. Respect that ownership too: do not re-enable
+    -- anticipation merely because one long-range sample happened to be clear.
+    local chainActive = (tonumber(state.hpAvoidanceSegments) or 0) > 0
+        or state.hpAvoidanceSide ~= nil
+        or state.hpAvoidanceExhausted == true
+    local requiredMs = math.max(500, tonumber(self.fallbackClearReleaseMs) or 1500)
+    if chainActive or state.hpSteerFallbackClearMs < requiredMs then
+        return false
+    end
+
+    log("STEER RESTORE %s clear long-range corridor sustained for %.2fs",
+        tostring(getSlot(state.index)), state.hpSteerFallbackClearMs * 0.001)
+    state.hpSteerFallbackSuppressed = nil
+    state.hpSteerFallbackClearMs = nil
+    state.hpSteerFallbackReason = nil
+    return true
+end
+
 function Steer:chooseOffset(state, x, y, z, directYaw)
     local currentSide = state.hpSteerSide
     local best = nil
@@ -171,14 +235,25 @@ end
 function Steer:apply(state, motion, dt)
     if state == nil or motion == nil then return end
 
-    -- Do not compete with the proven hard-stop/local-planner fallback. This
-    -- steering layer is only for uninterrupted normal FOLLOW motion.
+    -- If the emergency/local planner has taken over, make that ownership
+    -- sticky for the complete escape episode. Previously the anticipatory
+    -- controller re-entered immediately after every short bypass waypoint,
+    -- creating STOP -> AVOID -> STEER -> STOP loops in tight obstacle pockets.
     if state.obstacleBlocked == true
         or state.hpAvoidance ~= nil
         or motion.hpAvoidanceWaypoint == true
         or motion.navigationKind ~= "follow" then
-        clearState(state, true)
+        if state.obstacleBlocked == true or state.hpAvoidance ~= nil or motion.hpAvoidanceWaypoint == true then
+            self:suppressFallback(state, state.obstacleBlocked == true and "obstacle-blocked" or "local-avoidance")
+        else
+            clearState(state, true)
+        end
         return
+    end
+
+    if state.hpSteerFallbackSuppressed == true then
+        clearState(state, true)
+        if not self:tryReleaseFallback(state, motion, dt) then return end
     end
 
     local x = tonumber(motion.x)
@@ -212,14 +287,14 @@ function Steer:apply(state, motion, dt)
         state.hpSteerClearMs = 0
         local candidate, summary = self:chooseOffset(state, x, y, z, directYaw)
         if candidate == nil then
-            -- No long-range alternative is safe. Leave the original FOLLOW
-            -- target untouched; the short-range detector will stop safely if
-            -- necessary and the existing waypoint planner can take over.
+            -- No long-range alternative is safe. Yield once, then stay yielded
+            -- until the fallback system has genuinely escaped the obstacle
+            -- field. Re-entering on each short waypoint was the loop source.
             if state.hpAnticipatorySteering == true then
                 log("STEER FALLBACK %s no clear anticipatory corridor (%s)",
                     tostring(getSlot(state.index)), tostring(summary))
             end
-            clearState(state, true)
+            self:suppressFallback(state, "no-clear-long-range-corridor")
             return
         end
 
@@ -295,6 +370,12 @@ function Steer:install()
     function Follow:updateFollower(state, dt, ...)
         local result = originalUpdateFollower(self, state, dt, ...)
         if state ~= nil then
+            -- Record fallback ownership even on frames where the emergency
+            -- detector has already stopped locomotion and no motion remains.
+            if state.obstacleBlocked == true or state.hpAvoidance ~= nil then
+                Steer:suppressFallback(state, state.obstacleBlocked == true and "obstacle-blocked" or "local-avoidance")
+            end
+
             local motion = Loco.motions[state.id]
             if motion ~= nil then
                 Steer:apply(state, motion, dt)
@@ -306,7 +387,7 @@ function Steer:install()
     end
 
     self.installed = true
-    log("Loaded %s (%.1fm anticipatory sensor; continuous steering bias; hard stop fallback retained)",
+    log("Loaded %s (%.1fm anticipatory sensor; sticky fallback ownership; hard stop safety retained)",
         tostring(self.version), tonumber(self.lookAhead) or 3.8)
     return true
 end

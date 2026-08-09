@@ -190,6 +190,9 @@ end
 if HP_WorldLocalAvoidance == nil and source ~= nil then
     source((g_currentModDirectory or "") .. "scripts/HP_WorldLocalAvoidance.lua")
 end
+if HP_WorldAvoidancePhases == nil and source ~= nil then
+    source((g_currentModDirectory or "") .. "scripts/HP_WorldAvoidancePhases.lua")
+end
 if HP_WorldMovementProbe == nil and source ~= nil then
     source((g_currentModDirectory or "") .. "scripts/HP_WorldMovementProbe.lua")
 end

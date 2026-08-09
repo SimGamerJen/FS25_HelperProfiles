@@ -16,7 +16,7 @@ if HP_WorldWorkerManager == nil then return end
 if HP_WorldObstacleTurnEscape ~= nil then return end
 
 HP_WorldObstacleTurnEscape = {
-    version = "2.2.0.0-alpha4-obstacle-turn-escape-1",
+    version = "2.2.0.0-alpha4-obstacle-turn-escape-2",
     alignmentToleranceRad = math.rad(5),
     installed = false
 }
@@ -148,11 +148,16 @@ function Escape:handleMotion(motion, dt, originalUpdateMotion, locoSelf, ...)
     local desiredYaw = yawFromDirection(dx, dz)
     local yawDiff = angleDifference(desiredYaw, currentYaw)
 
-    -- The target corridor is the authority for whether a turn can escape the
-    -- old obstruction. Use zero speed so this is only the immediate route box,
-    -- matching the blocked-state route-clear test.
+    -- The blocked-state route-clear check intentionally uses a stationary
+    -- corridor. For the CURRENT facing, however, ask the question that matters
+    -- immediately before locomotion starts: would the normal obstacle wrapper
+    -- see an obstruction at walking speed? Using the same prospective speed
+    -- prevents a false stationary CLEAR followed by an instant moving BLOCKED.
+    local prospectiveWalkSpeed = math.max(
+        tonumber(motion.speed) or 0,
+        tonumber(Loco.walkSpeed) or 1.35)
     local currentBlocked, currentResult = Awareness:scan(
-        motion.index, motion.id, x, y, z, currentYaw, 0)
+        motion.index, motion.id, x, y, z, currentYaw, prospectiveWalkSpeed)
     local targetBlocked = Awareness:scan(
         motion.index, motion.id, x, y, z, desiredYaw, 0)
 
@@ -163,10 +168,10 @@ function Escape:handleMotion(motion, dt, originalUpdateMotion, locoSelf, ...)
         if not wasTurning then
             motion.hpObstacleTurnEscape = true
             motion.speed = 0
-            log("OBSTACLE TURN START %s obstacle=%s yaw=%.3f targetYaw=%.3f delta=%.3f",
+            log("OBSTACLE TURN START %s obstacle=%s yaw=%.3f targetYaw=%.3f delta=%.3f probeSpeed=%.2f",
                 tostring(getSlot(motion.index)),
                 tostring(currentResult ~= nil and currentResult.nodeName or "old-facing obstruction"),
-                currentYaw, desiredYaw, yawDiff)
+                currentYaw, desiredYaw, yawDiff, prospectiveWalkSpeed)
         end
 
         local dtMs = math.max(0, tonumber(dt) or 0)
@@ -218,7 +223,7 @@ function Escape:install()
     end
 
     self.installed = true
-    log("Loaded %s (turn-before-walk escape for clear follow route)", tostring(self.version))
+    log("Loaded %s (walking-lookahead turn-before-walk escape)", tostring(self.version))
     return true
 end
 

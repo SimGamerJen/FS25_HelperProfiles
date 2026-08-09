@@ -14,7 +14,7 @@ if HP_WorldWorkerManager == nil then return end
 if HP_WorldObstacleAwareness ~= nil then return end
 
 HP_WorldObstacleAwareness = {
-    version = "2.2.0.0-alpha4-obstacle-awareness-1",
+    version = "2.2.0.0-alpha4-obstacle-awareness-2",
     minimumLookAhead = 1.15,
     maximumLookAhead = 2.00,
     speedLookAheadFactor = 0.55,
@@ -317,9 +317,13 @@ function Awareness:updateBlockedFollower(state, dt)
     if distance <= 0.001 then return true end
 
     -- Test the CURRENT direct route to the player, not merely the worker's old
-    -- facing. If the player walks around the obstruction the route can clear.
+    -- facing. Clearance must use the corridor that FOLLOW will need as soon as
+    -- locomotion resumes; a stationary probe can falsely report CLEAR before
+    -- the walking-speed look-ahead is actually free.
     local desiredYaw = yawFromDirection(dx, dz)
-    local blocked, result = self:scan(state.index, state.id, workerX, workerY, workerZ, desiredYaw, 0)
+    local prospectiveWalkSpeed = math.max(0, tonumber(Loco.walkSpeed) or 1.35)
+    local blocked, result = self:scan(
+        state.index, state.id, workerX, workerY, workerZ, desiredYaw, prospectiveWalkSpeed)
 
     if blocked then
         state.obstacleClearMs = 0

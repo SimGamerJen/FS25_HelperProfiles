@@ -23,11 +23,14 @@
 
     <Profile name="hpList" extends="emptyPanel" with="anchorStretchingYLeft pivotTopLeft" />
 
+    <!-- Retained for compatibility. Management screens now use plain GuiElement containers for these regions. -->
     <Profile name="hpHeaderBox" extends="emptyPanel" with="anchorStretchingYLeft pivotTopLeft">
+        <imageSliceId value="gui.empty" />
         <imageColor value="$preset_hpColorListHeaderBackground"/>
     </Profile>
 
     <Profile name="hpDetailBox" extends="emptyPanel" with="anchorStretchingYLeft pivotTopLeft">
+        <imageSliceId value="gui.empty" />
         <imageColor value="0 0 0 0.45"/>
     </Profile>
 

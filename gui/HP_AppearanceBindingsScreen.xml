@@ -19,10 +19,9 @@
             </BoxLayout>
             <ThreePartBitmap profile="fs25_lineSeparatorTopHighlighted" position="45px -119px" size="1105px 2px" />
 
-            <Bitmap profile="hpHeaderBox" id="helperHeaderBox" position="45px -135px" size="300px 50px">
+            <GuiElement id="helperHeaderBox" position="45px -135px" size="300px 50px">
                 <Text profile="hpHeaderLeft" position="10px 0px" size="250px 40.77px" text="$l10n_hp_header_helper_binding_state" />
-                <ThreePartBitmap profile="fs25_lineSeparatorBottom" position="0px 2px" />
-            </Bitmap>
+            </GuiElement>
 
             <SmoothList profile="hpList" id="helperTable" position="50px -190px" size="290px 270px" focusInit="onOpen" focusChangeTop="nil" focusChangeBottom="nil">
                 <ListItem profile="hpListItem" name="helperRowTemplate" size="290px 40.77px">
@@ -34,10 +33,9 @@
                 <Slider profile="fs25_listSlider" size="6px 262px" dataElementId="helperTable" id="helperSlider" />
             </ThreePartBitmap>
 
-            <Bitmap profile="hpHeaderBox" id="categoryHeaderBox" position="385px -135px" size="265px 50px">
+            <GuiElement id="categoryHeaderBox" position="385px -135px" size="265px 50px">
                 <Text profile="hpHeaderLeft" position="10px 0px" size="235px 40.77px" text="$l10n_hp_header_category" />
-                <ThreePartBitmap profile="fs25_lineSeparatorBottom" position="0px 2px" />
-            </Bitmap>
+            </GuiElement>
 
             <SmoothList profile="hpList" id="categoryTable" position="390px -190px" size="255px 270px" focusChangeTop="nil" focusChangeBottom="nil">
                 <ListItem profile="hpListItem" name="categoryRowTemplate" size="255px 40.77px">
@@ -49,11 +47,10 @@
                 <Slider profile="fs25_listSlider" size="6px 262px" dataElementId="categoryTable" id="categorySlider" />
             </ThreePartBitmap>
 
-            <Bitmap profile="hpHeaderBox" id="presetHeaderBox" position="695px -135px" size="455px 50px">
+            <GuiElement id="presetHeaderBox" position="695px -135px" size="455px 50px">
                 <Text profile="hpHeaderLeft" position="10px 0px" size="265px 40.77px" text="$l10n_hp_header_appearance" />
                 <Text profile="hpHeaderRight" position="285px 0px" size="155px 40.77px" text="$l10n_hp_header_preset_id" />
-                <ThreePartBitmap profile="fs25_lineSeparatorBottom" position="0px 2px" />
-            </Bitmap>
+            </GuiElement>
 
             <SmoothList profile="hpList" id="presetTable" handleFocus="true" selectedWithoutFocus="false" position="700px -190px" size="445px 270px" focusChangeTop="nil" focusChangeBottom="nil">
                 <ListItem profile="hpListItem" name="presetRowTemplate" size="445px 40.77px">
@@ -66,11 +63,10 @@
                 <Slider profile="fs25_listSlider" size="6px 262px" dataElementId="presetTable" id="presetSlider" />
             </ThreePartBitmap>
 
-            <Bitmap profile="hpDetailBox" id="detailBox" position="45px -470px" size="1105px 145px">
+            <GuiElement id="detailBox" position="45px -470px" size="1105px 145px">
                 <Text profile="hpMetaText" id="detailText" position="10px 8px" size="1085px 35px" text="$l10n_hp_detail_select" textLayoutMode="scrolling" />
                 <Text profile="hpMetaText" id="statusText" position="10px -38px" size="1085px 35px" text="$l10n_hp_status_ready" textLayoutMode="scrolling" />
-                <ThreePartBitmap profile="fs25_lineSeparatorBottom" position="0px 2px" />
-            </Bitmap>
+            </GuiElement>
 
         </GuiElement>
 

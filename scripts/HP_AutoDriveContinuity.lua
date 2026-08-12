@@ -2,6 +2,12 @@
 -- Event-driven AutoDrive helper continuity bridge.
 -- Loaded after HelperProfiles.lua so its hooks wrap the final HelperProfiles picker.
 
+-- The first continuity prototype lives in HP_Compatibility.lua. Disable its polling
+-- update path for this test build so only the event-driven bridge owns continuity.
+if HP_AutoDriveContinuity ~= nil then
+    HP_AutoDriveContinuity.update = function() end
+end
+
 HP_AutoDriveContinuityV2 = HP_AutoDriveContinuityV2 or {
     installed = false,
     leaseMs = 3000,

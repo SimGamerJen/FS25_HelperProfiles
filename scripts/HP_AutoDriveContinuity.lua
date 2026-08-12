@@ -1,11 +1,11 @@
 -- HP_AutoDriveContinuity.lua (FS25_HelperProfiles)
 -- AutoDrive helper continuity bridge.
 --
--- Ownership is established when an active AutoDrive vehicle first acquires a helper.
--- That vehicle keeps the same helper across GIANTS/AutoDrive release/reacquire cycles
--- until AutoDrive has been genuinely inactive for a short sustained interval.
+-- V4 uses AutoDrive's own start/stop event functions as the authoritative vehicle
+-- context. This avoids scanning g_currentMission.vehicles and guessing which AD
+-- vehicle is currently asking HelperManager for a worker.
 
-print("[FS25_HelperProfiles/AutoDriveV3] Source loaded (session-ownership build)")
+print("[FS25_HelperProfiles/AutoDriveV4] Source loaded (AutoDrive-event-context build)")
 
 -- Disable the first polling prototype in HP_Compatibility.lua. This module owns
 -- AutoDrive continuity for this test branch.
@@ -13,19 +13,20 @@ if HP_AutoDriveContinuity ~= nil then
     HP_AutoDriveContinuity.update = function() end
 end
 
-HP_AutoDriveContinuityV3 = HP_AutoDriveContinuityV3 or {
+HP_AutoDriveContinuityV4 = HP_AutoDriveContinuityV4 or {
     installed = false,
     reservations = setmetatable({}, {__mode = "k"}),
+    pendingRestartVehicle = nil,
     originalGetRandomHelper = nil,
-    originalReleaseHelper = nil,
     originalIsHelperActive = nil,
+    originalSendStartEvent = nil,
+    originalSendStopEvent = nil,
     runtimeManager = nil,
-    stopGraceMs = 500,
     _lastWaitReason = nil,
     _lastWaitLogMs = -100000
 }
 
-local LOG = "[FS25_HelperProfiles/AutoDriveV3] "
+local LOG = "[FS25_HelperProfiles/AutoDriveV4] "
 
 local function log(message, ...)
     print(LOG .. string.format(tostring(message), ...))
@@ -49,34 +50,22 @@ local function helperName(helper)
     return tostring(helper ~= nil and helper.name or "?")
 end
 
-local function getAutoDriveState(vehicle)
+local function isAutoDriveActive(vehicle)
     if vehicle == nil or vehicle.ad == nil or vehicle.ad.stateModule == nil then
-        return false, 0
+        return false
     end
-
     local stateModule = vehicle.ad.stateModule
-    local active = false
-    if stateModule.isActive ~= nil then
-        local ok, value = pcall(stateModule.isActive, stateModule)
-        active = ok and value == true
+    if type(stateModule.isActive) ~= "function" then
+        return false
     end
-
-    local helperIndex = 0
-    if stateModule.getCurrentHelperIndex ~= nil then
-        local ok, value = pcall(stateModule.getCurrentHelperIndex, stateModule)
-        if ok then
-            helperIndex = tonumber(value) or 0
-        end
-    end
-
-    return active, helperIndex
+    local ok, value = pcall(stateModule.isActive, stateModule)
+    return ok and value == true
 end
 
 local function isEngineAvailable(helper)
     if helper == nil or helper.inUse == true or g_helperManager == nil then
         return false
     end
-
     for _, candidate in ipairs(g_helperManager.availableHelpers or {}) do
         if candidate == helper then
             return true
@@ -85,7 +74,7 @@ local function isEngineAvailable(helper)
     return false
 end
 
-function HP_AutoDriveContinuityV3:_logInstallWait(reason)
+function HP_AutoDriveContinuityV4:_logInstallWait(reason)
     local now = nowMs()
     reason = tostring(reason or "unknown")
     if self._lastWaitReason ~= reason or (now - (tonumber(self._lastWaitLogMs) or 0)) >= 10000 then
@@ -95,37 +84,7 @@ function HP_AutoDriveContinuityV3:_logInstallWait(reason)
     end
 end
 
-function HP_AutoDriveContinuityV3:_findAwaitingVehicle()
-    if g_currentMission == nil then
-        return nil, 0
-    end
-
-    local match = nil
-    local matches = 0
-
-    for _, vehicle in pairs(g_currentMission.vehicles or {}) do
-        if vehicle ~= nil and vehicle.ad ~= nil then
-            local active, helperIndex = getAutoDriveState(vehicle)
-            local currentHelper = vehicle.ad.currentHelper
-
-            -- AutoDrive sets itself active before calling getRandomHelper(). During
-            -- both initial allocation and an internal restart, currentHelper/index
-            -- are empty while the vehicle is awaiting its driver.
-            if active and (currentHelper == nil or (tonumber(helperIndex) or 0) <= 0) then
-                matches = matches + 1
-                match = vehicle
-            end
-        end
-    end
-
-    if matches == 1 then
-        return match, matches
-    end
-
-    return nil, matches
-end
-
-function HP_AutoDriveContinuityV3:_reserve(vehicle, helper, reason)
+function HP_AutoDriveContinuityV4:_reserve(vehicle, helper, reason)
     if vehicle == nil or helper == nil then
         return false
     end
@@ -133,8 +92,7 @@ function HP_AutoDriveContinuityV3:_reserve(vehicle, helper, reason)
     local previous = self.reservations[vehicle]
     self.reservations[vehicle] = {
         helper = helper,
-        helperIndex = tonumber(helper.index) or 0,
-        inactiveSince = nil
+        helperIndex = tonumber(helper.index) or 0
     }
 
     if previous == nil or previous.helper ~= helper then
@@ -149,9 +107,12 @@ function HP_AutoDriveContinuityV3:_reserve(vehicle, helper, reason)
     return true
 end
 
-function HP_AutoDriveContinuityV3:_clear(vehicle, reason)
+function HP_AutoDriveContinuityV4:_clear(vehicle, reason)
     local reservation = vehicle ~= nil and self.reservations[vehicle] or nil
     if reservation == nil then
+        if self.pendingRestartVehicle == vehicle then
+            self.pendingRestartVehicle = nil
+        end
         return false
     end
 
@@ -162,14 +123,16 @@ function HP_AutoDriveContinuityV3:_clear(vehicle, reason)
         tostring(reason or "unknown")
     )
     self.reservations[vehicle] = nil
+    if self.pendingRestartVehicle == vehicle then
+        self.pendingRestartVehicle = nil
+    end
     return true
 end
 
-function HP_AutoDriveContinuityV3:isReserved(helper)
+function HP_AutoDriveContinuityV4:isReserved(helper)
     if helper == nil then
         return false
     end
-
     for _, reservation in pairs(self.reservations or {}) do
         if reservation ~= nil and reservation.helper == helper then
             return true
@@ -178,33 +141,80 @@ function HP_AutoDriveContinuityV3:isReserved(helper)
     return false
 end
 
-function HP_AutoDriveContinuityV3:getReservedReacquire()
-    local vehicle, awaitingCount = self:_findAwaitingVehicle()
+function HP_AutoDriveContinuityV4:_onAutoDriveStartEvent(vehicle)
+    if vehicle == nil or vehicle.ad == nil then
+        return
+    end
+
+    local helper = vehicle.ad.currentHelper
+    if helper ~= nil then
+        self:_reserve(vehicle, helper, "autodrive-start-event")
+    else
+        log("Start event without current helper: vehicle='%s'", vehicleName(vehicle))
+    end
+
+    if self.pendingRestartVehicle == vehicle then
+        self.pendingRestartVehicle = nil
+    end
+end
+
+function HP_AutoDriveContinuityV4:_onAutoDriveStopEvent(vehicle)
+    if vehicle == nil or vehicle.ad == nil then
+        return
+    end
+
+    -- The stop event is sent before AutoDrive:onStopAutoDrive releases and clears
+    -- currentHelper. Capture/confirm ownership while the exact vehicle context is
+    -- still available.
+    local helper = vehicle.ad.currentHelper
+    if self.reservations[vehicle] == nil and helper ~= nil then
+        self:_reserve(vehicle, helper, "autodrive-stop-fallback")
+    end
+
+    local reservation = self.reservations[vehicle]
+    if reservation ~= nil and reservation.helper ~= nil then
+        self.pendingRestartVehicle = vehicle
+        log(
+            "Stop transition captured: vehicle='%s' helper='%s'; retaining ownership until next update frame",
+            vehicleName(vehicle),
+            helperName(reservation.helper)
+        )
+    end
+end
+
+function HP_AutoDriveContinuityV4:_getSynchronousRestartHelper()
+    local vehicle = self.pendingRestartVehicle
     if vehicle == nil then
-        if awaitingCount > 1 then
-            log("Continuity skipped: %d AutoDrive vehicles are simultaneously awaiting helpers", awaitingCount)
-        end
         return nil, nil
     end
 
     local reservation = self.reservations[vehicle]
     if reservation == nil or reservation.helper == nil then
+        self.pendingRestartVehicle = nil
+        return nil, nil
+    end
+
+    -- RestartADTask stops AD and immediately starts the mode again in the same call.
+    -- startAutoDrive() sets AD active before it asks HelperManager for a helper, so
+    -- an active pending vehicle here is the exact synchronous-restart case.
+    if not isAutoDriveActive(vehicle) then
         return nil, vehicle
     end
 
     local helper = reservation.helper
     if not isEngineAvailable(helper) then
         log(
-            "Reserved helper not engine-available yet: vehicle='%s' helper='%s'",
+            "Synchronous restart found but reserved helper is not engine-available: vehicle='%s' helper='%s' inUse=%s",
             vehicleName(vehicle),
-            helperName(helper)
+            helperName(helper),
+            tostring(helper.inUse)
         )
         return nil, vehicle
     end
 
-    reservation.inactiveSince = nil
+    self.pendingRestartVehicle = nil
     log(
-        "Driver continuity reacquire: vehicle='%s' helper='%s' index=%d",
+        "Driver continuity reacquire: vehicle='%s' helper='%s' index=%d reason=synchronous-restart",
         vehicleName(vehicle),
         helperName(helper),
         tonumber(helper.index) or tonumber(reservation.helperIndex) or 0
@@ -212,97 +222,26 @@ function HP_AutoDriveContinuityV3:getReservedReacquire()
     return helper, vehicle
 end
 
-function HP_AutoDriveContinuityV3:captureInitialAllocation(helper, awaitingVehicle)
-    if helper == nil then
-        return false
-    end
-
-    local vehicle = awaitingVehicle
-    local matches = 1
+function HP_AutoDriveContinuityV4:_expireUnrestartedStop()
+    local vehicle = self.pendingRestartVehicle
     if vehicle == nil then
-        vehicle, matches = self:_findAwaitingVehicle()
+        return
     end
 
-    if vehicle == nil then
-        if matches > 1 then
-            log("Initial reservation skipped: %d AutoDrive vehicles are simultaneously awaiting helpers", matches)
-        end
-        return false
-    end
-
-    -- If a reservation already exists, do not replace it with the currently
-    -- highlighted helper. The existing reservation owns this AutoDrive session.
-    local existing = self.reservations[vehicle]
-    if existing ~= nil and existing.helper ~= nil then
-        return true
-    end
-
-    return self:_reserve(vehicle, helper, "initial-allocation")
-end
-
-function HP_AutoDriveContinuityV3:observeRelease(helper)
-    if helper == nil then
-        return false
-    end
-
-    for vehicle, reservation in pairs(self.reservations or {}) do
-        if reservation ~= nil and reservation.helper == helper then
-            local active, helperIndex = getAutoDriveState(vehicle)
-            log(
-                "Reserved driver released by engine: vehicle='%s' helper='%s' adActive=%s helperIndex=%d; session ownership retained",
-                vehicleName(vehicle),
-                helperName(helper),
-                tostring(active),
-                tonumber(helperIndex) or 0
-            )
-            return true
-        end
-    end
-
-    -- Fallback for unusual call ordering: if AutoDrive still references the helper
-    -- at release time, establish the session reservation here.
-    if g_currentMission ~= nil then
-        local match = nil
-        local matches = 0
-        for _, vehicle in pairs(g_currentMission.vehicles or {}) do
-            if vehicle ~= nil and vehicle.ad ~= nil and vehicle.ad.currentHelper == helper then
-                matches = matches + 1
-                match = vehicle
-            end
-        end
-        if matches == 1 then
-            return self:_reserve(match, helper, "release-fallback")
-        end
-    end
-
-    return false
-end
-
-function HP_AutoDriveContinuityV3:_updateReservations()
-    local now = nowMs()
-    local grace = tonumber(self.stopGraceMs) or 500
-
-    for vehicle, reservation in pairs(self.reservations or {}) do
-        if reservation ~= nil then
-            local active = false
-            if vehicle ~= nil and vehicle.ad ~= nil then
-                active = select(1, getAutoDriveState(vehicle))
-            end
-
-            if active then
-                reservation.inactiveSince = nil
-            else
-                if reservation.inactiveSince == nil then
-                    reservation.inactiveSince = now
-                elseif (now - (tonumber(reservation.inactiveSince) or now)) >= grace then
-                    self:_clear(vehicle, "autodrive-inactive")
-                end
-            end
-        end
+    -- If RestartADTask was going to restart this AD session, it would already have
+    -- done so synchronously before this update frame. Reaching update while still
+    -- pending therefore means this was a genuine stop.
+    if not isAutoDriveActive(vehicle) then
+        self:_clear(vehicle, "autodrive-stopped-no-synchronous-restart")
+    else
+        -- Defensive fallback: an active vehicle should have consumed the token from
+        -- getRandomHelper/sendStartEvent. Keep ownership but drop the stale token.
+        log("Pending restart token expired while vehicle is active: vehicle='%s'", vehicleName(vehicle))
+        self.pendingRestartVehicle = nil
     end
 end
 
-function HP_AutoDriveContinuityV3:install()
+function HP_AutoDriveContinuityV4:install()
     if self.installed then
         return true
     end
@@ -321,69 +260,72 @@ function HP_AutoDriveContinuityV3:install()
         self:_logInstallWait("g_helperManager unavailable")
         return false
     end
-
-    local runtimeGetRandomHelper = runtimeManager.getRandomHelper
-    local runtimeReleaseHelper = runtimeManager.releaseHelper
-
-    if type(runtimeGetRandomHelper) ~= "function" then
-        self:_logInstallWait("g_helperManager.getRandomHelper unavailable (type=" .. tostring(type(runtimeGetRandomHelper)) .. ")")
+    if type(runtimeManager.getRandomHelper) ~= "function" then
+        self:_logInstallWait("g_helperManager.getRandomHelper unavailable (type=" .. tostring(type(runtimeManager.getRandomHelper)) .. ")")
         return false
     end
-    if type(runtimeReleaseHelper) ~= "function" then
-        self:_logInstallWait("g_helperManager.releaseHelper unavailable (type=" .. tostring(type(runtimeReleaseHelper)) .. ")")
+
+    if AutoDriveStartStopEvent == nil then
+        self:_logInstallWait("AutoDriveStartStopEvent unavailable")
+        return false
+    end
+    if type(AutoDriveStartStopEvent.sendStartEvent) ~= "function" then
+        self:_logInstallWait("AutoDriveStartStopEvent.sendStartEvent unavailable")
+        return false
+    end
+    if type(AutoDriveStartStopEvent.sendStopEvent) ~= "function" then
+        self:_logInstallWait("AutoDriveStartStopEvent.sendStopEvent unavailable")
         return false
     end
 
     self.runtimeManager = runtimeManager
-    self.originalGetRandomHelper = runtimeGetRandomHelper
+
+    self.originalGetRandomHelper = runtimeManager.getRandomHelper
     runtimeManager.getRandomHelper = function(manager, ...)
-        local reservedHelper, awaitingVehicle = HP_AutoDriveContinuityV3:getReservedReacquire()
-        if reservedHelper ~= nil then
-            print(("[FS25_HelperProfiles] getRandomHelper -> '%s' (autodrive-session-continuity)"):format(helperName(reservedHelper)))
-            return reservedHelper
-        end
-
-        local helper = HP_AutoDriveContinuityV3.originalGetRandomHelper(manager, ...)
+        local helper = HP_AutoDriveContinuityV4:_getSynchronousRestartHelper()
         if helper ~= nil then
-            HP_AutoDriveContinuityV3:captureInitialAllocation(helper, awaitingVehicle)
+            print(("[FS25_HelperProfiles] getRandomHelper -> '%s' (autodrive-event-continuity)"):format(helperName(helper)))
+            return helper
         end
-        return helper
-    end
-
-    self.originalReleaseHelper = runtimeReleaseHelper
-    runtimeManager.releaseHelper = function(manager, helper, ...)
-        HP_AutoDriveContinuityV3:observeRelease(helper)
-        return HP_AutoDriveContinuityV3.originalReleaseHelper(manager, helper, ...)
+        return HP_AutoDriveContinuityV4.originalGetRandomHelper(manager, ...)
     end
 
     if HelperProfiles.isHelperActive ~= nil then
         self.originalIsHelperActive = HelperProfiles.isHelperActive
         HelperProfiles.isHelperActive = function(helperProfilesSelf, helper)
-            if HP_AutoDriveContinuityV3:isReserved(helper) then
+            if HP_AutoDriveContinuityV4:isReserved(helper) then
                 return true
             end
-            return HP_AutoDriveContinuityV3.originalIsHelperActive(helperProfilesSelf, helper)
+            return HP_AutoDriveContinuityV4.originalIsHelperActive(helperProfilesSelf, helper)
         end
+    end
+
+    self.originalSendStartEvent = AutoDriveStartStopEvent.sendStartEvent
+    AutoDriveStartStopEvent.sendStartEvent = function(eventSelf, vehicle, ...)
+        HP_AutoDriveContinuityV4:_onAutoDriveStartEvent(vehicle)
+        return HP_AutoDriveContinuityV4.originalSendStartEvent(eventSelf, vehicle, ...)
+    end
+
+    self.originalSendStopEvent = AutoDriveStartStopEvent.sendStopEvent
+    AutoDriveStartStopEvent.sendStopEvent = function(eventSelf, vehicle, ...)
+        HP_AutoDriveContinuityV4:_onAutoDriveStopEvent(vehicle)
+        return HP_AutoDriveContinuityV4.originalSendStopEvent(eventSelf, vehicle, ...)
     end
 
     self.installed = true
     self._lastWaitReason = nil
-    log(
-        "Installed session-ownership continuity hooks (getRandomHelper=%s releaseHelper=%s stopGraceMs=%d)",
-        tostring(type(runtimeGetRandomHelper)),
-        tostring(type(runtimeReleaseHelper)),
-        tonumber(self.stopGraceMs) or 500
-    )
+    log("Installed AutoDrive event-context continuity hooks")
     return true
 end
 
-function HP_AutoDriveContinuityV3:loadMap()
+function HP_AutoDriveContinuityV4:loadMap()
     self.reservations = setmetatable({}, {__mode = "k"})
+    self.pendingRestartVehicle = nil
     self._lastWaitReason = nil
     self._lastWaitLogMs = -100000
 end
 
-function HP_AutoDriveContinuityV3:update(dt)
+function HP_AutoDriveContinuityV4:update(dt)
     if HP_Compatibility ~= nil and HP_Compatibility:isBlocked() then
         return
     end
@@ -391,12 +333,13 @@ function HP_AutoDriveContinuityV3:update(dt)
     if not self.installed then
         self:install()
     else
-        self:_updateReservations()
+        self:_expireUnrestartedStop()
     end
 end
 
-function HP_AutoDriveContinuityV3:deleteMap()
+function HP_AutoDriveContinuityV4:deleteMap()
     self.reservations = setmetatable({}, {__mode = "k"})
+    self.pendingRestartVehicle = nil
 end
 
-addModEventListener(HP_AutoDriveContinuityV3)
+addModEventListener(HP_AutoDriveContinuityV4)

@@ -2,6 +2,8 @@
 -- Event-driven AutoDrive helper continuity bridge.
 -- Loaded after HelperProfiles.lua so its hooks wrap the final HelperProfiles picker.
 
+print("[FS25_HelperProfiles/AutoDriveV2] Source loaded (runtime-manager hook build)")
+
 -- The first continuity prototype lives in HP_Compatibility.lua. Disable its polling
 -- update path for this test build so only the event-driven bridge owns continuity.
 if HP_AutoDriveContinuity ~= nil then
@@ -14,7 +16,10 @@ HP_AutoDriveContinuityV2 = HP_AutoDriveContinuityV2 or {
     reservations = setmetatable({}, {__mode = "k"}),
     originalGetRandomHelper = nil,
     originalReleaseHelper = nil,
-    originalIsHelperActive = nil
+    originalIsHelperActive = nil,
+    runtimeManager = nil,
+    _lastWaitReason = nil,
+    _lastWaitLogMs = -100000
 }
 
 local LOG = "[FS25_HelperProfiles/AutoDriveV2] "
@@ -66,8 +71,14 @@ local function isEngineAvailable(helper)
     return false
 end
 
-function HP_AutoDriveContinuityV2:isEnabled()
-    return rawget(_G, "AutoDrive") ~= nil
+function HP_AutoDriveContinuityV2:_logInstallWait(reason)
+    local now = nowMs()
+    reason = tostring(reason or "unknown")
+    if self._lastWaitReason ~= reason or (now - (tonumber(self._lastWaitLogMs) or 0)) >= 1000 then
+        self._lastWaitReason = reason
+        self._lastWaitLogMs = now
+        log("Waiting to install: %s", reason)
+    end
 end
 
 function HP_AutoDriveContinuityV2:_pruneExpired()
@@ -114,7 +125,7 @@ function HP_AutoDriveContinuityV2:_findOwningVehicle(helper)
 end
 
 function HP_AutoDriveContinuityV2:captureRelease(helper)
-    if not self:isEnabled() or helper == nil then return false end
+    if helper == nil then return false end
 
     local vehicle = self:_findOwningVehicle(helper)
     if vehicle == nil then return false end
@@ -139,7 +150,6 @@ function HP_AutoDriveContinuityV2:captureRelease(helper)
 end
 
 function HP_AutoDriveContinuityV2:getReacquireHelper()
-    if not self:isEnabled() then return nil, nil end
     self:_pruneExpired()
 
     local matchedVehicle = nil
@@ -182,12 +192,40 @@ end
 
 function HP_AutoDriveContinuityV2:install()
     if self.installed then return true end
-    if not self:isEnabled() then return false end
-    if HelperProfiles == nil or HelperProfiles._hooksDone ~= true then return false end
-    if HelperManager == nil or HelperManager.getRandomHelper == nil or HelperManager.releaseHelper == nil then return false end
 
-    self.originalGetRandomHelper = HelperManager.getRandomHelper
-    HelperManager.getRandomHelper = function(manager, ...)
+    if HelperProfiles == nil then
+        self:_logInstallWait("HelperProfiles global unavailable")
+        return false
+    end
+    if HelperProfiles._hooksDone ~= true then
+        self:_logInstallWait("HelperProfiles getRandomHelper hook not ready")
+        return false
+    end
+
+    local runtimeManager = rawget(_G, "g_helperManager")
+    if runtimeManager == nil then
+        self:_logInstallWait("g_helperManager unavailable")
+        return false
+    end
+
+    local runtimeGetRandomHelper = runtimeManager.getRandomHelper
+    local runtimeReleaseHelper = runtimeManager.releaseHelper
+
+    if type(runtimeGetRandomHelper) ~= "function" then
+        self:_logInstallWait("g_helperManager.getRandomHelper unavailable (type=" .. tostring(type(runtimeGetRandomHelper)) .. ")")
+        return false
+    end
+    if type(runtimeReleaseHelper) ~= "function" then
+        self:_logInstallWait("g_helperManager.releaseHelper unavailable (type=" .. tostring(type(runtimeReleaseHelper)) .. ")")
+        return false
+    end
+
+    -- Hook the live manager instance rather than assuming both methods are exposed
+    -- directly on the HelperManager class. AutoDrive invokes g_helperManager with
+    -- colon syntax, so these instance wrappers intercept the exact runtime calls.
+    self.runtimeManager = runtimeManager
+    self.originalGetRandomHelper = runtimeGetRandomHelper
+    runtimeManager.getRandomHelper = function(manager, ...)
         local helper = HP_AutoDriveContinuityV2:getReacquireHelper()
         if helper ~= nil then
             print(("[FS25_HelperProfiles] getRandomHelper -> '%s' (autodrive-continuity)"):format(tostring(helper.name)))
@@ -196,8 +234,8 @@ function HP_AutoDriveContinuityV2:install()
         return HP_AutoDriveContinuityV2.originalGetRandomHelper(manager, ...)
     end
 
-    self.originalReleaseHelper = HelperManager.releaseHelper
-    HelperManager.releaseHelper = function(manager, helper, ...)
+    self.originalReleaseHelper = runtimeReleaseHelper
+    runtimeManager.releaseHelper = function(manager, helper, ...)
         HP_AutoDriveContinuityV2:captureRelease(helper)
         return HP_AutoDriveContinuityV2.originalReleaseHelper(manager, helper, ...)
     end
@@ -213,12 +251,19 @@ function HP_AutoDriveContinuityV2:install()
     end
 
     self.installed = true
-    log("Installed event-driven getRandomHelper/releaseHelper continuity hooks")
+    self._lastWaitReason = nil
+    log(
+        "Installed event-driven runtime-manager continuity hooks (getRandomHelper=%s releaseHelper=%s)",
+        tostring(type(runtimeGetRandomHelper)),
+        tostring(type(runtimeReleaseHelper))
+    )
     return true
 end
 
 function HP_AutoDriveContinuityV2:loadMap()
     self.reservations = setmetatable({}, {__mode = "k"})
+    self._lastWaitReason = nil
+    self._lastWaitLogMs = -100000
 end
 
 function HP_AutoDriveContinuityV2:update(dt)

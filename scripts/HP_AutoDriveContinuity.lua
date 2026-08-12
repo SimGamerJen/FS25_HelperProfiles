@@ -74,7 +74,7 @@ end
 function HP_AutoDriveContinuityV2:_logInstallWait(reason)
     local now = nowMs()
     reason = tostring(reason or "unknown")
-    if self._lastWaitReason ~= reason or (now - (tonumber(self._lastWaitLogMs) or 0)) >= 1000 then
+    if self._lastWaitReason ~= reason or (now - (tonumber(self._lastWaitLogMs) or 0)) >= 10000 then
         self._lastWaitReason = reason
         self._lastWaitLogMs = now
         log("Waiting to install: %s", reason)
@@ -202,7 +202,10 @@ function HP_AutoDriveContinuityV2:install()
         return false
     end
 
-    local runtimeManager = rawget(_G, "g_helperManager")
+    -- IMPORTANT: use normal global lookup here. GIANTS mod environments can expose
+    -- engine globals through the environment metatable, so rawget(_G, ...) may
+    -- incorrectly report a valid engine global as missing.
+    local runtimeManager = g_helperManager
     if runtimeManager == nil then
         self:_logInstallWait("g_helperManager unavailable")
         return false

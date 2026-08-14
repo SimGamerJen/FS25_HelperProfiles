@@ -217,6 +217,7 @@ Version 2.0.26.0 :
         <sourceFile filename="scripts/HP_AppearanceMenu.lua"/>
         <sourceFile filename="scripts/gui/HP_AppearanceBindingsScreen.lua"/>
         <sourceFile filename="scripts/HelperProfiles.lua"/>
+        <sourceFile filename="scripts/HP_AutoDriveContinuity.lua"/>
         <sourceFile filename="scripts/HP_RosterExpansion.lua"/>
         <sourceFile filename="scripts/HP_IntegrationAPI.lua"/>
         <sourceFile filename="scripts/RegisterPlayerActionEvents.lua"/>

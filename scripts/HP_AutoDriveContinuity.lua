@@ -374,4 +374,14 @@ function HP_AutoDriveContinuityV5:deleteMap()
     self.pendingByVehicle = setmetatable({}, {__mode = "k"})
 end
 
+-- Keep payroll accounting optional and outside the continuity algorithm. The
+-- bridge is sourced here so older modDesc files on this feature branch do not
+-- need a new load-order dependency; failure to load it must never disable V5.
+if source ~= nil and g_currentModDirectory ~= nil then
+    local ok, err = pcall(source, g_currentModDirectory .. "scripts/HP_AutoDrivePayrollBridge.lua")
+    if not ok then
+        log("Optional HelperPayroll bridge failed to load: %s", tostring(err))
+    end
+end
+
 addModEventListener(HP_AutoDriveContinuityV5)

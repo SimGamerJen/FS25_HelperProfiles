@@ -22,15 +22,14 @@
             </BoxLayout>
             <ThreePartBitmap profile="fs25_lineSeparatorTopHighlighted" position="45px -119px" size="1105px 2px" />
 
-            <Bitmap profile="hpHeaderBox" id="rosterHeaderBox" position="45px -135px" size="1105px 50px">
+            <GuiElement id="rosterHeaderBox" position="45px -135px" size="1105px 50px">
                 <Text profile="hpHeaderLeft" position="10px 0px" size="55px 40.77px" text="$l10n_hp_roster_header_slot" />
                 <Text profile="hpHeaderLeft" position="75px 0px" size="210px 40.77px" text="$l10n_hp_roster_header_worker" />
                 <Text profile="hpHeaderLeft" position="295px 0px" size="270px 40.77px" text="$l10n_hp_roster_header_appearance" />
                 <Text profile="hpHeaderLeft" position="575px 0px" size="170px 40.77px" text="$l10n_hp_roster_header_role" />
                 <Text profile="hpHeaderLeft" position="755px 0px" size="140px 40.77px" text="$l10n_hp_roster_header_work_state" />
                 <Text profile="hpHeaderLeft" position="905px 0px" size="185px 40.77px" text="$l10n_hp_roster_header_roster" />
-                <ThreePartBitmap profile="fs25_lineSeparatorBottom" position="0px 2px" />
-            </Bitmap>
+            </GuiElement>
 
             <SmoothList profile="hpList" id="rosterTable" position="50px -190px" size="1095px 345px" focusInit="onOpen" focusChangeTop="nil" focusChangeBottom="nil">
                 <ListItem profile="hpListItem" name="rosterRowTemplate" size="1095px 40.77px">
@@ -47,11 +46,10 @@
                 <Slider profile="fs25_listSlider" size="6px 337px" dataElementId="rosterTable" id="rosterSlider" />
             </ThreePartBitmap>
 
-            <Bitmap profile="hpDetailBox" id="detailBox" position="45px -545px" size="1105px 110px">
+            <GuiElement id="detailBox" position="45px -545px" size="1105px 110px">
                 <Text profile="hpMetaText" id="detailText" position="10px 8px" size="1085px 35px" text="$l10n_hp_roster_detail" textLayoutMode="scrolling" />
                 <Text profile="hpMetaText" id="statusText" position="10px -38px" size="1085px 35px" text="$l10n_hp_status_ready" textLayoutMode="scrolling" />
-                <ThreePartBitmap profile="fs25_lineSeparatorBottom" position="0px 2px" />
-            </Bitmap>
+            </GuiElement>
         </GuiElement>
 
         <BoxLayout profile="fs25_dialogButtonBox" size="1170px 60px">

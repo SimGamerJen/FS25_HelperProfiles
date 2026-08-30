@@ -1,4 +1,3 @@
-# Refreshable stable release workflow.
 name: Release HelperProfiles 2.1.1.0
 
 on:
@@ -21,7 +20,7 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Repair and validate stable metadata
+      - name: Repair stable release metadata
         shell: bash
         run: |
           set -euo pipefail
@@ -30,125 +29,41 @@ jobs:
           import re
           import xml.etree.ElementTree as ET
 
-          mod_desc = Path('modDesc.xml')
-          text = mod_desc.read_text(encoding='utf-8')
-
-          changelogs = {
-              'en': '''Version 2.1.1.0:
-- Fixed texture-atlas bleed and layout rendering in the Helper Management appearance and roster screens.
-- Added Integration API v7 while retaining the existing roster and identity API contract.
-- Added temporary scoped preferred-worker hiring for compatible mods such as Remote Dispatcher.
-- Scoped worker requests are fail-closed: missing, OFF-roster or already-active workers are rejected rather than silently substituted.
-- Scoped requests do not alter the normal HelperProfiles selected worker or hiring mode.
-
-Version 2.1.0.0:
-- Expanded the managed helper identity pool from A-J to A-T.
-- Added stable helper01-helper20 canonical identities while retaining existing A-J compatibility.
-- Added per-save ON/OFF roster availability management.
-- Added the two-tab Helper Management interface for Appearances and Helper Roster.
-- OFF-roster workers are excluded from cycling, overlay selection, next-worker calculations, and hiring.
-- Added active-worker and at-least-one-worker roster safeguards.
-- Added guarded Disable Others and Enable All bulk actions.
-- Preserved AvatarSwitcher bindings, HelperPayroll roles, compensation overrides, and ledger identities when workers are disabled and re-enabled.
-- Kept HelperPayroll roles visible when the operational roster is filtered.
-- Added automatic A-J/K-T overlay paging.
-- Made active appearance bindings read-only.
-- Added Hired Helper Tool and external-roster incompatibility protection.
-- Improved startup and roster filtering performance to prevent the earlier FPS regression.
-- Added hpRoster and hpRosterManage diagnostics and management commands.
-
-Version 2.0.27.3:
-- Fixed duplicate shortcut prompts in the Profiles screen button bar.
-- Added distinct ESC, X, C, A, and Enter actions for Close, Bind, Clear, Clear All, and Save.
-
-Version 2.0.27.2:
-- Added a live HelperPayroll ROLE column to the main HelperProfiles overlay.
-- Compacted repeated worker names so the role column fits cleanly.
-
-Version 2.0.26.0:
-- Reworked the helper overlay into a clean, autosizing table.
-- Added measured columns, compact status information, and row highlighting.
-- Set multiplayer support to false.''',
-              'de': '''Version 2.1.1.0:
-- Textur-Atlas-Artefakte und Layout-Darstellungsfehler in den Ansichten Erscheinungsbilder und Helferliste wurden behoben.
-- Integration API v7 wurde hinzugefügt; der bestehende Helferlisten- und Identitätsvertrag bleibt erhalten.
-- Kompatible Mods wie Remote Dispatcher können einen Helfer vorübergehend und gezielt für einen einzelnen Einstellvorgang anfordern.
-- Gezielte Anforderungen schlagen kontrolliert fehl, wenn ein Helfer fehlt, nicht im Kader ist oder bereits aktiv ist; es wird kein anderer Helfer stillschweigend eingesetzt.
-- Gezielte Anforderungen ändern weder den normal ausgewählten Helfer noch den Einstellungsmodus von HelperProfiles.
-
-Version 2.1.0.0:
-- Der verwaltete Helferpool wurde von A-J auf A-T erweitert.
-- Stabile kanonische Identitäten helper01-helper20 wurden ergänzt; vorhandene A-J-Zuordnungen bleiben kompatibel.
-- Eine spielstandsbezogene EIN/AUS-Verwaltung der Helferliste wurde hinzugefügt.
-- Die zweireitige Helferverwaltung für Erscheinungsbilder und Helferliste wurde hinzugefügt.
-- Helfer außerhalb der Liste werden beim Wechseln, in Overlay-Berechnungen und beim Einstellen ausgeschlossen.
-- Schutzregeln für aktive Helfer und mindestens einen verbleibenden Helfer wurden ergänzt.
-- Geschützte Massenaktionen Andere deaktivieren und Alle aktivieren wurden hinzugefügt.
-- AvatarSwitcher-Bindungen, HelperPayroll-Rollen, Vergütungsüberschreibungen und Ledger-Identitäten bleiben beim Deaktivieren erhalten.
-- HelperPayroll-Rollen bleiben bei gefilterter Helferliste sichtbar.
-- Automatische Overlay-Seiten A-J/K-T wurden hinzugefügt.
-- Aktive Erscheinungsbindungen sind schreibgeschützt.
-- Schutz vor Hired Helper Tool und externen Helferlisten wurde ergänzt.
-- Start- und Filterleistung wurden verbessert, um den früheren FPS-Einbruch zu verhindern.
-- Die Befehle hpRoster und hpRosterManage wurden ergänzt.
-
-Version 2.0.27.3:
-- Doppelte Tastenkürzel in der Schaltflächenleiste wurden behoben.
-- Separate Aktionen für ESC, X, C, A und Enter wurden hinzugefügt.
-
-Version 2.0.27.2:
-- Eine Live-Spalte ROLLE für HelperPayroll wurde dem Haupt-Overlay hinzugefügt.
-
-Version 2.0.26.0:
-- Das Helfer-Overlay wurde zu einer automatisch skalierenden Tabelle überarbeitet.
-- Die Mehrspielerunterstützung wurde auf false gesetzt.''',
-              'fr': '''Version 2.1.1.0 :
-- Correction des débordements de l'atlas de textures et des problèmes de mise en page dans les écrans Apparences et Liste des aides.
-- Ajout de l'API d'intégration v7 tout en conservant le contrat existant de liste et d'identité.
-- Ajout d'une demande temporaire et ciblée d'aide pour les mods compatibles tels que Remote Dispatcher.
-- Les demandes ciblées échouent proprement si l'aide est absente, hors liste ou déjà active ; aucune autre aide n'est substituée silencieusement.
-- Les demandes ciblées ne modifient ni l'aide normalement sélectionnée ni le mode d'embauche de HelperProfiles.
-
-Version 2.1.0.0 :
-- Le groupe d'aides géré a été étendu de A-J à A-T.
-- Des identités canoniques stables helper01-helper20 ont été ajoutées tout en conservant la compatibilité A-J.
-- Une gestion ACTIF/INACTIF de la liste par sauvegarde a été ajoutée.
-- L'écran de gestion à deux onglets Apparences et Liste des aides a été ajouté.
-- Les aides hors liste sont exclues du défilement, de la superposition, du calcul de la prochaine aide et de l'embauche.
-- Des protections pour les aides actives et la dernière aide disponible ont été ajoutées.
-- Les actions groupées Désactiver les autres et Tout activer sont protégées.
-- Les apparences AvatarSwitcher, rôles HelperPayroll, réglages de rémunération et identités de registre sont conservés.
-- Les rôles HelperPayroll restent visibles lorsque la liste opérationnelle est filtrée.
-- La pagination automatique A-J/K-T de la superposition a été ajoutée.
-- Les liaisons d'apparence des aides actives sont en lecture seule.
-- Une protection contre Hired Helper Tool et les listes externes a été ajoutée.
-- Les performances de démarrage et de filtrage ont été améliorées afin d'éviter l'ancienne chute de FPS.
-- Les commandes hpRoster et hpRosterManage ont été ajoutées.
-
-Version 2.0.27.3 :
-- Les raccourcis en double de la barre de boutons ont été corrigés.
-- Des actions distinctes ESC, X, C, A et Entrée ont été ajoutées.
-
-Version 2.0.27.2 :
-- Une colonne RÔLE HelperPayroll en direct a été ajoutée au principal affichage HelperProfiles.
-
-Version 2.0.26.0 :
-- La superposition a été transformée en tableau redimensionnable.
-- La prise en charge du multijoueur a été définie sur false.'''
-          }
-
-          before, marker, after = text.partition('    <changelog>')
+          path = Path('modDesc.xml')
+          text = path.read_text(encoding='utf-8')
+          before, marker, changelog = text.partition('    <changelog>')
           if not marker:
               raise SystemExit('Missing changelog section')
-          for lang, body in changelogs.items():
-              pattern = rf'(<{lang}><!\[CDATA\[).*?(\]\]></{lang}>)'
-              after, count = re.subn(pattern, lambda m: m.group(1) + '\n' + body + '\n' + m.group(2), after, count=1, flags=re.S)
-              if count != 1:
-                  raise SystemExit(f'Could not replace {lang} changelog')
-          mod_desc.write_text(before + marker + after, encoding='utf-8')
+
+          german_lines = [
+              'Version 2.1.1.0:',
+              '- Textur-Atlas-Artefakte und Layout-Darstellungsfehler in den Ansichten Erscheinungsbilder und Helferliste wurden behoben.',
+              '- Integration API v7 wurde hinzugefügt; der bestehende Helferlisten- und Identitätsvertrag bleibt erhalten.',
+              '- Kompatible Mods wie Remote Dispatcher können einen Helfer vorübergehend und gezielt für einen einzelnen Einstellvorgang anfordern.',
+              '- Gezielte Anforderungen schlagen kontrolliert fehl, wenn ein Helfer fehlt, nicht im Kader ist oder bereits aktiv ist; es wird kein anderer Helfer stillschweigend eingesetzt.',
+              '- Gezielte Anforderungen ändern weder den normal ausgewählten Helfer noch den Einstellungsmodus von HelperProfiles.',
+              ''
+          ]
+          german_block = '\n'.join(german_lines)
+
+          # Remove the accidentally inserted German 2.1.1.0 block from EN.
+          changelog = changelog.replace(german_block, '', 1)
+
+          # Add it to the German changelog if it is not already present there.
+          de_match = re.search(r'<de><!\[CDATA\[(.*?)\]\]></de>', changelog, flags=re.S)
+          if de_match is None:
+              raise SystemExit('Missing German changelog')
+          de_body = de_match.group(1)
+          if 'Textur-Atlas-Artefakte' not in de_body:
+              replacement = '<de><![CDATA[\n' + german_block + de_body.lstrip('\n') + ']]></de>'
+              changelog = changelog[:de_match.start()] + replacement + changelog[de_match.end():]
+
+          text = before + marker + changelog
+          path.write_text(text, encoding='utf-8')
 
           compat = Path('scripts/HP_Compatibility.lua')
-          ctext = compat.read_text(encoding='utf-8').replace(
+          ctext = compat.read_text(encoding='utf-8')
+          ctext = ctext.replace(
               'caused the 2.1.1.0 alpha to scan every loaded mod on every frame.',
               'caused the 2.1.0.0 alpha to scan every loaded mod on every frame.'
           )
@@ -156,11 +71,21 @@ Version 2.0.26.0 :
 
           root = ET.parse('modDesc.xml').getroot()
           if root.findtext('version') != '2.1.1.0':
-              raise SystemExit('modDesc version is not 2.1.1.0')
+              raise SystemExit('Unexpected modDesc version')
+
+          repaired = path.read_text(encoding='utf-8')
+          _, _, repaired_changelog = repaired.partition('    <changelog>')
+          en = re.search(r'<en><!\[CDATA\[(.*?)\]\]></en>', repaired_changelog, flags=re.S).group(1)
+          de = re.search(r'<de><!\[CDATA\[(.*?)\]\]></de>', repaired_changelog, flags=re.S).group(1)
+          if 'Textur-Atlas-Artefakte' in en:
+              raise SystemExit('German release notes still present in English changelog')
+          if not de.lstrip().startswith('Version 2.1.1.0:'):
+              raise SystemExit('German changelog does not start with 2.1.1.0')
+
           api = Path('scripts/HP_IntegrationAPI.lua').read_text(encoding='utf-8')
-          for required in ('apiVersion = 7', 'modVersion = "2.1.1.0"', 'supportsScopedPreferredHire = true'):
-              if required not in api:
-                  raise SystemExit(f'Missing API v7 marker: {required}')
+          for wanted in ['apiVersion = 7', 'modVersion = "2.1.1.0"', 'supportsScopedPreferredHire = true']:
+              if wanted not in api:
+                  raise SystemExit('Missing API v7 marker: ' + wanted)
           PY
 
       - name: Commit metadata corrections
@@ -170,14 +95,12 @@ Version 2.0.26.0 :
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add modDesc.xml scripts/HP_Compatibility.lua
-          if git diff --cached --quiet; then
-            echo "Stable metadata already clean."
-          else
+          if ! git diff --cached --quiet; then
             git commit -m "Correct HelperProfiles 2.1.1.0 release metadata"
             git push origin HEAD:main
           fi
 
-      - name: Validate XML and package inputs
+      - name: Validate package inputs
         shell: bash
         run: |
           set -euo pipefail
@@ -208,7 +131,7 @@ Version 2.0.26.0 :
               }
               missing = sorted(required - names)
               if missing:
-                  raise SystemExit(f'Missing required package files: {missing}')
+                  raise SystemExit('Missing required package files: ' + ', '.join(missing))
               root = ET.fromstring(archive.read('modDesc.xml'))
               if root.findtext('version') != '2.1.1.0':
                   raise SystemExit('Unexpected packaged version')

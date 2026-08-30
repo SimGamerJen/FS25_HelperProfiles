@@ -1,0 +1,254 @@
+name: Release HelperProfiles 2.1.1.0
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - .github/workflows/release-2.1.1.0.yml
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Prepare 2.1.1.0 stable metadata
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+
+          OLD = "2.1.0.0"
+          NEW = "2.1.1.0"
+
+          # Keep every runtime/script version string aligned with modDesc.
+          for path in Path("scripts").rglob("*.lua"):
+              text = path.read_text(encoding="utf-8")
+              if OLD in text:
+                  path.write_text(text.replace(OLD, NEW), encoding="utf-8")
+
+          mod_desc = Path("modDesc.xml")
+          text = mod_desc.read_text(encoding="utf-8")
+          text = text.replace("<version>2.1.0.0</version>", "<version>2.1.1.0</version>", 1)
+
+          text = text.replace(
+              "Version 2.1.0.0 expands the permanent helper identity pool from A-J to A-T and adds per-save roster availability management.",
+              "Version 2.1.1.0 is a stable maintenance update that fixes Helper Management rendering and adds Integration API v7 for compatible mods.\n\nVersion 2.1.0.0 expanded the permanent helper identity pool from A-J to A-T and added per-save roster availability management.",
+              1,
+          )
+          text = text.replace(
+              "Version 2.1.0.0 erweitert den dauerhaften Helferpool von A-J auf A-T und fügt eine spielstandsbezogene Helferlistenverwaltung hinzu.",
+              "Version 2.1.1.0 ist ein stabiles Wartungsupdate, das die Darstellung der Helferverwaltung korrigiert und die Integration API v7 für kompatible Mods hinzufügt.\n\nVersion 2.1.0.0 erweiterte den dauerhaften Helferpool von A-J auf A-T und fügte eine spielstandsbezogene Helferlistenverwaltung hinzu.",
+              1,
+          )
+          text = text.replace(
+              "La version 2.1.0.0 étend le groupe permanent d'aides de A-J à A-T et ajoute une gestion de liste par sauvegarde.",
+              "La version 2.1.1.0 est une mise à jour de maintenance stable qui corrige l'affichage de la gestion des aides et ajoute l'API d'intégration v7 pour les mods compatibles.\n\nLa version 2.1.0.0 a étendu le groupe permanent d'aides de A-J à A-T et ajouté une gestion de liste par sauvegarde.",
+              1,
+          )
+
+          en = """Version 2.1.1.0:
+          - Fixed texture-atlas bleed and layout rendering in the Helper Management appearance and roster screens.
+          - Added Integration API v7 while retaining the existing roster and identity API contract.
+          - Added temporary scoped preferred-worker hiring for compatible mods such as Remote Dispatcher.
+          - Scoped worker requests are fail-closed: missing, OFF-roster or already-active workers are rejected rather than silently substituted.
+          - Scoped requests do not alter the normal HelperProfiles selected worker or hiring mode.
+
+          Version 2.1.0.0:"""
+          de = """Version 2.1.1.0:
+          - Textur-Atlas-Artefakte und Layout-Darstellungsfehler in den Ansichten Erscheinungsbilder und Helferliste wurden behoben.
+          - Integration API v7 wurde hinzugefügt; der bestehende Helferlisten- und Identitätsvertrag bleibt erhalten.
+          - Kompatible Mods wie Remote Dispatcher können einen Helfer vorübergehend und gezielt für einen einzelnen Einstellvorgang anfordern.
+          - Gezielte Anforderungen schlagen kontrolliert fehl, wenn ein Helfer fehlt, nicht im Kader ist oder bereits aktiv ist; es wird kein anderer Helfer stillschweigend eingesetzt.
+          - Gezielte Anforderungen ändern weder den normal ausgewählten Helfer noch den Einstellungsmodus von HelperProfiles.
+
+          Version 2.1.0.0:"""
+          fr = """Version 2.1.1.0 :
+          - Correction des débordements de l'atlas de textures et des problèmes de mise en page dans les écrans Apparences et Liste des aides.
+          - Ajout de l'API d'intégration v7 tout en conservant le contrat existant de liste et d'identité.
+          - Ajout d'une demande temporaire et ciblée d'aide pour les mods compatibles tels que Remote Dispatcher.
+          - Les demandes ciblées échouent proprement si l'aide est absente, hors liste ou déjà active ; aucune autre aide n'est substituée silencieusement.
+          - Les demandes ciblées ne modifient ni l'aide normalement sélectionnée ni le mode d'embauche de HelperProfiles.
+
+          Version 2.1.0.0 :"""
+
+          text = text.replace("Version 2.1.0.0:", en, 1)
+          text = text.replace("Version 2.1.0.0:", de, 1)
+          text = text.replace("Version 2.1.0.0 :", fr, 1)
+          mod_desc.write_text(text, encoding="utf-8")
+
+          readme = Path("README.md")
+          text = readme.read_text(encoding="utf-8")
+          text = text.replace("> **Current version:** `2.1.0.0`", "> **Current version:** `2.1.1.0`", 1)
+          marker = "## Highlights in 2.1.0.0\n"
+          if "## Highlights in 2.1.1.0" not in text:
+              new_highlights = """## Highlights in 2.1.1.0
+
+          - Fixes Helper Management texture-atlas bleed and layout rendering in the appearance and roster screens.
+          - Adds **Integration API v7** while retaining the existing A–T roster and identity contract.
+          - Adds a temporary, scoped preferred-worker hire capability for compatible mods such as **Remote Dispatcher**.
+          - Scoped worker requests are fail-closed: missing, OFF-roster or already-active workers are rejected rather than silently replaced.
+          - Scoped requests do not change the worker selected in the normal HelperProfiles overlay or the active hiring mode.
+
+          """
+              text = text.replace(marker, new_highlights + marker, 1)
+
+          main_features = "- Console commands for selection, diagnostics, roster management and overlay configuration.\n"
+          if "Integration API v7 for compatible companion mods" not in text:
+              text = text.replace(
+                  main_features,
+                  main_features + "- Integration API v7 for compatible companion mods, including scoped preferred-worker hiring.\n",
+                  1,
+              )
+
+          version_marker = "## Version History\n\n### Version 2.1.0.0"
+          if "### Version 2.1.1.0" not in text:
+              version_block = """## Version History
+
+          ### Version 2.1.1.0
+
+          - Fixed Helper Management atlas/layout rendering issues.
+          - Added Integration API v7 with scoped preferred-worker hiring.
+          - Preserved the existing roster/identity API contract for compatible integrations.
+          - Added fail-closed named-worker requests without changing normal HelperProfiles selection.
+
+          ### Version 2.1.0.0"""
+              text = text.replace(version_marker, version_block, 1)
+
+          text = text.replace(
+              "Version `2.1.0.0` is the validated release of the A–T identity pool, per-save roster availability manager and tabbed Helper Management interface.",
+              "Version `2.1.1.0` is the current stable maintenance release of the A–T identity pool, per-save roster availability manager and tabbed Helper Management interface, with Integration API v7 available for compatible companion mods.",
+              1,
+          )
+          readme.write_text(text, encoding="utf-8")
+
+          notes = Path("docs/releases/2.1.1.0.md")
+          notes.parent.mkdir(parents=True, exist_ok=True)
+          notes.write_text("""# HelperProfiles 2.1.1.0
+
+          HelperProfiles 2.1.1.0 is a stable maintenance and integration update for the validated 2.1.x A–T helper roster.
+
+          ## Changes
+
+          - Fixed texture-atlas bleed and layout rendering in the Helper Management appearance and roster screens.
+          - Added **Integration API v7** while retaining the existing permanent-slot, identity and roster-state API contract.
+          - Added temporary **scoped preferred-worker hiring** for compatible companion mods such as Remote Dispatcher.
+          - Scoped worker requests are fail-closed: a missing, OFF-roster or already-active worker is rejected rather than silently replaced by another worker.
+          - Scoped requests do not change the worker selected in the normal HelperProfiles overlay and do not change the user's HelperProfiles hiring mode.
+
+          ## Remote Dispatcher integration
+
+          Remote Dispatcher can use API v7 to bind a prepared vehicle to a specific HelperProfiles worker. The preference exists only for the synchronous helper-hire call and is then released immediately. HelperProfiles remains the owner of the roster and normal worker-selection behaviour outside that scope.
+
+          Remote Dispatcher remains optional; HelperProfiles does not require it.
+
+          ## Compatibility
+
+          - Single-player only.
+          - AvatarSwitcher remains optional.
+          - HelperPayroll remains optional.
+          - Hired Helper Tool remains incompatible because it also owns the helper roster.
+          - Existing HelperProfiles 2.1.0.0 save data and per-save roster/appearance files remain compatible.
+
+          ## Installation
+
+          Download `FS25_HelperProfiles.zip` and place it directly in the Farming Simulator 25 mods folder. Do not unpack it.
+          """.replace("          ", ""), encoding="utf-8")
+          PY
+
+      - name: Commit stable release metadata
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add modDesc.xml README.md scripts docs/releases/2.1.1.0.md
+          if git diff --cached --quiet; then
+            echo "Release metadata already prepared."
+          else
+            git commit -m "Release HelperProfiles 2.1.1.0"
+            git push origin HEAD:main
+          fi
+
+      - name: Validate release metadata
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -q '<version>2.1.1.0</version>' modDesc.xml
+          grep -q 'apiVersion = 7' scripts/HP_IntegrationAPI.lua
+          grep -q 'modVersion = "2.1.1.0"' scripts/HP_IntegrationAPI.lua
+          test -f docs/releases/2.1.1.0.md
+          python - <<'PY'
+          import xml.etree.ElementTree as ET
+          ET.parse('modDesc.xml')
+          ET.parse('gui/HP_AppearanceBindingsScreen.xml')
+          ET.parse('gui/HP_RosterManagerScreen.xml')
+          ET.parse('gui/guiProfiles.xml')
+          PY
+
+      - name: Build Farming Simulator mod package
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -f FS25_HelperProfiles.zip
+          zip -r FS25_HelperProfiles.zip \
+            modDesc.xml \
+            icon_helperProfiles.dds \
+            gui \
+            l10n \
+            scripts \
+            -x '*.DS_Store' '*__MACOSX*'
+
+          python - <<'PY'
+          import zipfile
+          import xml.etree.ElementTree as ET
+
+          package = 'FS25_HelperProfiles.zip'
+          with zipfile.ZipFile(package, 'r') as archive:
+              names = set(archive.namelist())
+              required = {
+                  'modDesc.xml',
+                  'icon_helperProfiles.dds',
+                  'gui/HP_AppearanceBindingsScreen.xml',
+                  'gui/HP_RosterManagerScreen.xml',
+                  'scripts/HelperProfiles.lua',
+                  'scripts/HP_RosterState.lua',
+                  'scripts/HP_RosterFilter.lua',
+                  'scripts/HP_RosterManagerScreen.lua',
+                  'scripts/HP_TabbedManagement.lua',
+                  'scripts/HP_IntegrationAPI.lua',
+              }
+              missing = sorted(required - names)
+              if missing:
+                  raise SystemExit(f'Missing required package files: {missing}')
+              root = ET.fromstring(archive.read('modDesc.xml'))
+              version = root.findtext('version')
+              if version != '2.1.1.0':
+                  raise SystemExit(f'Unexpected mod version: {version}')
+          PY
+
+      - name: Publish GitHub release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          TAG='2.1.1.0'
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            echo "Release $TAG already exists; no duplicate release created."
+            exit 0
+          fi
+
+          gh release create "$TAG" \
+            FS25_HelperProfiles.zip \
+            --target main \
+            --title 'HelperProfiles 2.1.1.0' \
+            --notes-file docs/releases/2.1.1.0.md

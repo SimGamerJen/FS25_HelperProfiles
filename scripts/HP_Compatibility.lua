@@ -223,7 +223,7 @@ end
 function HP_Compatibility:isBlocked()
     -- This accessor is used by render, input and helper-selection hot paths.
     -- It must remain a cached state lookup: performing a full mod-manager scan
-    -- here caused the 2.1.1.0 alpha to scan every loaded mod on every frame.
+    -- here caused the 2.1.0.0 alpha to scan every loaded mod on every frame.
     return self.blocked == true
 end
 

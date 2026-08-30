@@ -100,12 +100,6 @@ Version 2.1.1.0:
 - Scoped worker requests are fail-closed: missing, OFF-roster or already-active workers are rejected rather than silently substituted.
 - Scoped requests do not alter the normal HelperProfiles selected worker or hiring mode.
 
-Version 2.1.1.0:
-- Textur-Atlas-Artefakte und Layout-Darstellungsfehler in den Ansichten Erscheinungsbilder und Helferliste wurden behoben.
-- Integration API v7 wurde hinzugefügt; der bestehende Helferlisten- und Identitätsvertrag bleibt erhalten.
-- Kompatible Mods wie Remote Dispatcher können einen Helfer vorübergehend und gezielt für einen einzelnen Einstellvorgang anfordern.
-- Gezielte Anforderungen schlagen kontrolliert fehl, wenn ein Helfer fehlt, nicht im Kader ist oder bereits aktiv ist; es wird kein anderer Helfer stillschweigend eingesetzt.
-- Gezielte Anforderungen ändern weder den normal ausgewählten Helfer noch den Einstellungsmodus von HelperProfiles.
 
 Version 2.1.0.0:
 - Expanded the managed helper identity pool from A-J to A-T.
@@ -137,6 +131,12 @@ Version 2.0.26.0:
 - Set multiplayer support to false.
 ]]></en>
         <de><![CDATA[
+Version 2.1.1.0:
+- Textur-Atlas-Artefakte und Layout-Darstellungsfehler in den Ansichten Erscheinungsbilder und Helferliste wurden behoben.
+- Integration API v7 wurde hinzugefügt; der bestehende Helferlisten- und Identitätsvertrag bleibt erhalten.
+- Kompatible Mods wie Remote Dispatcher können einen Helfer vorübergehend und gezielt für einen einzelnen Einstellvorgang anfordern.
+- Gezielte Anforderungen schlagen kontrolliert fehl, wenn ein Helfer fehlt, nicht im Kader ist oder bereits aktiv ist; es wird kein anderer Helfer stillschweigend eingesetzt.
+- Gezielte Anforderungen ändern weder den normal ausgewählten Helfer noch den Einstellungsmodus von HelperProfiles.
 Version 2.1.0.0:
 - Der verwaltete Helferpool wurde von A-J auf A-T erweitert.
 - Stabile kanonische Identitäten helper01-helper20 wurden ergänzt; vorhandene A-J-Zuordnungen bleiben kompatibel.

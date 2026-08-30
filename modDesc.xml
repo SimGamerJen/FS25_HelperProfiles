@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <modDesc descVersion="110">
     <author>SimGamerJen</author>
-    <version>2.1.0.0</version>
+    <version>2.1.1.0</version>
     <title>
         <en>Helper Profiles</en>
         <de>Helferprofile</de>
@@ -11,7 +11,9 @@
         <en><![CDATA[
 Helper Profiles is a single-player helper-management mod for Farming Simulator 25.
 
-Version 2.1.0.0 expands the permanent helper identity pool from A-J to A-T and adds per-save roster availability management. Workers can be placed ON or OFF roster without deleting their appearance bindings, HelperPayroll roles, overrides, or ledger identity.
+Version 2.1.1.0 is a stable maintenance update that fixes Helper Management rendering and adds Integration API v7 for compatible mods.
+
+Version 2.1.0.0 expanded the permanent helper identity pool from A-J to A-T and added per-save roster availability management. Workers can be placed ON or OFF roster without deleting their appearance bindings, HelperPayroll roles, overrides, or ledger identity.
 
 Main features:
 - Autosizing helper overlay with selected, next, available, active, appearance, and optional HelperPayroll role information.
@@ -36,7 +38,9 @@ RALT + ; toggles the overlay.
         <de><![CDATA[
 Helferprofile ist ein Helfer-Verwaltungsmod für den Einzelspielermodus von Farming Simulator 25.
 
-Version 2.1.0.0 erweitert den dauerhaften Helferpool von A-J auf A-T und fügt eine spielstandsbezogene Helferlistenverwaltung hinzu. Helfer können in die Liste aufgenommen oder daraus entfernt werden, ohne Erscheinungsbindungen, HelperPayroll-Rollen, Überschreibungen oder Ledger-Identitäten zu löschen.
+Version 2.1.1.0 ist ein stabiles Wartungsupdate, das die Darstellung der Helferverwaltung korrigiert und die Integration API v7 für kompatible Mods hinzufügt.
+
+Version 2.1.0.0 erweiterte den dauerhaften Helferpool von A-J auf A-T und fügte eine spielstandsbezogene Helferlistenverwaltung hinzu. Helfer können in die Liste aufgenommen oder daraus entfernt werden, ohne Erscheinungsbindungen, HelperPayroll-Rollen, Überschreibungen oder Ledger-Identitäten zu löschen.
 
 Hauptfunktionen:
 - Automatisch skalierendes Helfer-Overlay mit Auswahl-, Nächster-, Verfügbar-, Aktiv-, Erscheinungs- und optionalen HelperPayroll-Rolleninformationen.
@@ -61,7 +65,9 @@ RALT + ; schaltet das Overlay ein oder aus.
         <fr><![CDATA[
 Profils d'aides est un mod de gestion des aides pour le mode solo de Farming Simulator 25.
 
-La version 2.1.0.0 étend le groupe permanent d'aides de A-J à A-T et ajoute une gestion de liste par sauvegarde. Une aide peut être placée dans ou hors de la liste sans supprimer son apparence, son rôle HelperPayroll, ses réglages ni son identité de registre.
+La version 2.1.1.0 est une mise à jour de maintenance stable qui corrige l'affichage de la gestion des aides et ajoute l'API d'intégration v7 pour les mods compatibles.
+
+La version 2.1.0.0 a étendu le groupe permanent d'aides de A-J à A-T et ajouté une gestion de liste par sauvegarde. Une aide peut être placée dans ou hors de la liste sans supprimer son apparence, son rôle HelperPayroll, ses réglages ni son identité de registre.
 
 Fonctions principales :
 - Superposition redimensionnable affichant la sélection, la prochaine aide, l'état disponible ou actif, l'apparence et le rôle HelperPayroll facultatif.
@@ -87,6 +93,20 @@ RALT + ; active ou désactive la superposition.
 
     <changelog>
         <en><![CDATA[
+Version 2.1.1.0:
+- Fixed texture-atlas bleed and layout rendering in the Helper Management appearance and roster screens.
+- Added Integration API v7 while retaining the existing roster and identity API contract.
+- Added temporary scoped preferred-worker hiring for compatible mods such as Remote Dispatcher.
+- Scoped worker requests are fail-closed: missing, OFF-roster or already-active workers are rejected rather than silently substituted.
+- Scoped requests do not alter the normal HelperProfiles selected worker or hiring mode.
+
+Version 2.1.1.0:
+- Textur-Atlas-Artefakte und Layout-Darstellungsfehler in den Ansichten Erscheinungsbilder und Helferliste wurden behoben.
+- Integration API v7 wurde hinzugefügt; der bestehende Helferlisten- und Identitätsvertrag bleibt erhalten.
+- Kompatible Mods wie Remote Dispatcher können einen Helfer vorübergehend und gezielt für einen einzelnen Einstellvorgang anfordern.
+- Gezielte Anforderungen schlagen kontrolliert fehl, wenn ein Helfer fehlt, nicht im Kader ist oder bereits aktiv ist; es wird kein anderer Helfer stillschweigend eingesetzt.
+- Gezielte Anforderungen ändern weder den normal ausgewählten Helfer noch den Einstellungsmodus von HelperProfiles.
+
 Version 2.1.0.0:
 - Expanded the managed helper identity pool from A-J to A-T.
 - Added stable helper01-helper20 canonical identities while retaining existing A-J compatibility.
@@ -145,6 +165,13 @@ Version 2.0.26.0:
 - Die Mehrspielerunterstützung wurde auf false gesetzt.
 ]]></de>
         <fr><![CDATA[
+Version 2.1.1.0 :
+- Correction des débordements de l'atlas de textures et des problèmes de mise en page dans les écrans Apparences et Liste des aides.
+- Ajout de l'API d'intégration v7 tout en conservant le contrat existant de liste et d'identité.
+- Ajout d'une demande temporaire et ciblée d'aide pour les mods compatibles tels que Remote Dispatcher.
+- Les demandes ciblées échouent proprement si l'aide est absente, hors liste ou déjà active ; aucune autre aide n'est substituée silencieusement.
+- Les demandes ciblées ne modifient ni l'aide normalement sélectionnée ni le mode d'embauche de HelperProfiles.
+
 Version 2.1.0.0 :
 - Le groupe d'aides géré a été étendu de A-J à A-T.
 - Des identités canoniques stables helper01-helper20 ont été ajoutées tout en conservant la compatibilité A-J.

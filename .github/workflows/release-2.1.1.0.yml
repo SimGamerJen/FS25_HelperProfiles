@@ -1,3 +1,4 @@
+# Refreshable stable release workflow.
 name: Release HelperProfiles 2.1.1.0
 
 on:
@@ -129,29 +130,25 @@ Version 2.0.27.3 :
 - Des actions distinctes ESC, X, C, A et Entrée ont été ajoutées.
 
 Version 2.0.27.2 :
-- Une colonne RÔLE HelperPayroll en direct a été ajoutée à la superposition.
+- Une colonne RÔLE HelperPayroll en direct a été ajoutée au principal affichage HelperProfiles.
 
 Version 2.0.26.0 :
 - La superposition a été transformée en tableau redimensionnable.
 - La prise en charge du multijoueur a été définie sur false.'''
           }
 
+          before, marker, after = text.partition('    <changelog>')
+          if not marker:
+              raise SystemExit('Missing changelog section')
           for lang, body in changelogs.items():
               pattern = rf'(<{lang}><!\[CDATA\[).*?(\]\]></{lang}>)'
-              # Restrict replacement to the changelog section by splitting once.
-              before, marker, after = text.partition('    <changelog>')
-              if not marker:
-                  raise SystemExit('Missing changelog section')
               after, count = re.subn(pattern, lambda m: m.group(1) + '\n' + body + '\n' + m.group(2), after, count=1, flags=re.S)
               if count != 1:
                   raise SystemExit(f'Could not replace {lang} changelog')
-              text = before + marker + after
-
-          mod_desc.write_text(text, encoding='utf-8')
+          mod_desc.write_text(before + marker + after, encoding='utf-8')
 
           compat = Path('scripts/HP_Compatibility.lua')
-          ctext = compat.read_text(encoding='utf-8')
-          ctext = ctext.replace(
+          ctext = compat.read_text(encoding='utf-8').replace(
               'caused the 2.1.1.0 alpha to scan every loaded mod on every frame.',
               'caused the 2.1.0.0 alpha to scan every loaded mod on every frame.'
           )
@@ -160,7 +157,6 @@ Version 2.0.26.0 :
           root = ET.parse('modDesc.xml').getroot()
           if root.findtext('version') != '2.1.1.0':
               raise SystemExit('modDesc version is not 2.1.1.0')
-
           api = Path('scripts/HP_IntegrationAPI.lua').read_text(encoding='utf-8')
           for required in ('apiVersion = 7', 'modVersion = "2.1.1.0"', 'supportsScopedPreferredHire = true'):
               if required not in api:
@@ -201,8 +197,7 @@ Version 2.0.26.0 :
           python - <<'PY'
           import zipfile
           import xml.etree.ElementTree as ET
-          package = 'FS25_HelperProfiles.zip'
-          with zipfile.ZipFile(package, 'r') as archive:
+          with zipfile.ZipFile('FS25_HelperProfiles.zip', 'r') as archive:
               names = set(archive.namelist())
               required = {
                   'modDesc.xml', 'icon_helperProfiles.dds',

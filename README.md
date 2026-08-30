@@ -2,9 +2,17 @@
 
 **FS25 HelperProfiles** is a single-player helper-management mod for Farming Simulator 25. It expands the standard helper roster to 20 permanent worker identities, provides deterministic helper selection, adds per-save ON/OFF roster management, displays an autosizing helper overlay, and supports save-specific AvatarSwitcher appearance bindings.
 
-> **Current version:** `2.1.0.0`  
+> **Current version:** `2.1.1.0`  
 > **Game:** Farming Simulator 25  
 > **Multiplayer:** Not supported
+
+## Highlights in 2.1.1.0
+
+- Fixes Helper Management texture-atlas bleed and layout rendering in the appearance and roster screens.
+- Adds **Integration API v7** while retaining the existing A–T roster and identity contract.
+- Adds a temporary, scoped preferred-worker hire capability for compatible mods such as **Remote Dispatcher**.
+- Scoped worker requests are fail-closed: missing, OFF-roster or already-active workers are rejected rather than silently replaced.
+- Scoped requests do not change the worker selected in the normal HelperProfiles overlay or the active hiring mode.
 
 ## Highlights in 2.1.0.0
 
@@ -33,6 +41,7 @@
 - Optional read-only HelperPayroll role information.
 - Per-save roster availability stored independently from appearance and payroll data.
 - Console commands for selection, diagnostics, roster management and overlay configuration.
+- Integration API v7 for compatible companion mods, including scoped preferred-worker hiring.
 
 ## Screenshots
 
@@ -351,6 +360,13 @@ Confirm HelperPayroll `0.4.2.0` or later is enabled for the same savegame and th
 
 ## Version History
 
+### Version 2.1.1.0
+
+- Fixed Helper Management atlas/layout rendering issues.
+- Added Integration API v7 with scoped preferred-worker hiring.
+- Preserved the existing roster/identity API contract for compatible integrations.
+- Added fail-closed named-worker requests without changing normal HelperProfiles selection.
+
 ### Version 2.1.0.0
 
 - Expanded the helper identity pool to A–T.
@@ -371,7 +387,7 @@ Confirm HelperPayroll `0.4.2.0` or later is enabled for the same savegame and th
 
 ## Development Status
 
-Version `2.1.0.0` is the validated release of the A–T identity pool, per-save roster availability manager and tabbed Helper Management interface.
+Version `2.1.1.0` is the current stable maintenance release of the A–T identity pool, per-save roster availability manager and tabbed Helper Management interface, with Integration API v7 available for compatible companion mods.
 
 A future HelperPayroll update may optionally filter or mark OFF-roster workers in its Workers tab while preserving payroll history and assignments.
 

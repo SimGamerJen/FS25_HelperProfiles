@@ -9,197 +9,99 @@
     </title>
     <description>
         <en><![CDATA[
-Helper Profiles is a single-player helper-management mod for Farming Simulator 25.
+Give your farm a consistent team of workers and choose who takes the next AI job. Helper Profiles expands the standard helper roster to 20 permanent worker slots (A-T), with a clear status overlay and a two-tab Helper Management screen.
 
-Version 2.1.1.0 is a stable maintenance update that fixes Helper Management rendering and adds Integration API v7 for compatible mods.
+Manage your team:
+- Choose which workers are available for hire in each savegame.
+- Switch individual workers ON or OFF roster, enable all workers, or disable the others while keeping your selected worker and any active workers.
+- OFF-roster workers are excluded from selection, the overlay and new hires. Their saved appearance bindings and HelperPayroll assignments are retained when they return.
+- Active workers cannot be switched OFF, and at least one worker must remain ON roster.
 
-Version 2.1.0.0 expanded the permanent helper identity pool from A-J to A-T and added per-save roster availability management. Workers can be placed ON or OFF roster without deleting their appearance bindings, HelperPayroll roles, overrides, or ledger identity.
+Choose who works next:
+- Cycle through available workers using a shortcut.
+- Prefer Selected mode hires your chosen worker when free, falling back to another available worker when needed.
+- First Free mode hires the first available worker in roster order.
+- See your selected worker, the next worker expected to be hired, and which helpers are available or active in an automatically sized table.
+- The overlay pages between A-J and K-T, can be shown or hidden, and offers configurable position, size and appearance.
 
-Main features:
-- Autosizing helper overlay with selected, next, available, active, appearance, and optional HelperPayroll role information.
-- Configurable prefer-selected and first-free hiring modes.
-- Permanent A-T helper identities with stable helper01-helper20 canonical IDs.
-- Per-save ON/OFF roster state stored under modSettings/FS25_HelperProfiles/saves/savegameX/roster.xml.
-- OFF-roster workers are excluded from cycling, overlay selection, next-worker calculations, and hiring.
-- A two-tab Helper Management screen for AvatarSwitcher appearance bindings and roster availability.
-- Active-worker and at-least-one-worker safeguards.
-- Optional AvatarSwitcher integration for save-specific worker appearances.
-- Optional read-only HelperPayroll role display.
+Personalise your helpers with optional companion mods:
+- AvatarSwitcher lets you bind saved appearance presets to individual helpers through the Appearances tab. Bindings are saved separately for each savegame.
+- HelperPayroll adds a read-only role display to the overlay and roster screen. Manage roles, pay rates and wages in HelperPayroll.
+- Helper Profiles works without either companion mod; custom appearance bindings and payroll role information require the corresponding mod.
 
-Known incompatibility:
-Do not use HelperProfiles with Hired Helper Tool. When an incompatible external helper-roster owner is detected, HelperProfiles disables itself for the current session to prevent competing roster ownership.
+Default keyboard controls:
+- Semicolon (;): cycle workers.
+- Shift + ;: switch hiring mode.
+- Right Ctrl + ;: open Helper Management (Appearances and Helper Roster tabs).
+- Right Alt + ;: show or hide the overlay.
+Controls can be reassigned in the game's control settings.
 
-Default controls:
-; cycles workers.
-SHIFT + ; toggles HelperProfiles hiring mode.
-RCTRL + ; opens Helper Management.
-RALT + ; toggles the overlay.
+Single player only.
+Not compatible with Hired Helper Tool or conflicting helper-roster expansion mods. Helper Profiles disables itself for the session when an incompatible roster owner is detected.
 ]]></en>
         <de><![CDATA[
-Helferprofile ist ein Helfer-Verwaltungsmod für den Einzelspielermodus von Farming Simulator 25.
+Stelle ein festes Team für deinen Hof zusammen und bestimme, wer den nächsten KI-Auftrag übernimmt. Helferprofile erweitert die standardmäßige Helferliste auf 20 feste Helferplätze (A-T) und bietet eine übersichtliche Statusanzeige sowie eine Helferverwaltung mit zwei Tabs.
 
-Version 2.1.1.0 ist ein stabiles Wartungsupdate, das die Darstellung der Helferverwaltung korrigiert und die Integration API v7 für kompatible Mods hinzufügt.
+Dein Team verwalten:
+- Lege für jeden Spielstand fest, welche Helfer eingestellt werden können.
+- Aktiviere oder deaktiviere einzelne Helfer, aktiviere alle oder deaktiviere die übrigen. Dabei bleiben der ausgewählte Helfer und alle arbeitenden Helfer aktiviert.
+- Deaktivierte Helfer erscheinen weder in der Auswahl noch im Overlay und werden nicht neu eingestellt. Ihre gespeicherten Erscheinungsbilder und HelperPayroll-Zuordnungen bleiben für die spätere Rückkehr erhalten.
+- Arbeitende Helfer können nicht deaktiviert werden. Mindestens ein Helfer muss aktiviert bleiben.
 
-Version 2.1.0.0 erweiterte den dauerhaften Helferpool von A-J auf A-T und fügte eine spielstandsbezogene Helferlistenverwaltung hinzu. Helfer können in die Liste aufgenommen oder daraus entfernt werden, ohne Erscheinungsbindungen, HelperPayroll-Rollen, Überschreibungen oder Ledger-Identitäten zu löschen.
+Den nächsten Helfer auswählen:
+- Wechsle per Tastenkürzel zwischen verfügbaren Helfern.
+- Der Modus „Ausgewählten bevorzugen“ stellt deinen gewählten Helfer ein, sofern er frei ist. Andernfalls wird ein anderer verfügbarer Helfer verwendet.
+- Der Modus „Ersten freien verwenden“ stellt den ersten verfügbaren Helfer in der Reihenfolge der Liste ein.
+- Eine Tabelle mit automatischer Größenanpassung zeigt den ausgewählten und den voraussichtlich nächsten Helfer sowie verfügbare und arbeitende Helfer.
+- Das Overlay wechselt zwischen den Seiten A-J und K-T. Es lässt sich ein- und ausblenden sowie in Position, Größe und Darstellung anpassen.
 
-Hauptfunktionen:
-- Automatisch skalierendes Helfer-Overlay mit Auswahl-, Nächster-, Verfügbar-, Aktiv-, Erscheinungs- und optionalen HelperPayroll-Rolleninformationen.
-- Einstellungsmodi Ausgewählten bevorzugen und Ersten freien verwenden.
-- Dauerhafte A-T-Helferidentitäten mit stabilen kanonischen IDs helper01-helper20.
-- Spielstandsbezogener EIN/AUS-Listenstatus unter modSettings/FS25_HelperProfiles/saves/savegameX/roster.xml.
-- Helfer außerhalb der Liste werden beim Wechseln, in Overlay-Berechnungen und beim Einstellen ausgeschlossen.
-- Zweireitige Helferverwaltung für AvatarSwitcher-Erscheinungsbindungen und Listenverfügbarkeit.
-- Schutz aktiver Helfer und Sicherstellung, dass mindestens ein Helfer in der Liste bleibt.
-- Optionale AvatarSwitcher-Integration für spielstandsbezogene Erscheinungsbilder.
-- Optionale schreibgeschützte Anzeige von HelperPayroll-Rollen.
+Helfer mit optionalen Begleitmods personalisieren:
+- Mit AvatarSwitcher kannst du einzelnen Helfern im Tab für Erscheinungsbilder gespeicherte Aussehensvorlagen zuweisen. Die Zuordnungen werden für jeden Spielstand separat gespeichert.
+- HelperPayroll ergänzt eine schreibgeschützte Rollenanzeige im Overlay und in der Helferliste. Rollen, Lohnsätze und Löhne werden in HelperPayroll verwaltet.
+- Helferprofile funktioniert auch ohne diese Begleitmods. Eigene Erscheinungszuordnungen und Rolleninformationen benötigen den jeweiligen Mod.
 
-Bekannte Inkompatibilität:
-HelperProfiles darf nicht zusammen mit Hired Helper Tool verwendet werden. Wird ein inkompatibler externer Besitzer der Helferliste erkannt, deaktiviert sich HelperProfiles für die aktuelle Sitzung.
+Standard-Tastaturbelegung:
+- Semikolon (;): zwischen Helfern wechseln.
+- Umschalt + ;: Einstellungsmodus wechseln.
+- Rechte Strg-Taste + ;: Helferverwaltung mit den Tabs für Erscheinungsbilder und Helferliste öffnen.
+- Rechte Alt-Taste + ;: Overlay ein- oder ausblenden.
+Die Tasten können in den Steuerungseinstellungen des Spiels geändert werden.
 
-Standardsteuerung:
-; wechselt zwischen Helfern.
-SHIFT + ; schaltet den Einstellungsmodus um.
-RCTRL + ; öffnet die Helferverwaltung.
-RALT + ; schaltet das Overlay ein oder aus.
+Nur für den Einzelspielermodus.
+Nicht kompatibel mit Hired Helper Tool oder kollidierenden Mods zur Erweiterung der Helferliste. Wird eine inkompatible Verwaltung der Helferliste erkannt, deaktiviert sich Helferprofile für die aktuelle Sitzung.
 ]]></de>
         <fr><![CDATA[
-Profils d'aides est un mod de gestion des aides pour le mode solo de Farming Simulator 25.
+Constituez une équipe permanente pour votre ferme et choisissez qui effectuera la prochaine tâche d'IA. Profils d'aides étend la liste standard à 20 emplacements permanents (A-T), avec un tableau d'état clair et un écran de gestion à deux onglets.
 
-La version 2.1.1.0 est une mise à jour de maintenance stable qui corrige l'affichage de la gestion des aides et ajoute l'API d'intégration v7 pour les mods compatibles.
+Gérez votre équipe :
+- Choisissez les aides disponibles à l'embauche pour chaque sauvegarde.
+- Activez ou désactivez chaque aide dans la liste, activez-les toutes ou désactivez les autres en conservant l'aide sélectionnée et celles qui travaillent.
+- Les aides désactivées sont exclues de la sélection, du tableau et des nouvelles embauches. Leurs apparences enregistrées et leurs affectations HelperPayroll sont conservées pour leur retour.
+- Une aide qui travaille ne peut pas être désactivée. Au moins une aide doit rester activée dans la liste.
 
-La version 2.1.0.0 a étendu le groupe permanent d'aides de A-J à A-T et ajouté une gestion de liste par sauvegarde. Une aide peut être placée dans ou hors de la liste sans supprimer son apparence, son rôle HelperPayroll, ses réglages ni son identité de registre.
+Choisissez qui travaillera ensuite :
+- Parcourez les aides disponibles à l'aide d'un raccourci.
+- Le mode « Préférer la sélection » embauche l'aide choisie si elle est libre, ou une autre aide disponible si nécessaire.
+- Le mode « Première aide libre » embauche la première aide disponible dans l'ordre de la liste.
+- Un tableau à taille automatique affiche l'aide sélectionnée, la prochaine aide prévue à l'embauche et les aides disponibles ou au travail.
+- Le tableau passe entre les pages A-J et K-T. Vous pouvez l'afficher ou le masquer et configurer sa position, sa taille et son apparence.
 
-Fonctions principales :
-- Superposition redimensionnable affichant la sélection, la prochaine aide, l'état disponible ou actif, l'apparence et le rôle HelperPayroll facultatif.
-- Modes d'embauche Préférer la sélection et Première aide libre.
-- Identités permanentes A-T avec IDs canoniques stables helper01-helper20.
-- État de liste ACTIF/INACTIF par sauvegarde dans modSettings/FS25_HelperProfiles/saves/savegameX/roster.xml.
-- Les aides hors liste sont exclues du défilement, de la superposition, du calcul de la prochaine aide et de l'embauche.
-- Écran de gestion à deux onglets pour les apparences AvatarSwitcher et la disponibilité de la liste.
-- Protection des aides actives et obligation de conserver au moins une aide dans la liste.
-- Intégration AvatarSwitcher facultative pour les apparences par sauvegarde.
-- Affichage facultatif et en lecture seule des rôles HelperPayroll.
+Personnalisez vos aides avec des mods complémentaires facultatifs :
+- AvatarSwitcher permet d'attribuer des apparences enregistrées à chaque aide dans l'onglet Apparences. Les associations sont enregistrées séparément pour chaque sauvegarde.
+- HelperPayroll ajoute un affichage des rôles en lecture seule au tableau et à la liste des aides. Les rôles, les tarifs et les salaires se gèrent dans HelperPayroll.
+- Profils d'aides fonctionne sans ces deux mods. Les associations d'apparences personnalisées et les informations de rôle nécessitent le mod correspondant.
 
-Incompatibilité connue :
-N'utilisez pas HelperProfiles avec Hired Helper Tool. Lorsqu'un propriétaire externe incompatible de la liste est détecté, HelperProfiles se désactive pour la session en cours.
+Commandes clavier par défaut :
+- Point-virgule (;) : parcourir les aides.
+- Maj + ; : changer de mode d'embauche.
+- Ctrl droit + ; : ouvrir la gestion des aides (onglets Apparences et Liste des aides).
+- Alt droit + ; : afficher ou masquer le tableau.
+Les touches peuvent être réattribuées dans les paramètres des commandes du jeu.
 
-Commandes par défaut :
-; parcourt les aides.
-SHIFT + ; change le mode d'embauche.
-RCTRL + ; ouvre la gestion des aides.
-RALT + ; active ou désactive la superposition.
+Mode solo uniquement.
+Non compatible avec Hired Helper Tool ou les mods d'extension de la liste des aides qui entrent en conflit. Profils d'aides se désactive pour la session lorsqu'une gestion incompatible de la liste est détectée.
 ]]></fr>
     </description>
-
-    <changelog>
-        <en><![CDATA[
-Version 2.1.1.0:
-- Fixed texture-atlas bleed and layout rendering in the Helper Management appearance and roster screens.
-- Added Integration API v7 while retaining the existing roster and identity API contract.
-- Added temporary scoped preferred-worker hiring for compatible mods such as Remote Dispatcher.
-- Scoped worker requests are fail-closed: missing, OFF-roster or already-active workers are rejected rather than silently substituted.
-- Scoped requests do not alter the normal HelperProfiles selected worker or hiring mode.
-
-
-Version 2.1.0.0:
-- Expanded the managed helper identity pool from A-J to A-T.
-- Added stable helper01-helper20 canonical identities while retaining existing A-J compatibility.
-- Added per-save ON/OFF roster availability management.
-- Added the two-tab Helper Management interface for Appearances and Helper Roster.
-- OFF-roster workers are excluded from cycling, overlay selection, next-worker calculations, and hiring.
-- Added active-worker and at-least-one-worker roster safeguards.
-- Added guarded Disable Others and Enable All bulk actions.
-- Preserved AvatarSwitcher bindings, HelperPayroll roles, compensation overrides, and ledger identities when workers are disabled and re-enabled.
-- Kept HelperPayroll roles visible when the operational roster is filtered.
-- Added automatic A-J/K-T overlay paging.
-- Made active appearance bindings read-only.
-- Added Hired Helper Tool and external-roster incompatibility protection.
-- Improved startup and roster filtering performance to prevent the earlier FPS regression.
-- Added hpRoster and hpRosterManage diagnostics and management commands.
-
-Version 2.0.27.3:
-- Fixed duplicate shortcut prompts in the Profiles screen button bar.
-- Added distinct ESC, X, C, A, and Enter actions for Close, Bind, Clear, Clear All, and Save.
-
-Version 2.0.27.2:
-- Added a live HelperPayroll ROLE column to the main HelperProfiles overlay.
-- Compacted repeated worker names so the role column fits cleanly.
-
-Version 2.0.26.0:
-- Reworked the helper overlay into a clean, autosizing table.
-- Added measured columns, compact status information, and row highlighting.
-- Set multiplayer support to false.
-]]></en>
-        <de><![CDATA[
-Version 2.1.1.0:
-- Textur-Atlas-Artefakte und Layout-Darstellungsfehler in den Ansichten Erscheinungsbilder und Helferliste wurden behoben.
-- Integration API v7 wurde hinzugefügt; der bestehende Helferlisten- und Identitätsvertrag bleibt erhalten.
-- Kompatible Mods wie Remote Dispatcher können einen Helfer vorübergehend und gezielt für einen einzelnen Einstellvorgang anfordern.
-- Gezielte Anforderungen schlagen kontrolliert fehl, wenn ein Helfer fehlt, nicht im Kader ist oder bereits aktiv ist; es wird kein anderer Helfer stillschweigend eingesetzt.
-- Gezielte Anforderungen ändern weder den normal ausgewählten Helfer noch den Einstellungsmodus von HelperProfiles.
-Version 2.1.0.0:
-- Der verwaltete Helferpool wurde von A-J auf A-T erweitert.
-- Stabile kanonische Identitäten helper01-helper20 wurden ergänzt; vorhandene A-J-Zuordnungen bleiben kompatibel.
-- Eine spielstandsbezogene EIN/AUS-Verwaltung der Helferliste wurde hinzugefügt.
-- Die zweireitige Helferverwaltung für Erscheinungsbilder und Helferliste wurde hinzugefügt.
-- Helfer außerhalb der Liste werden beim Wechseln, in Overlay-Berechnungen und beim Einstellen ausgeschlossen.
-- Schutzregeln für aktive Helfer und mindestens einen verbleibenden Helfer wurden ergänzt.
-- Geschützte Massenaktionen Andere deaktivieren und Alle aktivieren wurden hinzugefügt.
-- AvatarSwitcher-Bindungen, HelperPayroll-Rollen, Vergütungsüberschreibungen und Ledger-Identitäten bleiben beim Deaktivieren erhalten.
-- HelperPayroll-Rollen bleiben bei gefilterter Helferliste sichtbar.
-- Automatische Overlay-Seiten A-J/K-T wurden hinzugefügt.
-- Aktive Erscheinungsbindungen sind schreibgeschützt.
-- Schutz vor Hired Helper Tool und externen Helferlisten wurde ergänzt.
-- Start- und Filterleistung wurden verbessert, um den früheren FPS-Einbruch zu verhindern.
-- Die Befehle hpRoster und hpRosterManage wurden ergänzt.
-
-Version 2.0.27.3:
-- Doppelte Tastenkürzel in der Schaltflächenleiste wurden behoben.
-- Separate Aktionen für ESC, X, C, A und Enter wurden hinzugefügt.
-
-Version 2.0.27.2:
-- Eine Live-Spalte ROLLE für HelperPayroll wurde dem Haupt-Overlay hinzugefügt.
-
-Version 2.0.26.0:
-- Das Helfer-Overlay wurde zu einer automatisch skalierenden Tabelle überarbeitet.
-- Die Mehrspielerunterstützung wurde auf false gesetzt.
-]]></de>
-        <fr><![CDATA[
-Version 2.1.1.0 :
-- Correction des débordements de l'atlas de textures et des problèmes de mise en page dans les écrans Apparences et Liste des aides.
-- Ajout de l'API d'intégration v7 tout en conservant le contrat existant de liste et d'identité.
-- Ajout d'une demande temporaire et ciblée d'aide pour les mods compatibles tels que Remote Dispatcher.
-- Les demandes ciblées échouent proprement si l'aide est absente, hors liste ou déjà active ; aucune autre aide n'est substituée silencieusement.
-- Les demandes ciblées ne modifient ni l'aide normalement sélectionnée ni le mode d'embauche de HelperProfiles.
-
-Version 2.1.0.0 :
-- Le groupe d'aides géré a été étendu de A-J à A-T.
-- Des identités canoniques stables helper01-helper20 ont été ajoutées tout en conservant la compatibilité A-J.
-- Une gestion ACTIF/INACTIF de la liste par sauvegarde a été ajoutée.
-- L'écran de gestion à deux onglets Apparences et Liste des aides a été ajouté.
-- Les aides hors liste sont exclues du défilement, de la superposition, du calcul de la prochaine aide et de l'embauche.
-- Des protections pour les aides actives et la dernière aide disponible ont été ajoutées.
-- Les actions groupées Désactiver les autres et Tout activer sont protégées.
-- Les apparences AvatarSwitcher, rôles HelperPayroll, réglages de rémunération et identités de registre sont conservés.
-- Les rôles HelperPayroll restent visibles lorsque la liste opérationnelle est filtrée.
-- La pagination automatique A-J/K-T de la superposition a été ajoutée.
-- Les liaisons d'apparence des aides actives sont en lecture seule.
-- Une protection contre Hired Helper Tool et les listes externes a été ajoutée.
-- Les performances de démarrage et de filtrage ont été améliorées afin d'éviter l'ancienne chute de FPS.
-- Les commandes hpRoster et hpRosterManage ont été ajoutées.
-
-Version 2.0.27.3 :
-- Les raccourcis en double de la barre de boutons ont été corrigés.
-- Des actions distinctes ESC, X, C, A et Entrée ont été ajoutées.
-
-Version 2.0.27.2 :
-- Une colonne RÔLE HelperPayroll en direct a été ajoutée à la superposition.
-
-Version 2.0.26.0 :
-- La superposition a été transformée en tableau redimensionnable.
-- La prise en charge du multijoueur a été définie sur false.
-]]></fr>
-    </changelog>
 
     <l10n filenamePrefix="l10n/l10n"/>
     <iconFilename>icon_helperProfiles.dds</iconFilename>

@@ -38,6 +38,10 @@ Controls can be reassigned in the game's control settings.
 
 Single player only.
 Not compatible with Hired Helper Tool or conflicting helper-roster expansion mods. Helper Profiles disables itself for the session when an incompatible roster owner is detected.
+
+Changelog 2.1.1.0:
+- Fixed texture and layout issues in the Helper Management appearance and roster screens.
+- Added support for compatible companion mods to request a specific available worker without changing your selected worker or hiring mode.
 ]]></en>
         <de><![CDATA[
 Stelle ein festes Team für deinen Hof zusammen und bestimme, wer den nächsten KI-Auftrag übernimmt. Helferprofile erweitert die standardmäßige Helferliste auf 20 feste Helferplätze (A-T) und bietet eine übersichtliche Statusanzeige sowie eine Helferverwaltung mit zwei Tabs.
@@ -69,6 +73,10 @@ Die Tasten können in den Steuerungseinstellungen des Spiels geändert werden.
 
 Nur für den Einzelspielermodus.
 Nicht kompatibel mit Hired Helper Tool oder kollidierenden Mods zur Erweiterung der Helferliste. Wird eine inkompatible Verwaltung der Helferliste erkannt, deaktiviert sich Helferprofile für die aktuelle Sitzung.
+
+Changelog 2.1.1.0:
+- Textur- und Layoutfehler in den Ansichten für Erscheinungsbilder und Helferliste der Helferverwaltung wurden behoben.
+- Kompatible Begleitmods können gezielt einen verfügbaren Helfer anfordern, ohne den ausgewählten Helfer oder den Einstellungsmodus zu ändern.
 ]]></de>
         <fr><![CDATA[
 Constituez une équipe permanente pour votre ferme et choisissez qui effectuera la prochaine tâche d'IA. Profils d'aides étend la liste standard à 20 emplacements permanents (A-T), avec un tableau d'état clair et un écran de gestion à deux onglets.
@@ -100,6 +108,10 @@ Les touches peuvent être réattribuées dans les paramètres des commandes du j
 
 Mode solo uniquement.
 Non compatible avec Hired Helper Tool ou les mods d'extension de la liste des aides qui entrent en conflit. Profils d'aides se désactive pour la session lorsqu'une gestion incompatible de la liste est détectée.
+
+Changelog 2.1.1.0 :
+- Correction des problèmes de textures et de mise en page dans les écrans Apparences et Liste des aides.
+- Les mods complémentaires compatibles peuvent demander une aide disponible précise sans modifier l'aide sélectionnée ni le mode d'embauche.
 ]]></fr>
     </description>
 

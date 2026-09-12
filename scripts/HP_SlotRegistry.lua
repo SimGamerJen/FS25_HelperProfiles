@@ -190,6 +190,15 @@ end
 if HP_WorldActionUI == nil and source ~= nil then
     source((g_currentModDirectory or "") .. "scripts/HP_WorldActionUI.lua")
 end
+if HP_WorldPedestrianProbe == nil and source ~= nil then
+    source((g_currentModDirectory or "") .. "scripts/HP_WorldPedestrianProbe.lua")
+end
+if HP_WorldPedestrianProbeDeep == nil and source ~= nil then
+    source((g_currentModDirectory or "") .. "scripts/HP_WorldPedestrianProbeDeep.lua")
+end
+if HP_WorldSplinePath == nil and source ~= nil then
+    source((g_currentModDirectory or "") .. "scripts/HP_WorldSplinePath.lua")
+end
 if HP_WorldMovementProbe == nil and source ~= nil then
     source((g_currentModDirectory or "") .. "scripts/HP_WorldMovementProbe.lua")
 end

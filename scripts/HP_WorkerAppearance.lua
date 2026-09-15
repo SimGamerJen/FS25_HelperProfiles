@@ -152,7 +152,12 @@ function HP_WorkerAppearance:applyAppearanceToVehicle(vehicle, reason, force, he
     end
 
     vehicle.hpLastAppliedAppearanceSignature = signature
-    self:debug("Applied " .. tostring(preset and preset.id or "preset") .. " to " .. self:getVehicleName(vehicle) .. " | helper=" .. tostring(helper and helper.name or "?") .. " | reason=" .. tostring(reason))
+    self:debug(
+        "Applied " .. tostring(preset and preset.id or "preset") ..
+        " to " .. self:getVehicleName(vehicle) ..
+        " | helper=" .. tostring(helper and helper.name or "?") ..
+        " | reason=" .. tostring(reason)
+    )
     self:logAppliedOnce(vehicle, helper, preset, reason)
     return true
 end

@@ -332,7 +332,14 @@ function HP_ASBridge:writeLinks()
 
     setXMLString(xmlFile, "helperProfilesAppearance#version", "2.0.20")
     setXMLString(xmlFile, "helperProfilesAppearance#savegame", tostring(self.savegameName or "unknownSavegame"))
-    setXMLString(xmlFile, "helperProfilesAppearance#note", "Per-save helper appearance links. Bind helper names to AvatarSwitcher preset IDs. Use the HP appearance menu or hpAppearance bind <helperIndex> <presetId>. Category is stored as metadata/legacy fallback. displayName is derived from the bound AvatarSwitcher preset and used by the HP overlay/menu.")
+    setXMLString(
+        xmlFile,
+        "helperProfilesAppearance#note",
+        "Per-save helper appearance links. Bind helper names to AvatarSwitcher preset IDs. " ..
+        "Use the HP appearance menu or hpAppearance bind <helperIndex> <presetId>. " ..
+        "Category is stored as metadata/legacy fallback. displayName is derived from the bound " ..
+        "AvatarSwitcher preset and used by the HP overlay/menu."
+    )
 
     local rows = {}
     for _, link in pairs(self.linksByHelperName or {}) do table.insert(rows, link) end
@@ -818,5 +825,13 @@ function HP_ASBridge:loadMap()
     self:init()
     local api = getASAPI()
     local directOk = self:isDirectAvailable()
-    hpPrint("Loaded. Appearance provider available=" .. tostring(self:isAvailable()) .. " | api=" .. tostring(self:isApiAvailable()) .. " | global=" .. tostring(_G ~= nil and _G.AvatarSwitcherAPI ~= nil) .. " | direct=" .. tostring(directOk) .. " | directPresetCount=" .. tostring(#(self.directPresets or {})) .. " | savegame=" .. tostring(self.savegameName) .. " | linksFile=" .. tostring(self.linksFile))
+    hpPrint(
+        "Loaded. Appearance provider available=" .. tostring(self:isAvailable()) ..
+        " | api=" .. tostring(self:isApiAvailable()) ..
+        " | global=" .. tostring(_G ~= nil and _G.AvatarSwitcherAPI ~= nil) ..
+        " | direct=" .. tostring(directOk) ..
+        " | directPresetCount=" .. tostring(#(self.directPresets or {})) ..
+        " | savegame=" .. tostring(self.savegameName) ..
+        " | linksFile=" .. tostring(self.linksFile)
+    )
 end

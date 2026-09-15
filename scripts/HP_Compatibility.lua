@@ -197,7 +197,11 @@ function HP_Compatibility:setBlocked(conflict, source)
 
     if not self.warningLogged then
         self.warningLogged = true
-        print(LOG .. "HelperProfiles disabled for this session: incompatible helper-roster owner detected (" .. self.conflictMod .. ", source=" .. self.conflictSource .. "). Disable either HelperProfiles or Hired Helper Tool and reload the save.")
+        print(
+            LOG .. "HelperProfiles disabled for this session: incompatible helper-roster owner detected (" ..
+            self.conflictMod .. ", source=" .. self.conflictSource ..
+            "). Disable either HelperProfiles or Hired Helper Tool and reload the save."
+        )
     end
     return true
 end

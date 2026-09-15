@@ -281,7 +281,14 @@ function HP_AppearanceBindingsScreen:reloadData(reloadBridge)
 
     self.helperRows = getHelpers()
     if #self.helperRows == 0 then
-        table.insert(self.helperRows, { index = 1, slot = "A", helper = nil, name = hpI18n("hp_helper_fallback", "Helper 1"), displayName = hpI18n("hp_no_helpers_available", "No helpers available"), label = hpI18n("hp_no_helpers_available", "No helpers available") })
+        table.insert(self.helperRows, {
+            index = 1,
+            slot = "A",
+            helper = nil,
+            name = hpI18n("hp_helper_fallback", "Helper 1"),
+            displayName = hpI18n("hp_no_helpers_available", "No helpers available"),
+            label = hpI18n("hp_no_helpers_available", "No helpers available")
+        })
     end
 
     self.categoryRows = {}
@@ -487,7 +494,14 @@ function HP_AppearanceBindingsScreen:updateDetailText()
 
     local detail = hpI18n("hp_detail_select", "Select a helper slot and appearance.")
     if helperRow ~= nil and presetRow ~= nil and presetRow.id ~= nil and presetRow.id ~= "" then
-        detail = hpFormat("hp_detail_selected", "Selected: %s  |  %s  |  %s [%s]", tostring(helperRow.displayName or helperRow.name), tostring(category or "-"), tostring(presetRow.label or presetRow.id), tostring(presetRow.id))
+        detail = hpFormat(
+            "hp_detail_selected",
+            "Selected: %s  |  %s  |  %s [%s]",
+            tostring(helperRow.displayName or helperRow.name),
+            tostring(category or "-"),
+            tostring(presetRow.label or presetRow.id),
+            tostring(presetRow.id)
+        )
     end
 
     if helperRow ~= nil and self:isHelperRowReadOnly(helperRow) then
@@ -512,7 +526,12 @@ function HP_AppearanceBindingsScreen:updateDetailText()
         if bindingLabel ~= nil and bindingLabel ~= "" then
             status = status .. "  |  " .. hpFormat("hp_status_current_binding", "Current binding: %s → %s", tostring(helperRow.displayName or helperRow.name), bindingLabel)
         else
-            status = status .. "  |  " .. hpFormat("hp_status_current_binding", "Current binding: %s → %s", tostring(helperRow.displayName or helperRow.name), hpI18n("hp_state_unbound_title", "Unbound"))
+            status = status .. "  |  " .. hpFormat(
+                "hp_status_current_binding",
+                "Current binding: %s → %s",
+                tostring(helperRow.displayName or helperRow.name),
+                hpI18n("hp_state_unbound_title", "Unbound")
+            )
         end
     end
 

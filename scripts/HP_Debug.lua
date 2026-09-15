@@ -245,7 +245,11 @@ end
 function Debug:hpAppearance(...)
     local a, b, c, d = normalizeArgs(...)
     if a == nil or a == "" or a == "help" then
-        print("[HP] hpAppearance status | menu | reload | refresh | debug | cycle [delta] | bind <helperIndex> <presetId> | unbind <helperIndex> | clear | bindLegacy <helperIndex> <category> [presetId]")
+        print(
+            "[HP] hpAppearance status | menu | reload | refresh | debug | cycle [delta] | " ..
+            "bind <helperIndex> <presetId> | unbind <helperIndex> | clear | " ..
+            "bindLegacy <helperIndex> <category> [presetId]"
+        )
         return
     end
 
@@ -288,7 +292,14 @@ function Debug:hpAppearance(...)
                 end
                 local slotName = tostring(h.name or "?")
                 local slotSuffix = (displayName ~= slotName) and (" | slot=" .. slotName) or ""
-                print(("[HP] %02d %s%s | preset=%s | category=%s | label=%s"):format(i, tostring(displayName), slotSuffix, tostring(presetId or "?"), tostring(category or "?"), tostring(label or "?")))
+                print(("[HP] %02d %s%s | preset=%s | category=%s | label=%s"):format(
+                    i,
+                    tostring(displayName),
+                    slotSuffix,
+                    tostring(presetId or "?"),
+                    tostring(category or "?"),
+                    tostring(label or "?")
+                ))
             end
         end
         return
@@ -364,7 +375,13 @@ function Debug:hpAppearance(...)
                     local okName, dn = HP_ProtectedCall.call(HelperProfiles.getDisplayNameForHelper, HelperProfiles, helper, idx)
                     if okName and dn ~= nil and tostring(dn) ~= "" then displayName = tostring(dn) end
                 end
-                print(("[HP] Bound %s (%s) -> AS preset '%s' | category=%s | label=%s"):format(tostring(displayName), tostring(helper.name or idx), tostring(res.id or presetId), tostring(res.category or "?"), tostring(res.name or res.id or presetId)))
+                print(("[HP] Bound %s (%s) -> AS preset '%s' | category=%s | label=%s"):format(
+                    tostring(displayName),
+                    tostring(helper.name or idx),
+                    tostring(res.id or presetId),
+                    tostring(res.category or "?"),
+                    tostring(res.name or res.id or presetId)
+                ))
             else
                 print(("[HP] Bind failed for %s -> preset '%s': %s"):format(tostring(helper.name or idx), tostring(presetId), tostring(res)))
             end

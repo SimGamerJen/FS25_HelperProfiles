@@ -12,7 +12,7 @@ local function hpPrint(message) print(LOG .. tostring(message)) end
 
 local function hpI18n(key, fallback)
     if g_i18n ~= nil and g_i18n.getText ~= nil then
-        local ok, value = pcall(g_i18n.getText, g_i18n, key)
+        local ok, value = HP_ProtectedCall.call(g_i18n.getText, g_i18n, key)
         if ok and value ~= nil and value ~= "" and value ~= key then return tostring(value) end
     end
     return fallback or key
@@ -58,7 +58,7 @@ end
 local function getRoleLabel(slot)
     local api = getPayrollAPI()
     if api == nil or type(api.getRoleForSlot) ~= "function" then return "-" end
-    local ok, roleData = pcall(api.getRoleForSlot, api, slot)
+    local ok, roleData = HP_ProtectedCall.call(api.getRoleForSlot, api, slot)
     if ok and type(roleData) == "table" then
         return tostring(roleData.roleName or roleData.roleId or "-")
     end
@@ -67,7 +67,7 @@ end
 
 local function getDisplayName(helper, stableIndex)
     if HelperProfiles ~= nil and HelperProfiles.getDisplayNameForHelper ~= nil then
-        local ok, displayName = pcall(HelperProfiles.getDisplayNameForHelper, HelperProfiles, helper, stableIndex)
+        local ok, displayName = HP_ProtectedCall.call(HelperProfiles.getDisplayNameForHelper, HelperProfiles, helper, stableIndex)
         if ok and displayName ~= nil and tostring(displayName) ~= "" then return tostring(displayName) end
     end
     return tostring(helper ~= nil and helper.name or ("Helper " .. tostring(stableIndex)))
@@ -75,7 +75,7 @@ end
 
 local function getAppearanceLabel(helper, stableIndex)
     if HelperProfiles ~= nil and HelperProfiles.getAppearanceLabelForHelper ~= nil then
-        local ok, label = pcall(HelperProfiles.getAppearanceLabelForHelper, HelperProfiles, helper, stableIndex)
+        local ok, label = HP_ProtectedCall.call(HelperProfiles.getAppearanceLabelForHelper, HelperProfiles, helper, stableIndex)
         if ok and label ~= nil and tostring(label) ~= "" then
             local text = tostring(label)
             local lower = string.lower(text)
@@ -92,7 +92,7 @@ end
 local function isActive(helper)
     if helper == nil then return false end
     if HelperProfiles ~= nil and HelperProfiles.isHelperActive ~= nil then
-        local ok, value = pcall(HelperProfiles.isHelperActive, HelperProfiles, helper)
+        local ok, value = HP_ProtectedCall.call(HelperProfiles.isHelperActive, HelperProfiles, helper)
         if ok then return value == true end
     end
     return helper.inUse == true
@@ -139,7 +139,7 @@ end
 function HP_RosterManagerScreen:removeBulkRosterAction()
     local id = self._bulkRosterActionEventId
     if id ~= nil and g_inputBinding ~= nil and g_inputBinding.removeActionEvent ~= nil then
-        pcall(function() g_inputBinding:removeActionEvent(id) end)
+        HP_ProtectedCall.call(function() g_inputBinding:removeActionEvent(id) end)
     end
     self._bulkRosterActionEventId = nil
 end
@@ -153,7 +153,7 @@ function HP_RosterManagerScreen:registerBulkRosterAction()
         return
     end
 
-    local callOk, registered, id = pcall(function()
+    local callOk, registered, id = HP_ProtectedCall.call(function()
         return g_inputBinding:registerActionEvent(
             inputAction,
             self,
@@ -455,7 +455,7 @@ function HP_RosterManagerGui:loadDialog()
     if g_gui == nil then return false end
 
     local modDir = self.modDirectory or MOD_DIR or g_currentModDirectory or ""
-    local ok, err = pcall(function()
+    local ok, err = HP_ProtectedCall.call(function()
         if g_gui.loadProfiles ~= nil then g_gui:loadProfiles(modDir .. "gui/guiProfiles.xml") end
         local frame = HP_RosterManagerScreen.new(g_i18n)
         g_gui:loadGui(modDir .. "gui/HP_RosterManagerScreen.xml", "HP_RosterManagerDialog", frame)

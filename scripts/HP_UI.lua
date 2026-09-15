@@ -68,7 +68,7 @@ end
 local function safeGetTextWidth(size, text)
     text = tostring(text or "")
     if _G.getTextWidth ~= nil then
-        local ok, width = pcall(getTextWidth, size, text)
+        local ok, width = HP_ProtectedCall.call(getTextWidth, size, text)
         if ok and type(width) == "number" then
             return width
         end
@@ -187,7 +187,7 @@ function HP_UI:flash(text, seconds) self.flashText = text or ""; self.flashTime 
 
 local function hpI18n(key, fallback)
     if g_i18n ~= nil and g_i18n.getText ~= nil then
-        local ok, value = pcall(g_i18n.getText, g_i18n, key)
+        local ok, value = HP_ProtectedCall.call(g_i18n.getText, g_i18n, key)
         if ok and value ~= nil and value ~= "" and value ~= key then
             return tostring(value)
         end
@@ -202,7 +202,7 @@ end
 
 local function getDisplayName(helper, index)
     if HelperProfiles ~= nil and HelperProfiles.getDisplayNameForHelper ~= nil then
-        local ok, displayName = pcall(HelperProfiles.getDisplayNameForHelper, HelperProfiles, helper, index)
+        local ok, displayName = HP_ProtectedCall.call(HelperProfiles.getDisplayNameForHelper, HelperProfiles, helper, index)
         if ok and displayName ~= nil and tostring(displayName) ~= "" then
             return tostring(displayName)
         end
@@ -212,7 +212,7 @@ end
 
 local function getAppearanceLabel(helper, index)
     if HelperProfiles ~= nil and HelperProfiles.getAppearanceLabelForHelper ~= nil then
-        local ok, label = pcall(HelperProfiles.getAppearanceLabelForHelper, HelperProfiles, helper, index)
+        local ok, label = HP_ProtectedCall.call(HelperProfiles.getAppearanceLabelForHelper, HelperProfiles, helper, index)
         if ok and label ~= nil and tostring(label) ~= "" then
             local text = tostring(label)
             if text == "no AS preset" or text == "AS presets unavailable" then
@@ -279,7 +279,7 @@ local function refreshPayrollCache()
     end
 
     if type(api.getStatus) == "function" then
-        local ok, status = pcall(api.getStatus, api)
+        local ok, status = HP_ProtectedCall.call(api.getStatus, api)
         if ok and type(status) == "table" then
             payrollCache.available = status.available ~= false
         end
@@ -293,13 +293,13 @@ local function refreshPayrollCache()
 
     local profileCount = 0
     if HelperProfiles ~= nil and HelperProfiles.getProfiles ~= nil then
-        local okProfiles, profiles = pcall(HelperProfiles.getProfiles, HelperProfiles)
+        local okProfiles, profiles = HP_ProtectedCall.call(HelperProfiles.getProfiles, HelperProfiles)
         if okProfiles and type(profiles) == "table" then profileCount = #profiles end
     end
     local slotCount = HP_SlotRegistry ~= nil and HP_SlotRegistry:getManagedCount(profileCount) or profileCount
     for index = 1, slotCount do
         local slot = HP_SlotRegistry ~= nil and HP_SlotRegistry:indexToSlot(index) or tostring(index)
-        local ok, roleData = pcall(api.getRoleForSlot, api, slot)
+        local ok, roleData = HP_ProtectedCall.call(api.getRoleForSlot, api, slot)
         if ok and type(roleData) == "table" then
             local label = roleData.roleName or roleData.roleId
             if label ~= nil and tostring(label) ~= "" then
@@ -367,7 +367,7 @@ local function collectRows()
     end
 
     if HelperProfiles.getPickMode ~= nil then
-        local ok, mode = pcall(HelperProfiles.getPickMode, HelperProfiles)
+        local ok, mode = HP_ProtectedCall.call(HelperProfiles.getPickMode, HelperProfiles)
         if ok then summary.mode = getModeLabel(mode) end
     elseif HelperProfiles._pickMode ~= nil then
         summary.mode = getModeLabel(HelperProfiles._pickMode)
@@ -580,11 +580,11 @@ local function isBaseHudShown()
         local hud = g_currentMission.hud
         if hud ~= nil then
             if hud.getIsVisible ~= nil then
-                local ok, result = pcall(hud.getIsVisible, hud)
+                local ok, result = HP_ProtectedCall.call(hud.getIsVisible, hud)
                 if ok then return result end
             end
             if hud.getVisible ~= nil then
-                local ok, result = pcall(hud.getVisible, hud)
+                local ok, result = HP_ProtectedCall.call(hud.getVisible, hud)
                 if ok then return result end
             end
             if hud.isVisible ~= nil then
@@ -594,7 +594,7 @@ local function isBaseHudShown()
     end
 
     if g_gameSettings ~= nil and g_gameSettings.getValue ~= nil then
-        local ok, result = pcall(g_gameSettings.getValue, g_gameSettings, "showHud")
+        local ok, result = HP_ProtectedCall.call(g_gameSettings.getValue, g_gameSettings, "showHud")
         if ok and result ~= nil then return result == true end
     end
 

@@ -34,11 +34,11 @@ end
 function HP_WorkerAppearance:getVehicleName(vehicle)
     if vehicle == nil then return "vehicle" end
     if type(vehicle.getFullName) == "function" then
-        local ok, name = pcall(vehicle.getFullName, vehicle)
+        local ok, name = HP_ProtectedCall.call(vehicle.getFullName, vehicle)
         if ok and name ~= nil and name ~= "" then return tostring(name) end
     end
     if type(vehicle.getName) == "function" then
-        local ok, name = pcall(vehicle.getName, vehicle)
+        local ok, name = HP_ProtectedCall.call(vehicle.getName, vehicle)
         if ok and name ~= nil and name ~= "" then return tostring(name) end
     end
     return tostring(vehicle.configFileName or vehicle)
@@ -46,7 +46,7 @@ end
 
 function HP_WorkerAppearance:getHelperIndexForVehicle(vehicle)
     if vehicle ~= nil and type(vehicle.getAIHelperIndex) == "function" then
-        local ok, idx = pcall(vehicle.getAIHelperIndex, vehicle)
+        local ok, idx = HP_ProtectedCall.call(vehicle.getAIHelperIndex, vehicle)
         if ok and idx ~= nil then return idx end
     end
     if vehicle ~= nil and vehicle.spec_aiVehicle ~= nil then
@@ -141,7 +141,7 @@ function HP_WorkerAppearance:applyAppearanceToVehicle(vehicle, reason, force, he
         return true
     end
 
-    local ok, applyErr = pcall(vehicle.setVehicleCharacter, vehicle, style)
+    local ok, applyErr = HP_ProtectedCall.call(vehicle.setVehicleCharacter, vehicle, style)
     if not ok then
         local now = g_time or 0
         if now - (self.lastWarnAt or -999999) > 3000 then
@@ -152,7 +152,12 @@ function HP_WorkerAppearance:applyAppearanceToVehicle(vehicle, reason, force, he
     end
 
     vehicle.hpLastAppliedAppearanceSignature = signature
-    self:debug("Applied " .. tostring(preset and preset.id or "preset") .. " to " .. self:getVehicleName(vehicle) .. " | helper=" .. tostring(helper and helper.name or "?") .. " | reason=" .. tostring(reason))
+    self:debug(
+        "Applied " .. tostring(preset and preset.id or "preset") ..
+        " to " .. self:getVehicleName(vehicle) ..
+        " | helper=" .. tostring(helper and helper.name or "?") ..
+        " | reason=" .. tostring(reason)
+    )
     self:logAppliedOnce(vehicle, helper, preset, reason)
     return true
 end
@@ -265,7 +270,7 @@ end
 function HP_WorkerAppearance:getVehicleIsAIActive(vehicle)
     if vehicle == nil then return false end
     if type(vehicle.getIsAIActive) == "function" then
-        local ok, active = pcall(vehicle.getIsAIActive, vehicle)
+        local ok, active = HP_ProtectedCall.call(vehicle.getIsAIActive, vehicle)
         if ok then return active == true end
     end
     if vehicle.spec_aiVehicle ~= nil then

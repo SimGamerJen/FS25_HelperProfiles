@@ -1,0 +1,45 @@
+name: Scan HelperProfiles Lua for ModHub compliance
+
+on:
+  push:
+    branches:
+      - agent/modhub-publiclua-0.9.21
+    paths:
+      - .github/workflows/modhub-lua-scan.yml
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out compliance branch
+        uses: actions/checkout@v4
+        with:
+          ref: agent/modhub-publiclua-0.9.21
+
+      - name: Report protected calls and long Lua lines
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+
+          wrapper = Path('scripts/HP_ProtectedCall.lua')
+          direct = []
+          long_lines = []
+          for path in sorted(Path('scripts').rglob('*.lua')):
+              text = path.read_text(encoding='utf-8')
+              if path != wrapper:
+                  for n, line in enumerate(text.splitlines(), 1):
+                      if 'pcall(' in line or 'xpcall(' in line:
+                          direct.append((str(path), n, line.strip()))
+              for n, line in enumerate(text.splitlines(), 1):
+                  if len(line) > 200:
+                      long_lines.append((str(path), n, len(line), line.strip()))
+
+          print(f'Direct protected calls outside wrapper: {len(direct)}')
+          for item in direct:
+              print(f'PCALL {item[0]}:{item[1]} {item[2]}')
+          print(f'Lua lines over 200 chars: {len(long_lines)}')
+          for item in long_lines:
+              print(f'LONG {item[0]}:{item[1]} len={item[2]} {item[3]}')
+          PY

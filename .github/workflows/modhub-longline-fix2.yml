@@ -1,0 +1,151 @@
+name: Apply HelperProfiles ModHub long-line cleanup v2
+
+on:
+  push:
+    branches:
+      - agent/modhub-publiclua-0.9.21
+    paths:
+      - .github/workflows/modhub-longline-fix2.yml
+
+permissions:
+  contents: write
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out compliance branch
+        uses: actions/checkout@v4
+        with:
+          ref: agent/modhub-publiclua-0.9.21
+          fetch-depth: 0
+
+      - name: Split reported long Lua lines
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+
+          def replace_line(filename, needle, replacement):
+              path = Path(filename)
+              lines = path.read_text(encoding='utf-8').splitlines()
+              matches = [i for i, line in enumerate(lines) if needle in line]
+              if len(matches) != 1:
+                  raise SystemExit(f'{filename}: expected one match for {needle!r}, found {len(matches)}')
+              i = matches[0]
+              indent = lines[i][:len(lines[i]) - len(lines[i].lstrip())]
+              rendered = [indent + part if part else '' for part in replacement]
+              lines[i:i+1] = rendered
+              path.write_text('\n'.join(lines) + '\n', encoding='utf-8')
+
+          replace_line('scripts/HP_ASBridge.lua', 'setXMLString(xmlFile, "helperProfilesAppearance#note"', [
+              'setXMLString(',
+              '    xmlFile,',
+              '    "helperProfilesAppearance#note",',
+              '    "Per-save helper appearance links. Bind helper names to AvatarSwitcher preset IDs. " ..',
+              '    "Use the HP appearance menu or hpAppearance bind <helperIndex> <presetId>. " ..',
+              '    "Category is stored as metadata/legacy fallback. displayName is derived from the bound " ..',
+              '    "AvatarSwitcher preset and used by the HP overlay/menu."',
+              ')',
+          ])
+          replace_line('scripts/HP_ASBridge.lua', 'hpPrint("Loaded. Appearance provider available="', [
+              'hpPrint(',
+              '    "Loaded. Appearance provider available=" .. tostring(self:isAvailable()) ..',
+              '    " | api=" .. tostring(self:isApiAvailable()) ..',
+              '    " | global=" .. tostring(_G ~= nil and _G.AvatarSwitcherAPI ~= nil) ..',
+              '    " | direct=" .. tostring(directOk) ..',
+              '    " | directPresetCount=" .. tostring(#(self.directPresets or {})) ..',
+              '    " | savegame=" .. tostring(self.savegameName) ..',
+              '    " | linksFile=" .. tostring(self.linksFile)',
+              ')',
+          ])
+          replace_line('scripts/HP_Compatibility.lua', 'HelperProfiles disabled for this session: incompatible helper-roster owner detected', [
+              'print(',
+              '    LOG .. "HelperProfiles disabled for this session: incompatible helper-roster owner detected (" ..',
+              '    self.conflictMod .. ", source=" .. self.conflictSource ..',
+              '    "). Disable either HelperProfiles or Hired Helper Tool and reload the save."',
+              ')',
+          ])
+          replace_line('scripts/HP_Debug.lua', 'hpAppearance status | menu | reload | refresh | debug', [
+              'print(',
+              '    "[HP] hpAppearance status | menu | reload | refresh | debug | cycle [delta] | " ..',
+              '    "bind <helperIndex> <presetId> | unbind <helperIndex> | clear | " ..',
+              '    "bindLegacy <helperIndex> <category> [presetId]"',
+              ')',
+          ])
+          replace_line('scripts/HP_Debug.lua', '[HP] %02d %s%s | preset=%s | category=%s | label=%s', [
+              'print(("[HP] %02d %s%s | preset=%s | category=%s | label=%s"):format(',
+              '    i,',
+              '    tostring(displayName),',
+              '    slotSuffix,',
+              '    tostring(presetId or "?"),',
+              '    tostring(category or "?"),',
+              '    tostring(label or "?")',
+              '))',
+          ])
+          replace_line('scripts/HP_Debug.lua', '[HP] Bound %s (%s) -> AS preset', [
+              'print(("[HP] Bound %s (%s) -> AS preset \'%s\' | category=%s | label=%s"):format(',
+              '    tostring(displayName),',
+              '    tostring(helper.name or idx),',
+              '    tostring(res.id or presetId),',
+              '    tostring(res.category or "?"),',
+              '    tostring(res.name or res.id or presetId)',
+              '))',
+          ])
+          replace_line('scripts/HP_WorkerAppearance.lua', 'self:debug("Applied " .. tostring(preset and preset.id or "preset")', [
+              'self:debug(',
+              '    "Applied " .. tostring(preset and preset.id or "preset") ..',
+              '    " to " .. self:getVehicleName(vehicle) ..',
+              '    " | helper=" .. tostring(helper and helper.name or "?") ..',
+              '    " | reason=" .. tostring(reason)',
+              ')',
+          ])
+          replace_line('scripts/gui/HP_AppearanceBindingsScreen.lua', 'table.insert(self.helperRows, { index = 1, slot = "A"', [
+              'table.insert(self.helperRows, {',
+              '    index = 1,',
+              '    slot = "A",',
+              '    helper = nil,',
+              '    name = hpI18n("hp_helper_fallback", "Helper 1"),',
+              '    displayName = hpI18n("hp_no_helpers_available", "No helpers available"),',
+              '    label = hpI18n("hp_no_helpers_available", "No helpers available")',
+              '})',
+          ])
+          replace_line('scripts/gui/HP_AppearanceBindingsScreen.lua', 'detail = hpFormat("hp_detail_selected"', [
+              'detail = hpFormat(',
+              '    "hp_detail_selected",',
+              '    "Selected: %s  |  %s  |  %s [%s]",',
+              '    tostring(helperRow.displayName or helperRow.name),',
+              '    tostring(category or "-"),',
+              '    tostring(presetRow.label or presetRow.id),',
+              '    tostring(presetRow.id)',
+              ')',
+          ])
+          replace_line('scripts/gui/HP_AppearanceBindingsScreen.lua', 'status = status .. "  |  " .. hpFormat("hp_status_current_binding"', [
+              'status = status .. "  |  " .. hpFormat(',
+              '    "hp_status_current_binding",',
+              '    "Current binding: %s → %s",',
+              '    tostring(helperRow.displayName or helperRow.name),',
+              '    hpI18n("hp_state_unbound_title", "Unbound")',
+              ')',
+          ])
+
+          long_lines = []
+          for path in sorted(Path('scripts').rglob('*.lua')):
+              for n, line in enumerate(path.read_text(encoding='utf-8').splitlines(), 1):
+                  if len(line) > 200:
+                      long_lines.append(f'{path}:{n}:{len(line)}')
+          if long_lines:
+              raise SystemExit('Lua lines over 200 chars remain: ' + ', '.join(long_lines))
+          print('Split all 10 reported long Lua lines; no >200-character Lua lines remain')
+          PY
+
+      - name: Commit long-line cleanup
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add scripts
+          git commit -m "Clean up ModHub Lua long-line warnings"
+          git push origin HEAD:agent/modhub-publiclua-0.9.21

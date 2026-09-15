@@ -113,7 +113,7 @@ end
 function HP_SlotRegistry:getManagerCount()
     if g_helperManager == nil then return 0 end
     if g_helperManager.getNumOfHelpers ~= nil then
-        local ok, count = pcall(g_helperManager.getNumOfHelpers, g_helperManager)
+        local ok, count = HP_ProtectedCall.call(g_helperManager.getNumOfHelpers, g_helperManager)
         if ok and tonumber(count) ~= nil then return math.floor(tonumber(count)) end
     end
     return math.floor(tonumber(g_helperManager.numHelpers) or 0)

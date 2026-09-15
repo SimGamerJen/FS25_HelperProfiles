@@ -40,13 +40,13 @@ end
 
 local function vehicleName(vehicle)
     if vehicle ~= nil and type(vehicle.getFullName) == "function" then
-        local ok, value = pcall(vehicle.getFullName, vehicle)
+        local ok, value = HP_ProtectedCall.call(vehicle.getFullName, vehicle)
         if ok and value ~= nil and tostring(value) ~= "" then
             return tostring(value)
         end
     end
     if vehicle ~= nil and type(vehicle.getName) == "function" then
-        local ok, value = pcall(vehicle.getName, vehicle)
+        local ok, value = HP_ProtectedCall.call(vehicle.getName, vehicle)
         if ok and value ~= nil and tostring(value) ~= "" then
             return tostring(value)
         end
@@ -72,7 +72,7 @@ local function isAutoDriveActive(vehicle)
         return false
     end
 
-    local ok, value = pcall(stateModule.isActive, stateModule)
+    local ok, value = HP_ProtectedCall.call(stateModule.isActive, stateModule)
     return ok and value == true
 end
 
@@ -378,7 +378,7 @@ end
 -- bridge is sourced here so older modDesc files on this feature branch do not
 -- need a new load-order dependency; failure to load it must never disable V5.
 if source ~= nil and g_currentModDirectory ~= nil then
-    local ok, err = pcall(source, g_currentModDirectory .. "scripts/HP_AutoDrivePayrollBridge.lua")
+    local ok, err = HP_ProtectedCall.call(source, g_currentModDirectory .. "scripts/HP_AutoDrivePayrollBridge.lua")
     if not ok then
         log("Optional HelperPayroll bridge failed to load: %s", tostring(err))
     end

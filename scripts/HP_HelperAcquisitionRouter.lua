@@ -45,7 +45,7 @@ function HP_HelperAcquisitionRouter:_resolveScopedHire(methodName)
         return nil, nil, false
     end
 
-    local ok, helper, reason, scoped = pcall(
+    local ok, helper, reason, scoped = HP_ProtectedCall.call(
         HP_IntegrationAPI.resolveScopedPreferredHelper,
         HP_IntegrationAPI
     )

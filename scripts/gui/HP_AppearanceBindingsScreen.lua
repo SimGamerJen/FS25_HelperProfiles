@@ -29,7 +29,7 @@ end
 
 local function hpI18n(key, fallback)
     if g_i18n ~= nil and g_i18n.getText ~= nil then
-        local ok, value = pcall(g_i18n.getText, g_i18n, key)
+        local ok, value = HP_ProtectedCall.call(g_i18n.getText, g_i18n, key)
         if ok and value ~= nil and value ~= "" and value ~= key then
             return value
         end
@@ -39,7 +39,7 @@ end
 
 local function hpFormat(key, fallback, ...)
     local pattern = hpI18n(key, fallback)
-    local ok, value = pcall(string.format, pattern, ...)
+    local ok, value = HP_ProtectedCall.call(string.format, pattern, ...)
     if ok then return value end
     return pattern
 end
@@ -70,7 +70,7 @@ end
 
 local function getDerivedDisplayNameForPreset(preset, fallback)
     if HP_ASBridge ~= nil and HP_ASBridge.deriveDisplayNameFromPreset ~= nil then
-        local ok, value = pcall(HP_ASBridge.deriveDisplayNameFromPreset, HP_ASBridge, preset, fallback)
+        local ok, value = HP_ProtectedCall.call(HP_ASBridge.deriveDisplayNameFromPreset, HP_ASBridge, preset, fallback)
         if ok and value ~= nil and tostring(value) ~= "" then return tostring(value) end
     end
     return tostring(fallback or "")
@@ -138,7 +138,7 @@ end
 local function getHelperDisplayName(helper, idx)
     local fallback = tostring((helper ~= nil and helper.name) or ("Helper " .. tostring(idx or "?")))
     if HelperProfiles ~= nil and HelperProfiles.getDisplayNameForHelper ~= nil then
-        local ok, displayName, baseName = pcall(HelperProfiles.getDisplayNameForHelper, HelperProfiles, helper, idx)
+        local ok, displayName, baseName = HP_ProtectedCall.call(HelperProfiles.getDisplayNameForHelper, HelperProfiles, helper, idx)
         if ok and displayName ~= nil and tostring(displayName) ~= "" then
             return tostring(displayName), tostring(baseName or fallback)
         end
@@ -182,7 +182,7 @@ end
 isHelperActive = function(helper)
     if helper == nil then return false end
     if HelperProfiles ~= nil and HelperProfiles.isHelperActive ~= nil then
-        local ok, active = pcall(HelperProfiles.isHelperActive, HelperProfiles, helper)
+        local ok, active = HP_ProtectedCall.call(HelperProfiles.isHelperActive, HelperProfiles, helper)
         if ok then return active == true end
     end
     return helper.inUse == true
@@ -715,7 +715,7 @@ function HP_AppearanceBindingsGui:loadDialog()
     local profilePath = modDir .. "gui/guiProfiles.xml"
     local dialogPath = modDir .. "gui/HP_AppearanceBindingsScreen.xml"
 
-    local ok, err = pcall(function()
+    local ok, err = HP_ProtectedCall.call(function()
         if g_gui.loadProfiles ~= nil then
             g_gui:loadProfiles(profilePath)
         end

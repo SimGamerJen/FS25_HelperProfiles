@@ -265,7 +265,7 @@ function Debug:hpAppearance(...)
             print("[HP] Appearance links savegame=" .. tostring(savegameName or "?") .. " | file=" .. tostring(linksFile or "?"))
         end
         if api ~= nil and type(api.getDiagnostics) == "function" then
-            local ok, d = pcall(api.getDiagnostics)
+            local ok, d = HP_ProtectedCall.call(api.getDiagnostics)
             if ok and type(d) == "table" then
                 print(("[HP] AS diagnostics: hasAS=%s init=%s loadPresets=%s presets=%s presetCount=%s presetsById=%s builder=%s version=%s"):format(
                     tostring(d.hasAvatarSwitcher), tostring(d.initialized), tostring(d.hasLoadPresets), tostring(d.hasPresets),
@@ -283,7 +283,7 @@ function Debug:hpAppearance(...)
                 end
                 local displayName = h.name or "?"
                 if HelperProfiles.getDisplayNameForHelper then
-                    local okName, dn = pcall(HelperProfiles.getDisplayNameForHelper, HelperProfiles, h, i)
+                    local okName, dn = HP_ProtectedCall.call(HelperProfiles.getDisplayNameForHelper, HelperProfiles, h, i)
                     if okName and dn ~= nil and tostring(dn) ~= "" then displayName = tostring(dn) end
                 end
                 local slotName = tostring(h.name or "?")
@@ -361,7 +361,7 @@ function Debug:hpAppearance(...)
             if ok then
                 local displayName = helper.name or idx
                 if HelperProfiles.getDisplayNameForHelper then
-                    local okName, dn = pcall(HelperProfiles.getDisplayNameForHelper, HelperProfiles, helper, idx)
+                    local okName, dn = HP_ProtectedCall.call(HelperProfiles.getDisplayNameForHelper, HelperProfiles, helper, idx)
                     if okName and dn ~= nil and tostring(dn) ~= "" then displayName = tostring(dn) end
                 end
                 print(("[HP] Bound %s (%s) -> AS preset '%s' | category=%s | label=%s"):format(tostring(displayName), tostring(helper.name or idx), tostring(res.id or presetId), tostring(res.category or "?"), tostring(res.name or res.id or presetId)))

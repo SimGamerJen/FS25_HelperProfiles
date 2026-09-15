@@ -29,12 +29,12 @@ local function cloneStyle(sourceStyle)
     if PlayerStyle == nil or PlayerStyle.new == nil then return sourceStyle, "shared-style" end
 
     if sourceStyle.loadConfigurationIfRequired ~= nil then
-        pcall(sourceStyle.loadConfigurationIfRequired, sourceStyle)
+        HP_ProtectedCall.call(sourceStyle.loadConfigurationIfRequired, sourceStyle)
     end
 
     local style = PlayerStyle.new()
     if style ~= nil and style.copyFrom ~= nil then
-        local ok = pcall(style.copyFrom, style, sourceStyle)
+        local ok = HP_ProtectedCall.call(style.copyFrom, style, sourceStyle)
         if ok then return style, "copied-style" end
     end
 
@@ -60,7 +60,7 @@ local function getCount(manager)
     if manager == nil then return 0 end
     local count = 0
     if manager.getNumOfHelpers ~= nil then
-        local ok, value = pcall(manager.getNumOfHelpers, manager)
+        local ok, value = HP_ProtectedCall.call(manager.getNumOfHelpers, manager)
         if ok and tonumber(value) ~= nil then
             count = math.max(count, math.floor(tonumber(value)))
         end
@@ -74,7 +74,7 @@ end
 local function getByName(manager, name)
     if manager == nil then return nil end
     if manager.getHelperByName ~= nil then
-        local ok, helper = pcall(manager.getHelperByName, manager, name)
+        local ok, helper = HP_ProtectedCall.call(manager.getHelperByName, manager, name)
         if ok then return helper end
     end
     return manager.helpers ~= nil and manager.helpers[string.upper(tostring(name))] or nil
@@ -83,7 +83,7 @@ end
 local function getByIndex(manager, index)
     if manager == nil then return nil end
     if manager.getHelperByIndex ~= nil then
-        local ok, helper = pcall(manager.getHelperByIndex, manager, index)
+        local ok, helper = HP_ProtectedCall.call(manager.getHelperByIndex, manager, index)
         if ok then return helper end
     end
     return manager.indexToHelper ~= nil and manager.indexToHelper[index] or nil

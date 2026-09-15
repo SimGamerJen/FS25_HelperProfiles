@@ -94,7 +94,7 @@ end
 
 local function getDerivedDisplayNameForPreset(preset, fallback)
     if HP_ASBridge ~= nil and HP_ASBridge.deriveDisplayNameFromPreset ~= nil then
-        local ok, value = pcall(HP_ASBridge.deriveDisplayNameFromPreset, HP_ASBridge, preset, fallback)
+        local ok, value = HP_ProtectedCall.call(HP_ASBridge.deriveDisplayNameFromPreset, HP_ASBridge, preset, fallback)
         if ok and value ~= nil and tostring(value) ~= "" then return tostring(value) end
     end
     return tostring(fallback or "")
@@ -103,7 +103,7 @@ end
 local function getHelperDisplayName(helper, idx)
     local fallback = tostring((helper ~= nil and helper.name) or ("Helper " .. tostring(idx or "?")))
     if HelperProfiles ~= nil and HelperProfiles.getDisplayNameForHelper ~= nil then
-        local ok, displayName, baseName = pcall(HelperProfiles.getDisplayNameForHelper, HelperProfiles, helper, idx)
+        local ok, displayName, baseName = HP_ProtectedCall.call(HelperProfiles.getDisplayNameForHelper, HelperProfiles, helper, idx)
         if ok and displayName ~= nil and tostring(displayName) ~= "" then
             return tostring(displayName), tostring(baseName or fallback)
         end
@@ -120,7 +120,7 @@ end
 
 function HP_AppearanceMenu:setMouseCursor(visible)
     if g_inputBinding ~= nil and g_inputBinding.setShowMouseCursor ~= nil then
-        pcall(g_inputBinding.setShowMouseCursor, g_inputBinding, visible == true, visible == true)
+        HP_ProtectedCall.call(g_inputBinding.setShowMouseCursor, g_inputBinding, visible == true, visible == true)
     end
 end
 

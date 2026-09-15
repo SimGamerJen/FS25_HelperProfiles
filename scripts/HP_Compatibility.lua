@@ -101,7 +101,7 @@ local function scanModManager()
 
     if type(g_modManager.getModByName) == "function" then
         for _, name in ipairs(CONFLICT_NAMES) do
-            local ok, mod = pcall(g_modManager.getModByName, g_modManager, name)
+            local ok, mod = HP_ProtectedCall.call(g_modManager.getModByName, g_modManager, name)
             if ok and type(mod) == "table" and modLooksActive(mod) then
                 return getModLabel(mod, name)
             end
@@ -138,7 +138,7 @@ local function getManagerHelperCount()
 
     local count = 0
     if type(manager.getNumOfHelpers) == "function" then
-        local ok, value = pcall(manager.getNumOfHelpers, manager)
+        local ok, value = HP_ProtectedCall.call(manager.getNumOfHelpers, manager)
         if ok and tonumber(value) ~= nil then
             count = math.max(count, math.floor(tonumber(value)))
         end
@@ -160,7 +160,7 @@ local function removeRegisteredPlayerActions()
     }) do
         local id = HelperProfiles[field]
         if id ~= nil then
-            pcall(g_inputBinding.removeActionEvent, g_inputBinding, id)
+            HP_ProtectedCall.call(g_inputBinding.removeActionEvent, g_inputBinding, id)
             HelperProfiles[field] = nil
         end
     end
@@ -192,7 +192,7 @@ function HP_Compatibility:setBlocked(conflict, source)
     removeRegisteredPlayerActions()
 
     if HP_IntegrationAPI ~= nil and HP_IntegrationAPI.unpublish ~= nil then
-        pcall(HP_IntegrationAPI.unpublish, HP_IntegrationAPI)
+        HP_ProtectedCall.call(HP_IntegrationAPI.unpublish, HP_IntegrationAPI)
     end
 
     if not self.warningLogged then

@@ -26,11 +26,11 @@ end
 
 local function vehicleName(vehicle)
     if vehicle ~= nil and type(vehicle.getFullName) == "function" then
-        local ok, value = pcall(vehicle.getFullName, vehicle)
+        local ok, value = HP_ProtectedCall.call(vehicle.getFullName, vehicle)
         if ok and value ~= nil and tostring(value) ~= "" then return tostring(value) end
     end
     if vehicle ~= nil and type(vehicle.getName) == "function" then
-        local ok, value = pcall(vehicle.getName, vehicle)
+        local ok, value = HP_ProtectedCall.call(vehicle.getName, vehicle)
         if ok and value ~= nil and tostring(value) ~= "" then return tostring(value) end
     end
     return tostring(vehicle or "unknown-vehicle")
@@ -48,7 +48,7 @@ end
 
 local function ownerFarmId(vehicle)
     if vehicle ~= nil and type(vehicle.getOwnerFarmId) == "function" then
-        local ok, value = pcall(vehicle.getOwnerFarmId, vehicle)
+        local ok, value = HP_ProtectedCall.call(vehicle.getOwnerFarmId, vehicle)
         if ok and tonumber(value) ~= nil then return tonumber(value) end
     end
     if vehicle ~= nil and tonumber(vehicle.ownerFarmId) ~= nil then
@@ -75,7 +75,7 @@ function HP_AutoDrivePayrollBridge:_getPayrollAPI()
     end
 
     if type(api) ~= "table" then
-        local ok, value = pcall(function()
+        local ok, value = HP_ProtectedCall.call(function()
             return FS25_HelperPayroll_API or FS25_HelperPayrollAPI
         end)
         if ok then api = value end
@@ -123,7 +123,7 @@ function HP_AutoDrivePayrollBridge:_begin(vehicle, reservation)
         farmId = ownerFarmId(vehicle)
     }
 
-    local ok, accepted, result = pcall(api.beginExternalWorkerSession, api, request)
+    local ok, accepted, result = HP_ProtectedCall.call(api.beginExternalWorkerSession, api, request)
     if not ok then
         self:_logWait("HelperPayroll beginExternalWorkerSession raised an error: " .. tostring(accepted))
         return false
@@ -164,7 +164,7 @@ function HP_AutoDrivePayrollBridge:_finish(vehicle, active, reason)
     local finished = false
     local status = "api-unavailable"
     if type(api) == "table" and type(api.endExternalWorkerSession) == "function" then
-        local ok, accepted, result = pcall(api.endExternalWorkerSession, api, active.sessionId, reason)
+        local ok, accepted, result = HP_ProtectedCall.call(api.endExternalWorkerSession, api, active.sessionId, reason)
         if ok then
             finished = accepted == true
             status = type(result) == "table" and tostring(result.status or (finished and "finished" or "rejected")) or tostring(accepted)

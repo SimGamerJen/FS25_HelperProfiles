@@ -192,7 +192,7 @@ local function hp_setConfigSelection(playerStyle, configName, part)
     if part.name ~= nil and tostring(part.name) ~= "" then
         local name = tostring(part.name)
         if config.setSelectedItemName ~= nil then
-            local callOk, err = pcall(config.setSelectedItemName, config, name)
+            local callOk, err = HP_ProtectedCall.call(config.setSelectedItemName, config, name)
             if not callOk then
                 hpPrint("[DirectRuntimeStyle] setSelectedItemName failed for " .. tostring(configName) .. "=" .. name .. " | " .. tostring(err))
                 ok = false
@@ -215,7 +215,7 @@ local function hp_setConfigSelection(playerStyle, configName, part)
         local colorIndex = tonumber(part.color)
         if colorIndex ~= nil then
             if config.setSelectedColorIndex ~= nil then
-                local callOk, err = pcall(config.setSelectedColorIndex, config, colorIndex)
+                local callOk, err = HP_ProtectedCall.call(config.setSelectedColorIndex, config, colorIndex)
                 if not callOk then
                     hpPrint("[DirectRuntimeStyle] setSelectedColorIndex failed for " .. tostring(configName) .. "=" .. tostring(colorIndex) .. " | " .. tostring(err))
                     ok = false
@@ -539,7 +539,7 @@ function HP_ASBridge:getPresetById(presetId)
 
     local api = getASAPI()
     if api ~= nil and type(api.getPreset) == "function" then
-        local ok, preset = pcall(api.getPreset, presetId)
+        local ok, preset = HP_ProtectedCall.call(api.getPreset, presetId)
         if ok and type(preset) == "table" then
             return preset, nil
         end
@@ -655,7 +655,7 @@ function HP_ASBridge:getPresetsForHelper(helper, fallbackIndex)
 
     local api = getASAPI()
     if self:isApiAvailable() then
-        local ok, presets = pcall(api.getPresetsByCategory, category)
+        local ok, presets = HP_ProtectedCall.call(api.getPresetsByCategory, category)
         if ok and type(presets) == "table" then
             return presets, nil, link
         end
@@ -758,7 +758,7 @@ function HP_ASBridge:createPlayerStyleFromPresetStyle(style)
     local playerStyle = PlayerStyle.new()
 
     if style.filename ~= nil and playerStyle.loadConfigurationXML ~= nil then
-        local ok, err = pcall(playerStyle.loadConfigurationXML, playerStyle, style.filename)
+        local ok, err = HP_ProtectedCall.call(playerStyle.loadConfigurationXML, playerStyle, style.filename)
         if not ok then return nil, "loadConfigurationXML-failed: " .. tostring(err) end
     elseif style.filename ~= nil then
         playerStyle.xmlFilename = style.filename
@@ -775,7 +775,7 @@ function HP_ASBridge:createPlayerStyleFromPresetStyle(style)
         end
     end
 
-    if playerStyle.updateDisabledOptions ~= nil then pcall(playerStyle.updateDisabledOptions, playerStyle) end
+    if playerStyle.updateDisabledOptions ~= nil then HP_ProtectedCall.call(playerStyle.updateDisabledOptions, playerStyle) end
     if not allOk then hpPrint("[DirectRuntimeStyle] Built PlayerStyle, but one or more selections could not be resolved") end
     if not hp_isPlayerStyle(playerStyle) then return nil, "not-playerstyle" end
     return playerStyle, nil
@@ -788,7 +788,7 @@ function HP_ASBridge:createPlayerStyleForHelper(helper, fallbackIndex)
     local style, buildErr = nil, nil
     local api = getASAPI()
     if preset.source ~= "direct" and self:isApiAvailable() then
-        local ok, apiStyle, apiErr = pcall(api.createPlayerStyleFromPresetId, preset.id)
+        local ok, apiStyle, apiErr = HP_ProtectedCall.call(api.createPlayerStyleFromPresetId, preset.id)
         if ok then style, buildErr = apiStyle, apiErr else buildErr = tostring(apiStyle) end
     end
 
@@ -808,7 +808,7 @@ function HP_ASBridge:reload()
     self.directLoaded = false
     self:init()
     local api = getASAPI()
-    if self:isApiAvailable() and api ~= nil and api.reload ~= nil then pcall(api.reload) end
+    if self:isApiAvailable() and api ~= nil and api.reload ~= nil then HP_ProtectedCall.call(api.reload) end
     self:loadDirectPresets(true)
 end
 

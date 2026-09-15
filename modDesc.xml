@@ -162,6 +162,7 @@ Changelog 2.1.1.0 :
         <sourceFile filename="scripts/HP_AutoDrivePayrollBridge.lua"/>
         <sourceFile filename="scripts/HP_RosterExpansion.lua"/>
         <sourceFile filename="scripts/HP_IntegrationAPI.lua"/>
+        <sourceFile filename="scripts/HP_HelperAcquisitionRouter.lua"/>
         <sourceFile filename="scripts/RegisterPlayerActionEvents.lua"/>
     </extraSourceFiles>
 </modDesc>

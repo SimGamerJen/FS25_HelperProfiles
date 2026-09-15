@@ -1,18 +1,28 @@
 -- HP_IntegrationAPI.lua (FS25_HelperProfiles)
--- Optional shared API for compatible mods such as FS25_HelperPayroll.
--- API v6 exposes permanent A-T identities plus per-save ON/OFF roster state.
+-- Optional shared API for compatible mods such as FS25_HelperPayroll and
+-- FS25_RemoteDispatcher.
+-- API v7 retains the v6 roster/identity contract and adds a scoped preferred
+-- hire capability. A scoped hire is temporary, fail-closed, and does not alter
+-- the user's normal HelperProfiles UI selection.
 
 if HP_RosterFilter == nil and source ~= nil then
     source((g_currentModDirectory or "") .. "scripts/HP_RosterFilter.lua")
 end
 
 HP_IntegrationAPI = HP_IntegrationAPI or {
-    apiVersion = 6,
-    modVersion = "2.1.0.0",
+    apiVersion = 7,
+    modVersion = "2.1.1.0",
     published = false,
-    api = nil
+    api = nil,
+    scopedHireStack = {},
+    scopedHireCounter = 0,
+    scopedHireHooksInstalled = false,
+    previousHelperMethods = {}
 }
-HP_IntegrationAPI.apiVersion = 6
+HP_IntegrationAPI.apiVersion = 7
+HP_IntegrationAPI.modVersion = "2.1.1.0"
+HP_IntegrationAPI.scopedHireStack = HP_IntegrationAPI.scopedHireStack or {}
+HP_IntegrationAPI.previousHelperMethods = HP_IntegrationAPI.previousHelperMethods or {}
 
 local LOG = "[FS25_HelperProfiles/API] "
 local function hpApiPrint(message) print(LOG .. tostring(message)) end
@@ -116,6 +126,15 @@ local function isSlotEnabled(stableIndex, helper)
     return HP_RosterState:isEnabled(helper or stableIndex, stableIndex)
 end
 
+local function isHelperActive(helper)
+    if helper == nil then return false end
+    if HelperProfiles ~= nil and type(HelperProfiles.isHelperActive) == "function" then
+        local ok, active = pcall(HelperProfiles.isHelperActive, HelperProfiles, helper)
+        if ok then return active == true end
+    end
+    return helper.inUse == true
+end
+
 local function getSlotData(slot)
     local normalizedSlot, stableIndex, canonicalId = normalizeSlot(slot)
     if normalizedSlot == nil then return nil end
@@ -180,8 +199,7 @@ local function getSlotData(slot)
         table.insert(aliases, 1, identityId)
     end
 
-    local active = HelperProfiles ~= nil and HelperProfiles.isHelperActive ~= nil
-        and HelperProfiles:isHelperActive(helper) or helper.inUse == true
+    local active = isHelperActive(helper)
 
     return {
         slot = normalizedSlot,
@@ -209,12 +227,126 @@ local function getSlotData(slot)
     }
 end
 
+function HP_IntegrationAPI:getScopedHireEntry()
+    local stack = self.scopedHireStack or {}
+    return stack[#stack]
+end
+
+function HP_IntegrationAPI:beginPreferredHire(slot, owner)
+    if isCompatibilityBlocked() then
+        return nil, "helper-profiles-unavailable"
+    end
+
+    local normalizedSlot, stableIndex = normalizeSlot(slot)
+    if normalizedSlot == nil or stableIndex == nil then
+        return nil, "invalid-slot"
+    end
+
+    local helper = select(1, getHelperForSlot(normalizedSlot, stableIndex))
+    local data = getSlotData(normalizedSlot)
+    if helper == nil or data == nil then
+        return nil, "worker-missing"
+    end
+    if data.enabled ~= true then
+        return nil, "worker-off-roster"
+    end
+    if isHelperActive(helper) then
+        return nil, "worker-active"
+    end
+
+    self.scopedHireCounter = (self.scopedHireCounter or 0) + 1
+    local token = string.format("hpScopedHire:%d:%s", self.scopedHireCounter, normalizedSlot)
+    local entry = {
+        token = token,
+        owner = tostring(owner or "external"),
+        slot = normalizedSlot,
+        stableIndex = stableIndex,
+        helper = helper,
+        displayName = data.displayName,
+        startedAt = g_time or 0
+    }
+
+    self.scopedHireStack = self.scopedHireStack or {}
+    table.insert(self.scopedHireStack, entry)
+    hpApiPrint(string.format(
+        "Scoped preferred hire begin: owner=%s slot=%s worker=%s token=%s",
+        entry.owner, entry.slot, tostring(entry.displayName), entry.token
+    ))
+    return token, data
+end
+
+function HP_IntegrationAPI:endPreferredHire(token)
+    if token == nil then return false, "missing-token" end
+    local stack = self.scopedHireStack or {}
+    for index = #stack, 1, -1 do
+        local entry = stack[index]
+        if entry ~= nil and entry.token == token then
+            table.remove(stack, index)
+            hpApiPrint(string.format(
+                "Scoped preferred hire end: owner=%s slot=%s token=%s",
+                tostring(entry.owner), tostring(entry.slot), tostring(token)
+            ))
+            return true, nil
+        end
+    end
+    return false, "unknown-token"
+end
+
+function HP_IntegrationAPI:resolveScopedPreferredHelper()
+    local entry = self:getScopedHireEntry()
+    if entry == nil then return nil, nil, false end
+
+    local data = getSlotData(entry.slot)
+    if data == nil or data.enabled ~= true then
+        return nil, "scoped-worker-off-roster", true
+    end
+    if entry.helper == nil or isHelperActive(entry.helper) then
+        return nil, "scoped-worker-unavailable", true
+    end
+
+    return entry.helper, "scoped:" .. tostring(entry.slot), true
+end
+
+function HP_IntegrationAPI:installScopedHireHooks()
+    if self.scopedHireHooksInstalled then return true end
+    if HelperProfiles == nil or HelperProfiles._hooksDone ~= true then return false end
+    if HelperManager == nil then return false end
+
+    local function wrap(methodName)
+        local previous = HelperManager[methodName]
+        if type(previous) ~= "function" then return false end
+        self.previousHelperMethods[methodName] = previous
+        HelperManager[methodName] = function(manager, ...)
+            local helper, reason, scoped = HP_IntegrationAPI:resolveScopedPreferredHelper()
+            if scoped then
+                if helper ~= nil then
+                    hpApiPrint(string.format("%s -> '%s' (%s)", methodName, tostring(helper.name), tostring(reason)))
+                    return helper
+                end
+                hpApiPrint(string.format("%s blocked (%s)", methodName, tostring(reason)))
+                return nil
+            end
+            return previous(manager, ...)
+        end
+        return true
+    end
+
+    local any = false
+    any = wrap("getNextHelper") or any
+    any = wrap("getFreeHelper") or any
+    any = wrap("getRandomHelper") or any
+    self.scopedHireHooksInstalled = any
+    if any then hpApiPrint("Installed API v7 scoped preferred-hire wrappers") end
+    return any
+end
+
 local function buildApi()
     local api = {
         apiVersion = HP_IntegrationAPI.apiVersion,
         modName = "FS25_HelperProfiles",
         modVersion = HP_IntegrationAPI.modVersion,
-        readOnly = true
+        readOnly = false,
+        supportsScopedPreferredHire = true
     }
 
     function api:getStatus()
@@ -244,7 +376,8 @@ local function buildApi()
                 and HelperProfiles:getPickMode() or nil,
             rosterSource = expansion ~= nil and expansion.result or "unknown",
             rosterStateFile = HP_RosterState ~= nil and HP_RosterState.stateFile or nil,
-            expandedByHelperProfiles = expansion ~= nil and expansion.addedCount > 0 or false
+            expandedByHelperProfiles = expansion ~= nil and expansion.addedCount > 0 or false,
+            supportsScopedPreferredHire = true
         }
     end
 
@@ -268,6 +401,7 @@ local function buildApi()
     end
 
     function api:getSlotData(slot) return getSlotData(slot) end
+
     function api:isSlotEnabled(slot)
         local data = getSlotData(slot)
         return data ~= nil and data.enabled == true
@@ -314,10 +448,32 @@ local function buildApi()
         return slots
     end
 
+    function api:beginPreferredHire(slot, owner)
+        return HP_IntegrationAPI:beginPreferredHire(slot, owner)
+    end
+
+    function api:endPreferredHire(token)
+        return HP_IntegrationAPI:endPreferredHire(token)
+    end
+
+    function api:getPreferredHireStatus()
+        local entry = HP_IntegrationAPI:getScopedHireEntry()
+        if entry == nil then return {active = false} end
+        return {
+            active = true,
+            token = entry.token,
+            owner = entry.owner,
+            slot = entry.slot,
+            displayName = entry.displayName,
+            startedAt = entry.startedAt
+        }
+    end
+
     return api
 end
 
 function HP_IntegrationAPI:unpublish()
+    self.scopedHireStack = {}
     if g_currentMission ~= nil then
         if g_currentMission.helperProfilesAPI == self.api then g_currentMission.helperProfilesAPI = nil end
         if g_currentMission.fs25HelperProfilesAPI == self.api then g_currentMission.fs25HelperProfilesAPI = nil end
@@ -333,9 +489,12 @@ function HP_IntegrationAPI:publish(reason)
         return false
     end
     if g_currentMission == nil then return false end
+
     self.api = self.api or buildApi()
     self.api.apiVersion = self.apiVersion
     self.api.modVersion = self.modVersion
+    self.api.readOnly = false
+    self.api.supportsScopedPreferredHire = true
 
     local changed = g_currentMission.helperProfilesAPI ~= self.api
         or g_currentMission.fs25HelperProfilesAPI ~= self.api
@@ -348,7 +507,7 @@ function HP_IntegrationAPI:publish(reason)
 
     if changed then
         hpApiPrint(string.format(
-            "Published optional shared API: reason=%s apiVersion=%s modVersion=%s slots=%d enabled=%d",
+            "Published optional shared API: reason=%s apiVersion=%s modVersion=%s slots=%d enabled=%d scopedHire=true",
             tostring(reason or "runtime"), tostring(self.api.apiVersion), tostring(self.api.modVersion),
             getManagedSlotCount(), HP_RosterState ~= nil and HP_RosterState:getEnabledCount() or getManagedSlotCount()
         ))
@@ -356,21 +515,30 @@ function HP_IntegrationAPI:publish(reason)
     return true
 end
 
-function HP_IntegrationAPI:loadMap() self:publish("loadMap") end
+function HP_IntegrationAPI:loadMap()
+    self.scopedHireStack = {}
+    self:publish("loadMap")
+end
 
 function HP_IntegrationAPI:update()
     if isCompatibilityBlocked() then
         self:unpublish()
         return
     end
+
     if not self.published or g_currentMission == nil
         or g_currentMission.helperProfilesAPI ~= self.api
         or g_currentMission.fs25HelperProfilesAPI ~= self.api then
         self:publish("update")
     end
+
+    if not self.scopedHireHooksInstalled then
+        self:installScopedHireHooks()
+    end
 end
 
 function HP_IntegrationAPI:deleteMap()
+    self.scopedHireStack = {}
     self:unpublish()
 end
 

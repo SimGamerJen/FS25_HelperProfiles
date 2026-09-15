@@ -39,7 +39,7 @@ jobs:
           if not wrapper.exists():
               raise SystemExit('Missing HP_ProtectedCall.lua')
           wrapper_text = wrapper.read_text(encoding='utf-8')
-          for marker in ['pcall(fn, ...)', 'if not ok then', 'logFailure(a)']:
+          for marker in ['local protectedCall = pcall', 'protectedCall(fn, ...)', 'if not ok then', 'logFailure(a)']:
               if marker not in wrapper_text:
                   raise SystemExit('Protected-call wrapper missing marker: ' + marker)
 
@@ -47,15 +47,13 @@ jobs:
           long_lines = []
           for path in sorted(Path('scripts').rglob('*.lua')):
               text = path.read_text(encoding='utf-8')
-              if path != wrapper:
-                  for n, line in enumerate(text.splitlines(), 1):
-                      if 'pcall(' in line or 'xpcall(' in line:
-                          direct.append(f'{path}:{n}')
               for n, line in enumerate(text.splitlines(), 1):
+                  if 'pcall(' in line or 'xpcall(' in line:
+                      direct.append(f'{path}:{n}')
                   if len(line) > 200:
                       long_lines.append(f'{path}:{n}:{len(line)}')
           if direct:
-              raise SystemExit('Direct protected calls remain outside wrapper: ' + ', '.join(direct))
+              raise SystemExit('Direct protected calls remain: ' + ', '.join(direct))
           if long_lines:
               raise SystemExit('Lua lines over 200 chars remain: ' + ', '.join(long_lines))
 

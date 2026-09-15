@@ -31,7 +31,7 @@ local function _isPhysicalKeyPressed(keyName)
         return false
     end
 
-    local ok, result = pcall(Input.isKeyPressed, key)
+    local ok, result = HP_ProtectedCall.call(Input.isKeyPressed, key)
     return ok and result == true
 end
 
@@ -249,7 +249,7 @@ if HP_AppearanceBindingsScreen ~= nil then
     local function _removeAppearanceClearAllAction(screen)
         local id = screen ~= nil and screen._clearAllBindingsActionEventId or nil
         if id ~= nil and g_inputBinding ~= nil and g_inputBinding.removeActionEvent ~= nil then
-            pcall(function()
+            HP_ProtectedCall.call(function()
                 g_inputBinding:removeActionEvent(id)
             end)
         end
@@ -274,7 +274,7 @@ if HP_AppearanceBindingsScreen ~= nil then
             return
         end
 
-        local callOk, registered, id = pcall(function()
+        local callOk, registered, id = HP_ProtectedCall.call(function()
             return g_inputBinding:registerActionEvent(
                 inputAction,
                 screen,

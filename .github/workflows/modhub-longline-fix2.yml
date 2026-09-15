@@ -121,7 +121,7 @@ jobs:
               '    tostring(presetRow.id)',
               ')',
           ])
-          replace_line('scripts/gui/HP_AppearanceBindingsScreen.lua', 'status = status .. "  |  " .. hpFormat("hp_status_current_binding"', [
+          replace_line('scripts/gui/HP_AppearanceBindingsScreen.lua', 'hpI18n("hp_state_unbound_title", "Unbound"))', [
               'status = status .. "  |  " .. hpFormat(',
               '    "hp_status_current_binding",',
               '    "Current binding: %s → %s",',

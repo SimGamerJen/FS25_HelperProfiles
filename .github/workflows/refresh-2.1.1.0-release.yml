@@ -1,0 +1,80 @@
+name: Refresh HelperProfiles 2.1.1.0 release
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - .github/workflows/refresh-2.1.1.0-release.yml
+
+permissions:
+  contents: write
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    env:
+      TARGET_SHA: 74b7f70da718178b0f890e8c56d488720d4e2ecc
+      TAG: 2.1.1.0
+    steps:
+      - name: Check out patched stable release tree
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ env.TARGET_SHA }}
+          fetch-depth: 0
+
+      - name: Validate stable release tree
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+          import xml.etree.ElementTree as ET
+
+          root = ET.parse('modDesc.xml').getroot()
+          if root.findtext('version') != '2.1.1.0':
+              raise SystemExit('Unexpected modDesc version')
+
+          src = Path('scripts/RegisterPlayerActionEvents.lua').read_text(encoding='utf-8')
+          if '_getVehicleIsActiveForInput' not in src:
+              raise SystemExit('Vehicle input hotfix is missing')
+          if 'function(self, isActiveForInput, isActiveForGUI)' in src:
+              raise SystemExit('Legacy vehicle callback handling is still present')
+
+          experimental = list(Path('scripts').glob('HP_World*.lua'))
+          if experimental:
+              raise SystemExit('Experimental World Workers files present in stable release tree')
+          PY
+
+      - name: Build Farming Simulator mod package
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -f FS25_HelperProfiles.zip
+          zip -r FS25_HelperProfiles.zip modDesc.xml icon_helperProfiles.dds gui l10n scripts -x '*.DS_Store' '*__MACOSX*'
+
+      - name: Preserve rebuilt package as workflow artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: FS25_HelperProfiles-2.1.1.0-release-refresh
+          path: FS25_HelperProfiles.zip
+          if-no-files-found: error
+          retention-days: 7
+
+      - name: Replace stale tag and GitHub release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release delete "$TAG" --yes --cleanup-tag
+          elif gh api "repos/${GITHUB_REPOSITORY}/git/ref/tags/$TAG" >/dev/null 2>&1; then
+            gh api --silent -X DELETE "repos/${GITHUB_REPOSITORY}/git/refs/tags/$TAG"
+          fi
+
+          gh release create "$TAG" FS25_HelperProfiles.zip \
+            --target "$TARGET_SHA" \
+            --title 'HelperProfiles 2.1.1.0' \
+            --notes-file docs/releases/2.1.1.0.md

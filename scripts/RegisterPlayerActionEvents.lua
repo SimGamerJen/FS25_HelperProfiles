@@ -216,11 +216,20 @@ local function _unregisterVehicleActions(vehicle)
     end
 end
 
+local function _getVehicleIsActiveForInput(vehicle)
+    if vehicle == nil or vehicle.getIsActiveForInput == nil then
+        return false
+    end
+
+    local ok, active = HP_ProtectedCall.call(vehicle.getIsActiveForInput, vehicle)
+    return ok and active == true
+end
+
 if Vehicle ~= nil and Vehicle.registerActionEvents ~= nil and Utils ~= nil and Utils.appendedFunction ~= nil then
     Vehicle.registerActionEvents = Utils.appendedFunction(
         Vehicle.registerActionEvents,
-        function(self, isActiveForInput, isActiveForGUI)
-            _registerVehicleActions(self, isActiveForInput)
+        function(self, excludedVehicle)
+            _registerVehicleActions(self, _getVehicleIsActiveForInput(self))
         end
     )
 end

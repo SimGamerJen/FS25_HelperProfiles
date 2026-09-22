@@ -10,6 +10,7 @@ local _loggedVehicleCycle = false
 local _loggedVehicleToggle = false
 local _loggedVehicleMode = false
 local _loggedVehicleAppearanceMenu = false
+local _loggedVehicleControlledFallback = false
 
 local function _isPress(inputValue, callbackState)
     if type(inputValue) == "number" then
@@ -102,6 +103,11 @@ local function _setActionEventLowPriority(id, visible)
     end
 end
 
+local function _setActionEventActive(id, active)
+    if id == nil or g_inputBinding == nil or g_inputBinding.setActionEventActive == nil then return end
+    HP_ProtectedCall.call(g_inputBinding.setActionEventActive, g_inputBinding, id, active ~= false)
+end
+
 local function _registerPlayerAction(field, inputAction, target, callback, label)
     if HelperProfiles[field] ~= nil then return end
     if g_inputBinding == nil or inputAction == nil then
@@ -175,6 +181,7 @@ local function _addVehicleAction(vehicle, spec, inputAction, target, callback, l
     local _, id = vehicle:addActionEvent(spec.actionEvents, inputAction, target, callback, false, true, false, true)
     if id ~= nil then
         _setActionEventLowPriority(id, true)
+        _setActionEventActive(id, true)
         if loggedFlagName == "cycle" and not _loggedVehicleCycle then
             print(LOG .. "Registered " .. tostring(label) .. " (vehicle)")
             _loggedVehicleCycle = true
@@ -196,7 +203,16 @@ end
 
 local function _registerVehicleActions(vehicle, isActiveForInput)
     if _isCompatibilityBlocked() then return end
-    if not isActiveForInput or vehicle == nil or vehicle.addActionEvent == nil then return end
+    if vehicle == nil or vehicle.addActionEvent == nil then return end
+
+    local isControlledVehicle = g_currentMission ~= nil and g_currentMission.controlledVehicle == vehicle
+    if isActiveForInput ~= true and not isControlledVehicle then return end
+
+    if isActiveForInput ~= true and isControlledVehicle and not _loggedVehicleControlledFallback then
+        print(LOG .. "Vehicle input fallback active: controlled vehicle reported isActiveForInput=false")
+        _loggedVehicleControlledFallback = true
+    end
+
     local spec = _ensureVehicleSpec(vehicle)
 
     if vehicle.clearActionEventsTable then

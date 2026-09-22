@@ -42,7 +42,7 @@ HelperProfiles._pickMode = HelperProfiles._pickMode or "preferSelected"  -- pref
 
 local function hpI18n(key, fallback)
     if g_i18n ~= nil and g_i18n.getText ~= nil then
-        local ok, value = pcall(g_i18n.getText, g_i18n, key)
+        local ok, value = HP_ProtectedCall.call(g_i18n.getText, g_i18n, key)
         if ok and value ~= nil and value ~= "" and value ~= key then
             return value
         end
@@ -52,7 +52,7 @@ end
 
 local function hpFormat(key, fallback, ...)
     local pattern = hpI18n(key, fallback)
-    local ok, value = pcall(string.format, pattern, ...)
+    local ok, value = HP_ProtectedCall.call(string.format, pattern, ...)
     if ok then return value end
     return pattern
 end
@@ -230,7 +230,7 @@ end
 
 function HelperProfiles:getDisplayNameForHelper(helper, idx)
     if HP_ASBridge ~= nil and HP_ASBridge.getDisplayNameForHelper ~= nil then
-        local ok, displayName, baseName = pcall(HP_ASBridge.getDisplayNameForHelper, HP_ASBridge, helper, idx)
+        local ok, displayName, baseName = HP_ProtectedCall.call(HP_ASBridge.getDisplayNameForHelper, HP_ASBridge, helper, idx)
         if ok and displayName ~= nil and tostring(displayName) ~= "" then
             return tostring(displayName), tostring(baseName or (helper and helper.name) or idx or "?")
         end
@@ -241,7 +241,7 @@ end
 
 function HelperProfiles:getAppearanceLabelForHelper(helper, idx)
     if HP_ASBridge ~= nil and HP_ASBridge.getAppearanceLabelForHelper ~= nil then
-        local ok, label, presetId, category = pcall(HP_ASBridge.getAppearanceLabelForHelper, HP_ASBridge, helper, idx)
+        local ok, label, presetId, category = HP_ProtectedCall.call(HP_ASBridge.getAppearanceLabelForHelper, HP_ASBridge, helper, idx)
         if ok then
             return label, presetId, category
         end

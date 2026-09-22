@@ -41,7 +41,7 @@ end
 local function callProfiles(methodName)
     if isCompatibilityBlocked() then return {} end
     if HelperProfiles == nil or type(HelperProfiles[methodName]) ~= "function" then return {} end
-    local ok, profiles = pcall(HelperProfiles[methodName], HelperProfiles)
+    local ok, profiles = HP_ProtectedCall.call(HelperProfiles[methodName], HelperProfiles)
     return ok and type(profiles) == "table" and profiles or {}
 end
 
@@ -103,7 +103,7 @@ local function getSelectedHelperRef()
     if HelperProfiles == nil then return nil end
     if HelperProfiles.selectedHelperRef ~= nil then return HelperProfiles.selectedHelperRef end
     if type(HelperProfiles.getSelectedHelper) == "function" then
-        local ok, helper = pcall(HelperProfiles.getSelectedHelper, HelperProfiles)
+        local ok, helper = HP_ProtectedCall.call(HelperProfiles.getSelectedHelper, HelperProfiles)
         if ok then return helper end
     end
     local enabled = getEnabledProfiles()
@@ -129,7 +129,7 @@ end
 local function isHelperActive(helper)
     if helper == nil then return false end
     if HelperProfiles ~= nil and type(HelperProfiles.isHelperActive) == "function" then
-        local ok, active = pcall(HelperProfiles.isHelperActive, HelperProfiles, helper)
+        local ok, active = HP_ProtectedCall.call(HelperProfiles.isHelperActive, HelperProfiles, helper)
         if ok then return active == true end
     end
     return helper.inUse == true
@@ -170,7 +170,7 @@ local function getSlotData(slot)
     local displayName = tostring(helper.name or normalizedSlot)
     local baseName = tostring(helper.name or normalizedSlot)
     if HelperProfiles ~= nil and type(HelperProfiles.getDisplayNameForHelper) == "function" then
-        local ok, resolvedDisplayName, resolvedBaseName = pcall(
+        local ok, resolvedDisplayName, resolvedBaseName = HP_ProtectedCall.call(
             HelperProfiles.getDisplayNameForHelper, HelperProfiles, helper, stableIndex
         )
         if ok then
@@ -181,7 +181,7 @@ local function getSlotData(slot)
 
     local appearanceLabel, presetId, category = nil, nil, nil
     if HelperProfiles ~= nil and type(HelperProfiles.getAppearanceLabelForHelper) == "function" then
-        local ok, label, resolvedPresetId, resolvedCategory = pcall(
+        local ok, label, resolvedPresetId, resolvedCategory = HP_ProtectedCall.call(
             HelperProfiles.getAppearanceLabelForHelper, HelperProfiles, helper, stableIndex
         )
         if ok then

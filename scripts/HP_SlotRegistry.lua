@@ -113,7 +113,7 @@ end
 function HP_SlotRegistry:getManagerCount()
     if g_helperManager == nil then return 0 end
     if g_helperManager.getNumOfHelpers ~= nil then
-        local ok, count = pcall(g_helperManager.getNumOfHelpers, g_helperManager)
+        local ok, count = HP_ProtectedCall.call(g_helperManager.getNumOfHelpers, g_helperManager)
         if ok and tonumber(count) ~= nil then return math.floor(tonumber(count)) end
     end
     return math.floor(tonumber(g_helperManager.numHelpers) or 0)
@@ -189,6 +189,15 @@ if HP_WorldObstacleTurnEscape == nil and source ~= nil then
 end
 if HP_WorldActionUI == nil and source ~= nil then
     source((g_currentModDirectory or "") .. "scripts/HP_WorldActionUI.lua")
+end
+if HP_WorldPedestrianProbe == nil and source ~= nil then
+    source((g_currentModDirectory or "") .. "scripts/HP_WorldPedestrianProbe.lua")
+end
+if HP_WorldPedestrianProbeDeep == nil and source ~= nil then
+    source((g_currentModDirectory or "") .. "scripts/HP_WorldPedestrianProbeDeep.lua")
+end
+if HP_WorldSplinePath == nil and source ~= nil then
+    source((g_currentModDirectory or "") .. "scripts/HP_WorldSplinePath.lua")
 end
 if HP_WorldMovementProbe == nil and source ~= nil then
     source((g_currentModDirectory or "") .. "scripts/HP_WorldMovementProbe.lua")

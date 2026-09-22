@@ -1,4 +1,4 @@
-name: Release HelperProfiles 2.1.1.0
+name: Build HelperProfiles 2.1.1.0
 
 on:
   workflow_dispatch:
@@ -7,108 +7,66 @@ on:
       - main
     paths:
       - .github/workflows/release-2.1.1.0.yml
+      - modDesc.xml
+      - docs/releases/2.1.1.0.md
+      - scripts/HP_AutoDriveContinuity.lua
+      - scripts/HP_AutoDrivePayrollBridge.lua
+      - scripts/HP_HelperAcquisitionRouter.lua
+      - scripts/HP_IntegrationAPI.lua
 
 permissions:
   contents: write
 
 jobs:
-  release:
+  package:
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
-      - name: Repair stable release metadata
+      - name: Validate ModHub package inputs
         shell: bash
         run: |
           set -euo pipefail
           python - <<'PY'
           from pathlib import Path
-          import re
           import xml.etree.ElementTree as ET
 
-          path = Path('modDesc.xml')
-          text = path.read_text(encoding='utf-8')
-          before, marker, changelog = text.partition('    <changelog>')
-          if not marker:
-              raise SystemExit('Missing changelog section')
-
-          german_lines = [
-              'Version 2.1.1.0:',
-              '- Textur-Atlas-Artefakte und Layout-Darstellungsfehler in den Ansichten Erscheinungsbilder und Helferliste wurden behoben.',
-              '- Integration API v7 wurde hinzugefügt; der bestehende Helferlisten- und Identitätsvertrag bleibt erhalten.',
-              '- Kompatible Mods wie Remote Dispatcher können einen Helfer vorübergehend und gezielt für einen einzelnen Einstellvorgang anfordern.',
-              '- Gezielte Anforderungen schlagen kontrolliert fehl, wenn ein Helfer fehlt, nicht im Kader ist oder bereits aktiv ist; es wird kein anderer Helfer stillschweigend eingesetzt.',
-              '- Gezielte Anforderungen ändern weder den normal ausgewählten Helfer noch den Einstellungsmodus von HelperProfiles.',
-              ''
+          xml_files = [
+              'modDesc.xml',
+              'gui/HP_AppearanceBindingsScreen.xml',
+              'gui/HP_RosterManagerScreen.xml',
+              'gui/guiProfiles.xml',
+              'l10n/l10n_en.xml',
+              'l10n/l10n_de.xml',
+              'l10n/l10n_fr.xml',
           ]
-          german_block = '\n'.join(german_lines)
-
-          # Remove the accidentally inserted German 2.1.1.0 block from EN.
-          changelog = changelog.replace(german_block, '', 1)
-
-          # Add it to the German changelog if it is not already present there.
-          de_match = re.search(r'<de><!\[CDATA\[(.*?)\]\]></de>', changelog, flags=re.S)
-          if de_match is None:
-              raise SystemExit('Missing German changelog')
-          de_body = de_match.group(1)
-          if 'Textur-Atlas-Artefakte' not in de_body:
-              replacement = '<de><![CDATA[\n' + german_block + de_body.lstrip('\n') + ']]></de>'
-              changelog = changelog[:de_match.start()] + replacement + changelog[de_match.end():]
-
-          text = before + marker + changelog
-          path.write_text(text, encoding='utf-8')
-
-          compat = Path('scripts/HP_Compatibility.lua')
-          ctext = compat.read_text(encoding='utf-8')
-          ctext = ctext.replace(
-              'caused the 2.1.1.0 alpha to scan every loaded mod on every frame.',
-              'caused the 2.1.0.0 alpha to scan every loaded mod on every frame.'
-          )
-          compat.write_text(ctext, encoding='utf-8')
+          for path in xml_files:
+              ET.parse(path)
 
           root = ET.parse('modDesc.xml').getroot()
           if root.findtext('version') != '2.1.1.0':
               raise SystemExit('Unexpected modDesc version')
 
-          repaired = path.read_text(encoding='utf-8')
-          _, _, repaired_changelog = repaired.partition('    <changelog>')
-          en = re.search(r'<en><!\[CDATA\[(.*?)\]\]></en>', repaired_changelog, flags=re.S).group(1)
-          de = re.search(r'<de><!\[CDATA\[(.*?)\]\]></de>', repaired_changelog, flags=re.S).group(1)
-          if 'Textur-Atlas-Artefakte' in en:
-              raise SystemExit('German release notes still present in English changelog')
-          if not de.lstrip().startswith('Version 2.1.1.0:'):
-              raise SystemExit('German changelog does not start with 2.1.1.0')
+          mod_desc = Path('modDesc.xml').read_text(encoding='utf-8')
+          if 'Fixed helper continuity with AutoDrive' not in mod_desc:
+              raise SystemExit('Missing AutoDrive continuity changelog entry')
+
+          required_files = [
+              'icon_helperProfiles.dds',
+              'scripts/HP_AutoDriveContinuity.lua',
+              'scripts/HP_AutoDrivePayrollBridge.lua',
+              'scripts/HP_HelperAcquisitionRouter.lua',
+              'scripts/HP_IntegrationAPI.lua',
+          ]
+          for path in required_files:
+              if not Path(path).is_file():
+                  raise SystemExit('Missing required package file: ' + path)
 
           api = Path('scripts/HP_IntegrationAPI.lua').read_text(encoding='utf-8')
           for wanted in ['apiVersion = 7', 'modVersion = "2.1.1.0"', 'supportsScopedPreferredHire = true']:
               if wanted not in api:
                   raise SystemExit('Missing API v7 marker: ' + wanted)
-          PY
-
-      - name: Commit metadata corrections
-        shell: bash
-        run: |
-          set -euo pipefail
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add modDesc.xml scripts/HP_Compatibility.lua
-          if ! git diff --cached --quiet; then
-            git commit -m "Correct HelperProfiles 2.1.1.0 release metadata"
-            git push origin HEAD:main
-          fi
-
-      - name: Validate package inputs
-        shell: bash
-        run: |
-          set -euo pipefail
-          test -f docs/releases/2.1.1.0.md
-          python - <<'PY'
-          import xml.etree.ElementTree as ET
-          for path in ['modDesc.xml', 'gui/HP_AppearanceBindingsScreen.xml', 'gui/HP_RosterManagerScreen.xml', 'gui/guiProfiles.xml']:
-              ET.parse(path)
           PY
 
       - name: Build Farming Simulator mod package
@@ -120,24 +78,46 @@ jobs:
           python - <<'PY'
           import zipfile
           import xml.etree.ElementTree as ET
+
           with zipfile.ZipFile('FS25_HelperProfiles.zip', 'r') as archive:
               names = set(archive.namelist())
               required = {
-                  'modDesc.xml', 'icon_helperProfiles.dds',
-                  'gui/HP_AppearanceBindingsScreen.xml', 'gui/HP_RosterManagerScreen.xml',
-                  'scripts/HelperProfiles.lua', 'scripts/HP_RosterState.lua',
-                  'scripts/HP_RosterFilter.lua', 'scripts/HP_RosterManagerScreen.lua',
-                  'scripts/HP_TabbedManagement.lua', 'scripts/HP_IntegrationAPI.lua'
+                  'modDesc.xml',
+                  'icon_helperProfiles.dds',
+                  'gui/HP_AppearanceBindingsScreen.xml',
+                  'gui/HP_RosterManagerScreen.xml',
+                  'scripts/HelperProfiles.lua',
+                  'scripts/HP_RosterState.lua',
+                  'scripts/HP_RosterFilter.lua',
+                  'scripts/HP_RosterManagerScreen.lua',
+                  'scripts/HP_TabbedManagement.lua',
+                  'scripts/HP_IntegrationAPI.lua',
+                  'scripts/HP_AutoDriveContinuity.lua',
+                  'scripts/HP_AutoDrivePayrollBridge.lua',
+                  'scripts/HP_HelperAcquisitionRouter.lua',
               }
               missing = sorted(required - names)
               if missing:
                   raise SystemExit('Missing required package files: ' + ', '.join(missing))
+
+              if any(name.startswith('FS25_HelperProfiles/') for name in names):
+                  raise SystemExit('Package contains an unexpected wrapper directory')
+
               root = ET.fromstring(archive.read('modDesc.xml'))
               if root.findtext('version') != '2.1.1.0':
                   raise SystemExit('Unexpected packaged version')
           PY
 
+      - name: Upload ModHub-ready package artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: FS25_HelperProfiles-2.1.1.0-ModHub
+          path: FS25_HelperProfiles.zip
+          if-no-files-found: error
+          retention-days: 7
+
       - name: Publish or refresh GitHub release
+        if: github.event_name == 'workflow_dispatch'
         shell: bash
         env:
           GH_TOKEN: ${{ github.token }}

@@ -9,7 +9,9 @@ HP_AppearanceBindingsScreen = {}
 local HP_AppearanceBindingsScreen_mt = Class(HP_AppearanceBindingsScreen, MessageDialog)
 
 local LOG = "[FS25_HelperProfiles/AppearanceBindingsXML] "
-local function hpPrint(msg) print(LOG .. tostring(msg)) end
+local function hpPrint(msg)
+    -- Runtime diagnostics intentionally suppressed for ModHub release builds.
+end
 
 local HP_GUI_MOD_DIR = g_currentModDirectory or ""
 

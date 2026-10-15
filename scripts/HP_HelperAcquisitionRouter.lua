@@ -23,7 +23,7 @@ HP_HelperAcquisitionRouter = HP_HelperAcquisitionRouter or {
 local LOG = "[FS25_HelperProfiles/HelperRouter] "
 
 local function log(message, ...)
-    print(LOG .. string.format(tostring(message), ...))
+    -- Runtime diagnostics intentionally suppressed for ModHub release builds.
 end
 
 local function nowMs()

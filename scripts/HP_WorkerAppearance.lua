@@ -14,7 +14,9 @@ HP_WorkerAppearance = HP_WorkerAppearance or {
 }
 
 local LOG = "[FS25_HelperProfiles/WorkerAppearance] "
-local function hpwaPrint(msg) print(LOG .. tostring(msg)) end
+local function hpwaPrint(msg)
+    -- Runtime diagnostics intentionally suppressed for ModHub release builds.
+end
 
 function HP_WorkerAppearance:debug(msg)
     if self.debugEnabled then hpwaPrint(msg) end

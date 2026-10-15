@@ -8,7 +8,9 @@ local HP_RosterManagerScreen_mt = Class(HP_RosterManagerScreen, MessageDialog)
 local LOG = "[FS25_HelperProfiles/RosterManager] "
 local MOD_DIR = g_currentModDirectory or ""
 
-local function hpPrint(message) print(LOG .. tostring(message)) end
+local function hpPrint(message)
+    -- Runtime diagnostics intentionally suppressed for ModHub release builds.
+end
 
 local function hpI18n(key, fallback)
     if g_i18n ~= nil and g_i18n.getText ~= nil then

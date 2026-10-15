@@ -3,13 +3,13 @@
 
 -- ============================================================================
 -- FS25_HelperProfiles
--- ModVersion: 2.1.1.0
+-- ModVersion: 1.0.0.0
 -- Script:     HP_UI.lua
 -- BuildTag:   20260721-1
 -- ============================================================================
 
 do
-    local MOD_VERSION = "2.1.1.0"
+    local MOD_VERSION = "1.0.0.0"
     local SCRIPT_NAME = "HP_UI.lua"
     local BUILD_TAG = "20260728-1"
     local SCRIPT_VER = string.format("%s-%s+%s", MOD_VERSION, SCRIPT_NAME, BUILD_TAG)
@@ -571,7 +571,6 @@ function HP_UI:onToggleAction(actionName, inputValue, callbackState, isAnalog)
     if self.visible then
         self:flash(hpI18n("hp_flash_overlay_on", "HelperProfiles overlay: ON"), 1.25)
     else
-        print("[FS25_HelperProfiles] Overlay: OFF")
     end
 end
 

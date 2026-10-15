@@ -1,5 +1,5 @@
 -- HP_AppearanceBindingsScreen.lua (FS25_HelperProfiles)
--- ModVersion: 2.1.1.0
+-- ModVersion: 1.0.0.0
 -- BuildTag: 20260727.2
 -- XML dialog for per-save AvatarSwitcher appearance bindings.
 -- Reworked to follow the known-working AvatarSwitcher XML dialog pattern:
@@ -9,7 +9,9 @@ HP_AppearanceBindingsScreen = {}
 local HP_AppearanceBindingsScreen_mt = Class(HP_AppearanceBindingsScreen, MessageDialog)
 
 local LOG = "[FS25_HelperProfiles/AppearanceBindingsXML] "
-local function hpPrint(msg) print(LOG .. tostring(msg)) end
+local function hpPrint(msg)
+    -- Runtime diagnostics intentionally suppressed for ModHub release builds.
+end
 
 local HP_GUI_MOD_DIR = g_currentModDirectory or ""
 

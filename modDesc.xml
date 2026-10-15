@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<modDesc descVersion="113">
+<modDesc descVersion="114">
     <author>SimGamerJen</author>
-    <version>2.1.1.0</version>
+    <version>1.0.0.0</version>
     <title>
         <en>Helper Profiles</en>
         <de>Helferprofile</de>
@@ -38,12 +38,6 @@ Controls can be reassigned in the game's control settings.
 
 Single player only.
 Not compatible with Hired Helper Tool or conflicting helper-roster expansion mods. Helper Profiles disables itself for the session when an incompatible roster owner is detected.
-
-Changelog 2.1.1.0:
-- Fixed texture and layout issues in the Helper Management appearance and roster screens.
-- Added support for compatible companion mods to request a specific available worker without changing your selected worker or hiring mode.
-- Fixed helper continuity with AutoDrive so an assigned worker is retained when AutoDrive temporarily releases and reacquires a helper.
-- Fixed intermittent Helper Profiles vehicle keybind loss after switching vehicles by using the vehicle's actual active-input state when registering actions.
 ]]></en>
         <de><![CDATA[
 Stelle ein festes Team für deinen Hof zusammen und bestimme, wer den nächsten KI-Auftrag übernimmt. Helferprofile erweitert die standardmäßige Helferliste auf 20 feste Helferplätze (A-T) und bietet eine übersichtliche Statusanzeige sowie eine Helferverwaltung mit zwei Tabs.
@@ -75,12 +69,6 @@ Die Tasten können in den Steuerungseinstellungen des Spiels geändert werden.
 
 Nur für den Einzelspielermodus.
 Nicht kompatibel mit Hired Helper Tool oder kollidierenden Mods zur Erweiterung der Helferliste. Wird eine inkompatible Verwaltung der Helferliste erkannt, deaktiviert sich Helferprofile für die aktuelle Sitzung.
-
-Changelog 2.1.1.0:
-- Textur- und Layoutfehler in den Ansichten für Erscheinungsbilder und Helferliste der Helferverwaltung wurden behoben.
-- Kompatible Begleitmods können gezielt einen verfügbaren Helfer anfordern, ohne den ausgewählten Helfer oder den Einstellungsmodus zu ändern.
-- Die Helfer-Kontinuität mit AutoDrive wurde behoben, sodass ein zugewiesener Helfer beibehalten wird, wenn AutoDrive ihn vorübergehend freigibt und erneut anfordert.
-- Ein sporadischer Ausfall der Helferprofile-Tastenkürzel in Fahrzeugen nach einem Fahrzeugwechsel wurde behoben, indem beim Registrieren der Aktionen der tatsächliche aktive Eingabestatus des Fahrzeugs verwendet wird.
 ]]></de>
         <fr><![CDATA[
 Constituez une équipe permanente pour votre ferme et choisissez qui effectuera la prochaine tâche d'IA. Profils d'aides étend la liste standard à 20 emplacements permanents (A-T), avec un tableau d'état clair et un écran de gestion à deux onglets.
@@ -112,12 +100,6 @@ Les touches peuvent être réattribuées dans les paramètres des commandes du j
 
 Mode solo uniquement.
 Non compatible avec Hired Helper Tool ou les mods d'extension de la liste des aides qui entrent en conflit. Profils d'aides se désactive pour la session lorsqu'une gestion incompatible de la liste est détectée.
-
-Changelog 2.1.1.0 :
-- Correction des problèmes de textures et de mise en page dans les écrans Apparences et Liste des aides.
-- Les mods complémentaires compatibles peuvent demander une aide disponible précise sans modifier l'aide sélectionnée ni le mode d'embauche.
-- Correction de la continuité des aides avec AutoDrive afin qu'une aide affectée soit conservée lorsqu'AutoDrive la libère temporairement puis la réaffecte.
-- Correction de la perte intermittente des raccourcis Profils d'aides dans les véhicules après un changement de véhicule en utilisant l'état d'entrée actif réel du véhicule lors de l'enregistrement des actions.
 ]]></fr>
     </description>
 
@@ -145,9 +127,6 @@ Changelog 2.1.1.0 :
         </actionBinding>
         <actionBinding action="HP_TOGGLE_OVERLAY">
             <binding device="KB_MOUSE_DEFAULT" input="KEY_ralt KEY_semicolon"/>
-        </actionBinding>
-        <actionBinding action="HP_CLEAR_ALL_BINDINGS">
-            <binding device="KB_MOUSE_DEFAULT" input="KEY_a"/>
         </actionBinding>
     </inputBinding>
 

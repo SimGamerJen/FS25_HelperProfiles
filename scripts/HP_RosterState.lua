@@ -15,7 +15,7 @@ HP_RosterState = {
 local LOG = "[FS25_HelperProfiles/RosterState] "
 
 local function log(message, ...)
-    print(LOG .. string.format(tostring(message), ...))
+    -- Runtime diagnostics intentionally suppressed for ModHub release builds.
 end
 
 local function normalizePathSlashes(path)

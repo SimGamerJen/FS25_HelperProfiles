@@ -11,7 +11,7 @@ end
 
 HP_IntegrationAPI = HP_IntegrationAPI or {
     apiVersion = 7,
-    modVersion = "2.1.1.0",
+    modVersion = "1.0.0.0",
     published = false,
     api = nil,
     scopedHireStack = {},
@@ -20,12 +20,14 @@ HP_IntegrationAPI = HP_IntegrationAPI or {
     previousHelperMethods = {}
 }
 HP_IntegrationAPI.apiVersion = 7
-HP_IntegrationAPI.modVersion = "2.1.1.0"
+HP_IntegrationAPI.modVersion = "1.0.0.0"
 HP_IntegrationAPI.scopedHireStack = HP_IntegrationAPI.scopedHireStack or {}
 HP_IntegrationAPI.previousHelperMethods = HP_IntegrationAPI.previousHelperMethods or {}
 
 local LOG = "[FS25_HelperProfiles/API] "
-local function hpApiPrint(message) print(LOG .. tostring(message)) end
+local function hpApiPrint(message)
+    -- Runtime diagnostics intentionally suppressed for ModHub release builds.
+end
 
 local function isCompatibilityBlocked()
     return HP_Compatibility ~= nil and HP_Compatibility:isBlocked()

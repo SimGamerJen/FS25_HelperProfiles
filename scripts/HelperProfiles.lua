@@ -3,13 +3,13 @@
 
 -- ============================================================================
 -- FS25_HelperProfiles
--- ModVersion: 2.1.1.0
+-- ModVersion: 1.0.0.0
 -- Script:     HelperProfiles.lua
 -- BuildTag:   20260105-1
 -- ============================================================================
 
 do
-    local MOD_VERSION   = "2.1.1.0"
+    local MOD_VERSION   = "1.0.0.0"
     local SCRIPT_NAME   = "HelperProfiles.lua"
     local BUILD_TAG     = "20260513-2"
     local SCRIPT_VER    = string.format("%s-%s+%s", MOD_VERSION, SCRIPT_NAME, BUILD_TAG)
@@ -98,7 +98,6 @@ function HelperProfiles:_cacheDefaultOrderIfReady(list)
         self._defaultPosByRef[h]  = i
     end
 
-    print(("[FS25_HelperProfiles] Cached default helper order (%d helpers)"):format(#list))
 end
 
 function HelperProfiles:_sortToDefault(list)
@@ -368,7 +367,6 @@ function HelperProfiles:setSelection(idx)
 
     local label = target and target.name or (hpI18n("hp_helper_generic", "Helper") .. " " .. tostring(self.selectedIdx))
     self:_flash(hpFormat("hp_flash_helper_selected", "Helper: %s (%d/%d)", label, self.selectedIdx, #profiles), 1.2)
-    print(("[FS25_HelperProfiles] Selected helper: %s"):format(label))
     return true, nil
 end
 
@@ -450,12 +448,10 @@ local function hookOnce()
         HelperManager.getNextHelper = function(self, ...)
             local h, why = HelperProfiles:pickPreferredFreeHelper()
             if h then
-                print(("[FS25_HelperProfiles] getNextHelper -> '%s' (%s)"):format(tostring(h.name), why))
                 return h
             end
             return HelperProfiles._orig_getNext(self, ...)
         end
-        print("[FS25_HelperProfiles] Hooked HelperManager.getNextHelper")
     end
 
     -- getFreeHelper
@@ -464,12 +460,10 @@ local function hookOnce()
         HelperManager.getFreeHelper = function(self, ...)
             local h, why = HelperProfiles:pickPreferredFreeHelper()
             if h then
-                print(("[FS25_HelperProfiles] getFreeHelper -> '%s' (%s)"):format(tostring(h.name), why))
                 return h
             end
             return HelperProfiles._orig_getFree(self, ...)
         end
-        print("[FS25_HelperProfiles] Hooked HelperManager.getFreeHelper")
     end
 
     -- getRandomHelper
@@ -478,12 +472,10 @@ local function hookOnce()
         HelperManager.getRandomHelper = function(self, ...)
             local h, why = HelperProfiles:pickPreferredFreeHelper()
             if h then
-                print(("[FS25_HelperProfiles] getRandomHelper -> '%s' (%s)"):format(tostring(h.name), why))
                 return h
             end
             return HelperProfiles._orig_getRandom(self, ...)
         end
-        print("[FS25_HelperProfiles] Hooked HelperManager.getRandomHelper")
     end
 
     -- hireHelper (for logging/visibility)
@@ -498,7 +490,6 @@ local function hookOnce()
             if idx and g_helperManager and g_helperManager.indexToHelper then
                 local h = g_helperManager.indexToHelper[idx]
                 if h then
-                    print(("[FS25_HelperProfiles] hireHelper -> vehicle got '%s' (idx %d)"):format(tostring(h.name), idx))
                     if HP_WorkerAppearance ~= nil and HP_WorkerAppearance.onHelperHired ~= nil then
                         HP_WorkerAppearance:onHelperHired(vehicle, h, idx)
                     end
@@ -506,7 +497,6 @@ local function hookOnce()
             end
             return res
         end
-        print("[FS25_HelperProfiles] Hooked HelperManager.hireHelper")
     end
 
     HelperProfiles._hooksDone = (HelperProfiles._orig_getNext or HelperProfiles._orig_getFree or HelperProfiles._orig_getRandom) ~= nil

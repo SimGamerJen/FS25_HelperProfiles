@@ -24,7 +24,9 @@ HP_AppearanceMenu = HP_AppearanceMenu or {
 }
 
 local LOG = "[FS25_HelperProfiles/AppearanceMenu] "
-local function hpPrint(msg) print(LOG .. tostring(msg)) end
+local function hpPrint(msg)
+    -- Runtime diagnostics intentionally suppressed for ModHub release builds.
+end
 
 local function clamp(v, lo, hi)
     v = tonumber(v) or lo

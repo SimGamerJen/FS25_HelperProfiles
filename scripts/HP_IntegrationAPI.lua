@@ -25,7 +25,9 @@ HP_IntegrationAPI.scopedHireStack = HP_IntegrationAPI.scopedHireStack or {}
 HP_IntegrationAPI.previousHelperMethods = HP_IntegrationAPI.previousHelperMethods or {}
 
 local LOG = "[FS25_HelperProfiles/API] "
-local function hpApiPrint(message) print(LOG .. tostring(message)) end
+local function hpApiPrint(message)
+    -- Runtime diagnostics intentionally suppressed for ModHub release builds.
+end
 
 local function isCompatibilityBlocked()
     return HP_Compatibility ~= nil and HP_Compatibility:isBlocked()

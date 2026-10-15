@@ -14,7 +14,9 @@ HP_TabbedManagement = {
 }
 
 local LOG = "[FS25_HelperProfiles/TabbedManagement] "
-local function hpPrint(message) print(LOG .. tostring(message)) end
+local function hpPrint(message)
+    -- Runtime diagnostics intentionally suppressed for ModHub release builds.
+end
 
 local function configureTabs(screen, activeIndex)
     if screen == nil then return end

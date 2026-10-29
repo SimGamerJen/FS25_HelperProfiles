@@ -3,7 +3,7 @@ name: Validate ModHub 2.1.2.0 release
 on:
   push:
     branches:
-      - modhub/2.1.2.0-resubmission
+      - modhub/2.1.1.0-resubmission
   workflow_dispatch:
 
 permissions:

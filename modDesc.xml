@@ -170,6 +170,7 @@ Changelog 2.1.1.0 :
 
     <extraSourceFiles>
         <sourceFile filename="scripts/HP_ProtectedCall.lua"/>
+        <sourceFile filename="scripts/HP_PayrollCost.lua"/>
         <sourceFile filename="scripts/HP_SlotRegistry.lua"/>
         <sourceFile filename="scripts/HP_Compatibility.lua"/>
         <sourceFile filename="scripts/HP_Config.lua"/>

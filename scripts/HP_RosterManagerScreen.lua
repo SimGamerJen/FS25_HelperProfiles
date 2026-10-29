@@ -65,6 +65,43 @@ local function getRoleLabel(slot)
     return "-"
 end
 
+local function getPayrollCostSnapshot()
+    local api = getPayrollAPI()
+    if api == nil or type(api.getPayrollSnapshot) ~= "function" then
+        return {}, false
+    end
+
+    local ok, snapshot = HP_ProtectedCall.call(api.getPayrollSnapshot, api, {includeWorkers = false})
+    if not ok or type(snapshot) ~= "table" then
+        return {}, false
+    end
+
+    local costs = {}
+    for _, job in ipairs(snapshot.activeJobs or {}) do
+        local slot = job ~= nil and job.helperSlot or nil
+        local estimate = job ~= nil and tonumber(job.chargeEstimate) or nil
+        if slot ~= nil and estimate ~= nil then
+            local key = string.upper(tostring(slot))
+            costs[key] = (tonumber(costs[key]) or 0) + estimate
+        end
+    end
+
+    return costs, true
+end
+
+local function formatCurrentCost(value)
+    if value == nil then return "-" end
+    local amount = tonumber(value)
+    if amount == nil then return "-" end
+
+    if g_i18n ~= nil and g_i18n.formatMoney ~= nil then
+        local ok, formatted = HP_ProtectedCall.call(g_i18n.formatMoney, g_i18n, amount, 2, true, true)
+        if ok and formatted ~= nil then return tostring(formatted) end
+    end
+
+    return string.format("%.2f", amount)
+end
+
 local function getDisplayName(helper, stableIndex)
     if HelperProfiles ~= nil and HelperProfiles.getDisplayNameForHelper ~= nil then
         local ok, displayName = HP_ProtectedCall.call(HelperProfiles.getDisplayNameForHelper, HelperProfiles, helper, stableIndex)
@@ -120,6 +157,9 @@ function HP_RosterManagerScreen.new(target, customMt)
     self.selectedIndex = 1
     self.actionMessage = nil
     self.dirty = false
+    self.currentCostBySlot = {}
+    self.payrollCostAvailable = false
+    self._payrollRefreshMs = 0
     self._bulkRosterActionEventId = nil
     return self
 end
@@ -194,6 +234,36 @@ function HP_RosterManagerScreen:onClose()
     if HP_RosterManagerGui ~= nil then HP_RosterManagerGui.dialog = nil end
 end
 
+function HP_RosterManagerScreen:refreshPayrollCosts(force)
+    local costs, available = getPayrollCostSnapshot()
+    local changed = force == true or available ~= self.payrollCostAvailable
+    self.payrollCostAvailable = available
+
+    for _, row in ipairs(self.rows or {}) do
+        local key = string.upper(tostring(row.slot or ""))
+        local value = available and costs[key] or nil
+        if row.currentCost ~= value then
+            row.currentCost = value
+            changed = true
+        end
+    end
+
+    self.currentCostBySlot = costs
+    return changed
+end
+
+function HP_RosterManagerScreen:update(dt)
+    HP_RosterManagerScreen:superClass().update(self, dt)
+
+    self._payrollRefreshMs = (tonumber(self._payrollRefreshMs) or 0) - (tonumber(dt) or 0)
+    if self._payrollRefreshMs <= 0 then
+        self._payrollRefreshMs = 500
+        if self:refreshPayrollCosts(false) and self.rosterTable ~= nil then
+            self.rosterTable:reloadData()
+        end
+    end
+end
+
 function HP_RosterManagerScreen:reloadData()
     if HP_RosterState ~= nil and not HP_RosterState.initialized then HP_RosterState:init() end
     self.rows = {}
@@ -218,12 +288,15 @@ function HP_RosterManagerScreen:reloadData()
             displayName = getDisplayName(helper, stableIndex),
             appearance = getAppearanceLabel(helper, stableIndex),
             role = getRoleLabel(slot),
+            currentCost = nil,
             active = isActive(helper)
         }
     end
 
     self.selectedIndex = clamp(self.selectedIndex, 1, math.max(1, #self.rows))
     self.actionMessage = nil
+    self._payrollRefreshMs = 0
+    self:refreshPayrollCosts(true)
     self:refreshDirtyState()
     if self.rosterTable ~= nil then self.rosterTable:reloadData() end
     self:updateDetailText()
@@ -258,6 +331,7 @@ function HP_RosterManagerScreen:populateCellForItemInSection(list, section, inde
     cell:getAttribute("Worker"):setText(tostring(row.displayName or "-"))
     cell:getAttribute("Appearance"):setText(tostring(row.appearance or "-"))
     cell:getAttribute("Role"):setText(tostring(row.role or "-"))
+    cell:getAttribute("CurrentCost"):setText(formatCurrentCost(row.currentCost))
     cell:getAttribute("WorkState"):setText(row.active and hpI18n("hp_state_active", "ACTIVE") or hpI18n("hp_state_available", "AVAILABLE"))
     cell:getAttribute("RosterState"):setText(enabled and hpI18n("hp_roster_on", "ON ROSTER") or hpI18n("hp_roster_off", "OFF ROSTER"))
 end

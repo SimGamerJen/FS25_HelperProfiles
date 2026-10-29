@@ -27,6 +27,7 @@
 - Ensures at least one worker always remains ON roster.
 - Preserves AvatarSwitcher bindings, HelperPayroll roles, compensation overrides and ledger identities when workers are disabled and later restored.
 - Keeps HelperPayroll roles visible when the operational roster is filtered.
+- Shows a live HelperPayroll **Current Cost** estimate for active workers in the Helper Roster.
 - Adds guarded **Disable Others** and **Enable All** actions.
 - Adds automatic A–J/K–T overlay paging.
 - Adds Hired Helper Tool and external-roster incompatibility protection.
@@ -38,7 +39,7 @@
 - Configurable `preferSelected` and `firstFree` hiring modes.
 - Autosizing tabular overlay showing selected, next, available and active workers.
 - Optional AvatarSwitcher appearance bindings stored per savegame.
-- Optional read-only HelperPayroll role information.
+- Optional read-only HelperPayroll role information and live active-worker cost estimates.
 - Per-save roster availability stored independently from appearance and payroll data.
 - Console commands for selection, diagnostics, roster management and overlay configuration.
 - Integration API v7 for compatible companion mods, including scoped preferred-worker hiring.
@@ -262,11 +263,12 @@ AvatarSwitcher is optional. Without it, HelperProfiles still provides roster exp
 
 ### HelperPayroll
 
-HelperPayroll is optional. With HelperPayroll `0.4.2.0` or a compatible later version:
+HelperPayroll is optional. With a compatible HelperPayroll build that exposes the payroll snapshot API:
 
 - HelperProfiles supplies stable A–T slot identities and display names;
 - HelperPayroll manages roles, rates, overrides, settlement and ledger persistence;
 - the HelperProfiles overlay and roster tab display read-only payroll roles;
+- the Helper Roster displays the live estimated Current Cost for active workers;
 - roles remain assigned while workers are OFF roster.
 
 Payroll roles are edited in the HelperPayroll management screen, not HelperProfiles.

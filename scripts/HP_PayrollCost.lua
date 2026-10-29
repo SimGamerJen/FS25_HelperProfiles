@@ -99,28 +99,47 @@ function HP_PayrollCost.getCostsBySlot(snapshot)
     end
 
     for _, job in ipairs(snapshot.activeJobs or {}) do
-        local key, slot = rowKey(job)
-        if key ~= nil then
-            local group = groups[key] or {
-                slot = slot,
-                payBasis = tostring(job.payBasis or "hourly"),
-                payRate = tonumber(job.payRate) or 0,
-                labour = 0,
-                completedJobs = 0,
-                activeJobs = 0,
-                pendingCharge = 0,
-                minimum = legacyMinimum,
-                hasPending = false
-            }
-
-            group.activeJobs = group.activeJobs + 1
-            if group.payBasis ~= "daily" then
-                group.labour = group.labour + (tonumber(job.labourEstimate) or 0)
-                group.minimum = math.max(group.minimum, inferActiveMinimum(job, calloutFee))
-            elseif group.payRate <= 0 then
-                group.payRate = tonumber(job.payRate) or tonumber(job.chargeEstimate) or 0
+        local activeRows = {}
+        if type(job.workSegments) == "table" and #job.workSegments > 0 then
+            for _, segment in ipairs(job.workSegments) do
+                table.insert(activeRows, {
+                    helperSlot = job.helperSlot,
+                    gameDate = segment.gameDate,
+                    farmId = job.farmId,
+                    payBasis = job.payBasis,
+                    payRate = job.payRate,
+                    labourEstimate = segment.labourEstimate,
+                    chargeEstimate = segment.chargeEstimate
+                })
             end
-            groups[key] = group
+        else
+            table.insert(activeRows, job)
+        end
+
+        for _, active in ipairs(activeRows) do
+            local key, slot = rowKey(active)
+            if key ~= nil then
+                local group = groups[key] or {
+                    slot = slot,
+                    payBasis = tostring(active.payBasis or "hourly"),
+                    payRate = tonumber(active.payRate) or 0,
+                    labour = 0,
+                    completedJobs = 0,
+                    activeJobs = 0,
+                    pendingCharge = 0,
+                    minimum = legacyMinimum,
+                    hasPending = false
+                }
+
+                group.activeJobs = group.activeJobs + 1
+                if group.payBasis ~= "daily" then
+                    group.labour = group.labour + (tonumber(active.labourEstimate) or 0)
+                    group.minimum = math.max(group.minimum, inferActiveMinimum(active, calloutFee))
+                elseif group.payRate <= 0 then
+                    group.payRate = tonumber(active.payRate) or tonumber(active.chargeEstimate) or 0
+                end
+                groups[key] = group
+            end
         end
     end
 

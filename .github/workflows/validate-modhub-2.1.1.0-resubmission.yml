@@ -1,0 +1,118 @@
+name: Validate ModHub 2.1.1.0 resubmission
+
+on:
+  push:
+    branches:
+      - modhub/2.1.1.0-resubmission
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out resubmission branch
+        uses: actions/checkout@v4
+
+      - name: Install Lua syntax checker
+        run: sudo apt-get update && sudo apt-get install -y lua5.4
+
+      - name: Validate XML, metadata and release hygiene
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+          import re
+          import xml.etree.ElementTree as ET
+
+          xml_files = [
+              'modDesc.xml',
+              'gui/HP_AppearanceBindingsScreen.xml',
+              'gui/HP_RosterManagerScreen.xml',
+              'gui/guiProfiles.xml',
+              'l10n/l10n_en.xml',
+              'l10n/l10n_de.xml',
+              'l10n/l10n_fr.xml',
+          ]
+          for path in xml_files:
+              ET.parse(path)
+
+          root = ET.parse('modDesc.xml').getroot()
+          if root.attrib.get('descVersion') != '114':
+              raise SystemExit('Expected descVersion 114')
+          if root.findtext('version') != '2.1.1.0':
+              raise SystemExit('Expected version 2.1.1.0')
+
+          mod_desc = Path('modDesc.xml').read_text(encoding='utf-8')
+          required = [
+              'https://github.com/SimGamerJen/FS25_HelperProfiles',
+              'live HelperPayroll Current Cost column',
+              'Aligned ModHub version numbering with the existing public GitHub release history.',
+          ]
+          for wanted in required:
+              if wanted not in mod_desc:
+                  raise SystemExit('Missing ModHub metadata text: ' + wanted)
+
+          if 'KEY_a' in mod_desc:
+              raise SystemExit('Conflicting KEY_a default is still present')
+
+          roster_xml = Path('gui/HP_RosterManagerScreen.xml').read_text(encoding='utf-8')
+          if 'name="CurrentCost"' not in roster_xml:
+              raise SystemExit('CurrentCost roster cell missing')
+          if '$l10n_hp_roster_header_current_cost' not in roster_xml:
+              raise SystemExit('CurrentCost roster header missing')
+
+          roster_lua = Path('scripts/HP_RosterManagerScreen.lua').read_text(encoding='utf-8')
+          for wanted in ['getPayrollSnapshot', 'chargeEstimate', 'formatMoney', 'refreshPayrollCosts']:
+              if wanted not in roster_lua:
+                  raise SystemExit('Missing live cost implementation marker: ' + wanted)
+
+          allowed_print_files = {'scripts/HP_Debug.lua', 'scripts/HP_ProtectedCall.lua'}
+          for path in Path('scripts').rglob('*.lua'):
+              text = path.read_text(encoding='utf-8')
+              if 'print(' in text and path.as_posix() not in allowed_print_files:
+                  raise SystemExit('Unexpected runtime print() remains in ' + path.as_posix())
+
+          experimental = list(Path('scripts').glob('HP_World*.lua'))
+          if experimental:
+              raise SystemExit('Experimental World Workers files present: ' + ', '.join(map(str, experimental)))
+          PY
+
+      - name: Validate Lua syntax
+        shell: bash
+        run: |
+          set -euo pipefail
+          find scripts -name '*.lua' -print0 | while IFS= read -r -d '' file; do
+            luac -p "$file"
+          done
+
+      - name: Build ModHub-shaped package
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -f FS25_HelperProfiles.zip
+          zip -r FS25_HelperProfiles.zip modDesc.xml icon_helperProfiles.dds gui l10n scripts -x '*.DS_Store' '*__MACOSX*'
+          python - <<'PY'
+          import zipfile
+          import xml.etree.ElementTree as ET
+          with zipfile.ZipFile('FS25_HelperProfiles.zip', 'r') as archive:
+              names = set(archive.namelist())
+              if any(name.startswith('FS25_HelperProfiles/') for name in names):
+                  raise SystemExit('Unexpected wrapper directory in package')
+              root = ET.fromstring(archive.read('modDesc.xml'))
+              if root.attrib.get('descVersion') != '114':
+                  raise SystemExit('Packaged descVersion mismatch')
+              if root.findtext('version') != '2.1.1.0':
+                  raise SystemExit('Packaged version mismatch')
+          PY
+
+      - name: Upload test package
+        uses: actions/upload-artifact@v4
+        with:
+          name: FS25_HelperProfiles-2.1.1.0-ModHub-resubmission
+          path: FS25_HelperProfiles.zip
+          if-no-files-found: error
+          retention-days: 7

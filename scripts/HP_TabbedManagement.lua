@@ -14,7 +14,9 @@ HP_TabbedManagement = {
 }
 
 local LOG = "[FS25_HelperProfiles/TabbedManagement] "
-local function hpPrint(message) print(LOG .. tostring(message)) end
+local function hpPrint(message)
+    -- Routine diagnostics are intentionally suppressed in release builds.
+end
 
 local function configureTabs(screen, activeIndex)
     if screen == nil then return end

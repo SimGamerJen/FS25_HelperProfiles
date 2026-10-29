@@ -15,7 +15,7 @@ HP_RosterState = {
 local LOG = "[FS25_HelperProfiles/RosterState] "
 
 local function log(message, ...)
-    print(LOG .. string.format(tostring(message), ...))
+    -- Routine diagnostics are intentionally suppressed in release builds.
 end
 
 local function normalizePathSlashes(path)

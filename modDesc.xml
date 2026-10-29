@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<modDesc descVersion="113">
+<modDesc descVersion="115">
     <author>SimGamerJen</author>
-    <version>2.1.1.0</version>
+    <version>2.1.2.0</version>
     <title>
         <en>Helper Profiles</en>
         <de>Helferprofile</de>
@@ -26,7 +26,8 @@ Choose who works next:
 
 Personalise your helpers with optional companion mods:
 - AvatarSwitcher lets you bind saved appearance presets to individual helpers through the Appearances tab. Bindings are saved separately for each savegame.
-- HelperPayroll adds a read-only role display to the overlay and roster screen. Manage roles, pay rates and wages in HelperPayroll.
+- HelperPayroll adds a read-only role display plus live accrued payroll-period costs in both the overlay and Helper Roster. With daily payroll, completed work remains visible until settlement. Manage roles, pay rates and wages in HelperPayroll.
+  HelperPayroll GitHub: https://github.com/SimGamerJen/FS25_HelperPayroll
 - Helper Profiles works without either companion mod; custom appearance bindings and payroll role information require the corresponding mod.
 
 Default keyboard controls:
@@ -39,11 +40,17 @@ Controls can be reassigned in the game's control settings.
 Single player only.
 Not compatible with Hired Helper Tool or conflicting helper-roster expansion mods. Helper Profiles disables itself for the session when an incompatible roster owner is detected.
 
-Changelog 2.1.1.0:
+GitHub: https://github.com/SimGamerJen/FS25_HelperProfiles
+
+Changelog 2.1.2.0:
+- Added live HelperPayroll payroll-period costs to the overlay and Helper Roster. In dailyPayroll mode, completed work remains accumulated until payroll settlement.
 - Fixed texture and layout issues in the Helper Management appearance and roster screens.
 - Added support for compatible companion mods to request a specific available worker without changing your selected worker or hiring mode.
 - Fixed helper continuity with AutoDrive so an assigned worker is retained when AutoDrive temporarily releases and reacquires a helper.
 - Fixed intermittent Helper Profiles vehicle keybind loss after switching vehicles by using the vehicle's actual active-input state when registering actions.
+- Removed a default menu key assignment that conflicted with the base game MOVE LEFT control.
+- Reduced routine diagnostic output written to log.txt.
+- Aligned ModHub version numbering with the existing public GitHub release history.
 ]]></en>
         <de><![CDATA[
 Stelle ein festes Team für deinen Hof zusammen und bestimme, wer den nächsten KI-Auftrag übernimmt. Helferprofile erweitert die standardmäßige Helferliste auf 20 feste Helferplätze (A-T) und bietet eine übersichtliche Statusanzeige sowie eine Helferverwaltung mit zwei Tabs.
@@ -63,7 +70,8 @@ Den nächsten Helfer auswählen:
 
 Helfer mit optionalen Begleitmods personalisieren:
 - Mit AvatarSwitcher kannst du einzelnen Helfern im Tab für Erscheinungsbilder gespeicherte Aussehensvorlagen zuweisen. Die Zuordnungen werden für jeden Spielstand separat gespeichert.
-- HelperPayroll ergänzt eine schreibgeschützte Rollenanzeige im Overlay und in der Helferliste. Rollen, Lohnsätze und Löhne werden in HelperPayroll verwaltet.
+- HelperPayroll ergänzt eine schreibgeschützte Rollenanzeige sowie live aktualisierte, aufgelaufene Abrechnungskosten im Overlay und in der Helferliste. Bei täglicher Abrechnung bleiben abgeschlossene Arbeiten bis zur Auszahlung sichtbar. Rollen, Lohnsätze und Löhne werden in HelperPayroll verwaltet.
+  HelperPayroll GitHub: https://github.com/SimGamerJen/FS25_HelperPayroll
 - Helferprofile funktioniert auch ohne diese Begleitmods. Eigene Erscheinungszuordnungen und Rolleninformationen benötigen den jeweiligen Mod.
 
 Standard-Tastaturbelegung:
@@ -76,11 +84,17 @@ Die Tasten können in den Steuerungseinstellungen des Spiels geändert werden.
 Nur für den Einzelspielermodus.
 Nicht kompatibel mit Hired Helper Tool oder kollidierenden Mods zur Erweiterung der Helferliste. Wird eine inkompatible Verwaltung der Helferliste erkannt, deaktiviert sich Helferprofile für die aktuelle Sitzung.
 
-Changelog 2.1.1.0:
+GitHub: https://github.com/SimGamerJen/FS25_HelperProfiles
+
+Changelog 2.1.2.0:
+- Live aktualisierte HelperPayroll-Abrechnungskosten wurden dem Overlay und der Helferliste hinzugefügt. Im dailyPayroll-Modus bleiben abgeschlossene Arbeiten bis zur Auszahlung kumuliert.
 - Textur- und Layoutfehler in den Ansichten für Erscheinungsbilder und Helferliste der Helferverwaltung wurden behoben.
 - Kompatible Begleitmods können gezielt einen verfügbaren Helfer anfordern, ohne den ausgewählten Helfer oder den Einstellungsmodus zu ändern.
 - Die Helfer-Kontinuität mit AutoDrive wurde behoben, sodass ein zugewiesener Helfer beibehalten wird, wenn AutoDrive ihn vorübergehend freigibt und erneut anfordert.
 - Ein sporadischer Ausfall der Helferprofile-Tastenkürzel in Fahrzeugen nach einem Fahrzeugwechsel wurde behoben, indem beim Registrieren der Aktionen der tatsächliche aktive Eingabestatus des Fahrzeugs verwendet wird.
+- Eine Standard-Menütaste wurde entfernt, weil sie mit der Basisspiel-Belegung für NACH LINKS BEWEGEN kollidierte.
+- Routinemäßige Diagnoseausgaben in log.txt wurden reduziert.
+- Die ModHub-Versionierung wurde an die bestehende öffentliche GitHub-Versionshistorie angeglichen.
 ]]></de>
         <fr><![CDATA[
 Constituez une équipe permanente pour votre ferme et choisissez qui effectuera la prochaine tâche d'IA. Profils d'aides étend la liste standard à 20 emplacements permanents (A-T), avec un tableau d'état clair et un écran de gestion à deux onglets.
@@ -100,7 +114,8 @@ Choisissez qui travaillera ensuite :
 
 Personnalisez vos aides avec des mods complémentaires facultatifs :
 - AvatarSwitcher permet d'attribuer des apparences enregistrées à chaque aide dans l'onglet Apparences. Les associations sont enregistrées séparément pour chaque sauvegarde.
-- HelperPayroll ajoute un affichage des rôles en lecture seule au tableau et à la liste des aides. Les rôles, les tarifs et les salaires se gèrent dans HelperPayroll.
+- HelperPayroll ajoute un affichage des rôles en lecture seule ainsi que les coûts de paie cumulés de la période dans la superposition et la liste des aides. Avec la paie quotidienne, le travail terminé reste visible jusqu’au règlement. Les rôles, les tarifs et les salaires se gèrent dans HelperPayroll.
+  HelperPayroll GitHub: https://github.com/SimGamerJen/FS25_HelperPayroll
 - Profils d'aides fonctionne sans ces deux mods. Les associations d'apparences personnalisées et les informations de rôle nécessitent le mod correspondant.
 
 Commandes clavier par défaut :
@@ -113,11 +128,17 @@ Les touches peuvent être réattribuées dans les paramètres des commandes du j
 Mode solo uniquement.
 Non compatible avec Hired Helper Tool ou les mods d'extension de la liste des aides qui entrent en conflit. Profils d'aides se désactive pour la session lorsqu'une gestion incompatible de la liste est détectée.
 
-Changelog 2.1.1.0 :
+GitHub: https://github.com/SimGamerJen/FS25_HelperProfiles
+
+Changelog 2.1.2.0 :
+- Ajout des coûts HelperPayroll cumulés de la période dans la superposition et la liste des aides. En mode dailyPayroll, le travail terminé reste cumulé jusqu’au règlement.
 - Correction des problèmes de textures et de mise en page dans les écrans Apparences et Liste des aides.
 - Les mods complémentaires compatibles peuvent demander une aide disponible précise sans modifier l'aide sélectionnée ni le mode d'embauche.
 - Correction de la continuité des aides avec AutoDrive afin qu'une aide affectée soit conservée lorsqu'AutoDrive la libère temporairement puis la réaffecte.
 - Correction de la perte intermittente des raccourcis Profils d'aides dans les véhicules après un changement de véhicule en utilisant l'état d'entrée actif réel du véhicule lors de l'enregistrement des actions.
+- Suppression d’une touche de menu par défaut qui entrait en conflit avec la commande de base DÉPLACEMENT À GAUCHE.
+- Réduction des sorties de diagnostic de routine écrites dans log.txt.
+- Alignement de la numérotation ModHub sur l’historique public des versions GitHub.
 ]]></fr>
     </description>
 
@@ -146,15 +167,13 @@ Changelog 2.1.1.0 :
         <actionBinding action="HP_TOGGLE_OVERLAY">
             <binding device="KB_MOUSE_DEFAULT" input="KEY_ralt KEY_semicolon"/>
         </actionBinding>
-        <actionBinding action="HP_CLEAR_ALL_BINDINGS">
-            <binding device="KB_MOUSE_DEFAULT" input="KEY_a"/>
-        </actionBinding>
     </inputBinding>
 
     <multiplayer supported="false"/>
 
     <extraSourceFiles>
         <sourceFile filename="scripts/HP_ProtectedCall.lua"/>
+        <sourceFile filename="scripts/HP_PayrollCost.lua"/>
         <sourceFile filename="scripts/HP_SlotRegistry.lua"/>
         <sourceFile filename="scripts/HP_Compatibility.lua"/>
         <sourceFile filename="scripts/HP_Config.lua"/>

@@ -1,9 +1,9 @@
-name: Validate ModHub 2.1.1.0 resubmission
+name: Validate ModHub 2.1.2.0 release
 
 on:
   push:
     branches:
-      - modhub/2.1.1.0-resubmission
+      - modhub/2.1.2.0-resubmission
   workflow_dispatch:
 
 permissions:
@@ -43,8 +43,8 @@ jobs:
           root = ET.parse('modDesc.xml').getroot()
           if root.attrib.get('descVersion') != '114':
               raise SystemExit('Expected descVersion 114')
-          if root.findtext('version') != '2.1.1.0':
-              raise SystemExit('Expected version 2.1.1.0')
+          if root.findtext('version') != '2.1.2.0':
+              raise SystemExit('Expected version 2.1.2.0')
 
           mod_desc = Path('modDesc.xml').read_text(encoding='utf-8')
           required = [
@@ -191,14 +191,14 @@ jobs:
               root = ET.fromstring(archive.read('modDesc.xml'))
               if root.attrib.get('descVersion') != '114':
                   raise SystemExit('Packaged descVersion mismatch')
-              if root.findtext('version') != '2.1.1.0':
+              if root.findtext('version') != '2.1.2.0':
                   raise SystemExit('Packaged version mismatch')
           PY
 
       - name: Upload test package
         uses: actions/upload-artifact@v4
         with:
-          name: FS25_HelperProfiles-2.1.1.0-ModHub-resubmission
+          name: FS25_HelperProfiles-2.1.2.0-release
           path: FS25_HelperProfiles.zip
           if-no-files-found: error
           retention-days: 7

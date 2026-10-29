@@ -571,7 +571,6 @@ function HP_UI:onToggleAction(actionName, inputValue, callbackState, isAnalog)
     if self.visible then
         self:flash(hpI18n("hp_flash_overlay_on", "HelperProfiles overlay: ON"), 1.25)
     else
-        print("[FS25_HelperProfiles] Overlay: OFF")
     end
 end
 

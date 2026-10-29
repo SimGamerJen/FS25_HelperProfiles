@@ -49,7 +49,7 @@ jobs:
           mod_desc = Path('modDesc.xml').read_text(encoding='utf-8')
           required = [
               'https://github.com/SimGamerJen/FS25_HelperProfiles',
-              'live HelperPayroll running cost information',
+              'live accrued payroll-period costs',
               'Aligned ModHub version numbering with the existing public GitHub release history.',
           ]
           for wanted in required:
@@ -70,10 +70,18 @@ jobs:
               if wanted not in roster_lua:
                   raise SystemExit('Missing roster live cost implementation marker: ' + wanted)
 
+          payroll_cost = Path('scripts/HP_PayrollCost.lua').read_text(encoding='utf-8')
+          for wanted in ['pendingPayroll', 'activeJobs', 'dailyPayroll', 'minimumApplied', 'getCostsBySlot']:
+              if wanted not in payroll_cost:
+                  raise SystemExit('Missing cumulative payroll cost marker: ' + wanted)
+
           overlay_lua = Path('scripts/HP_UI.lua').read_text(encoding='utf-8')
-          for wanted in ['getPayrollSnapshot', 'chargeEstimate', 'formatPayrollCost', 'costsBySlot']:
+          for wanted in ['getPayrollSnapshot', 'formatPayrollCost', 'HP_PayrollCost.getCostsBySlot']:
               if wanted not in overlay_lua:
                   raise SystemExit('Missing overlay live cost implementation marker: ' + wanted)
+
+          if 'scripts/HP_PayrollCost.lua' not in mod_desc:
+              raise SystemExit('Payroll cost projection module is not loaded by modDesc')
 
           allowed_print_files = {'scripts/HP_Debug.lua', 'scripts/HP_ProtectedCall.lua'}
           for path in Path('scripts').rglob('*.lua'):
@@ -93,6 +101,79 @@ jobs:
           find scripts -name '*.lua' -print0 | while IFS= read -r -d '' file; do
             luac -p "$file"
           done
+
+      - name: Validate cumulative daily payroll projection
+        shell: bash
+        run: |
+          set -euo pipefail
+          lua <<'LUA'
+          dofile("scripts/HP_PayrollCost.lua")
+
+          local function assertCost(label, snapshot, slot, expected)
+              local costs = HP_PayrollCost.getCostsBySlot(snapshot)
+              local actual = costs[slot]
+              if expected == nil then
+                  if actual ~= nil then
+                      error(string.format("%s: expected nil, got %.2f", label, actual))
+                  end
+                  return
+              end
+              if math.abs((actual or -9999) - expected) > 0.001 then
+                  error(string.format("%s: expected %.2f, got %s", label, expected, tostring(actual)))
+              end
+          end
+
+          local base = {
+              policy = {billingMode="dailyPayroll", calloutFee=0, legacyMinimum=5},
+              pendingPayroll = {},
+              activeJobs = {}
+          }
+
+          assertCost("idle", base, "B", nil)
+
+          local activeFirst = {
+              policy = base.policy,
+              pendingPayroll = {},
+              activeJobs = {
+                  {helperSlot="B", gameDate="Y001-M06-D01", farmId=1, payBasis="hourly", payRate=18, labourEstimate=1.25, chargeEstimate=5}
+              }
+          }
+          assertCost("first active minimum", activeFirst, "B", 5)
+
+          local completed = {
+              policy = base.policy,
+              pendingPayroll = {
+                  {helperSlot="B", gameDate="Y001-M06-D01", farmId=1, payBasis="hourly", payRate=18, jobs=1, labour=1.25, chargeEstimate=5, minimumApplied=true}
+              },
+              activeJobs = {}
+          }
+          assertCost("completed pending", completed, "B", 5)
+
+          local secondShort = {
+              policy = base.policy,
+              pendingPayroll = completed.pendingPayroll,
+              activeJobs = {
+                  {helperSlot="B", gameDate="Y001-M06-D01", farmId=1, payBasis="hourly", payRate=18, labourEstimate=1.00, chargeEstimate=5}
+              }
+          }
+          assertCost("second short active", secondShort, "B", 5)
+
+          local secondLong = {
+              policy = base.policy,
+              pendingPayroll = completed.pendingPayroll,
+              activeJobs = {
+                  {helperSlot="B", gameDate="Y001-M06-D01", farmId=1, payBasis="hourly", payRate=18, labourEstimate=4.00, chargeEstimate=5}
+              }
+          }
+          assertCost("second active exceeds minimum", secondLong, "B", 5.25)
+
+          local settled = {
+              policy = base.policy,
+              pendingPayroll = {},
+              activeJobs = {}
+          }
+          assertCost("settled", settled, "B", nil)
+          LUA
 
       - name: Build ModHub-shaped package
         shell: bash

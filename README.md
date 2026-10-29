@@ -12,7 +12,7 @@
 - Keeps completed `dailyPayroll` work visible until HelperPayroll settles it.
 - Uses HelperPayroll's public payroll snapshot rather than duplicating wage calculations inside HelperProfiles.
 - Adds support for active payroll day segments, including jobs that cross midnight.
-- Updates ModHub metadata to **descVersion 114** and links the public GitHub project directly from the in-game description.
+- Updates ModHub metadata to **descVersion 115** and links the public GitHub project directly from the in-game description.
 - Removes the conflicting default `A` menu binding and reduces routine HelperProfiles log output.
 - Rebalances the roster-management table for the new Current Cost column.
 - Retains the Integration API v7, AutoDrive continuity and vehicle-input fixes from 2.1.1.0.
@@ -378,7 +378,7 @@ Confirm HelperPayroll `0.4.2.0` or later is enabled for the same savegame and th
 - Added live HelperPayroll payroll-period COST information to the overlay and Helper Roster.
 - Kept completed daily-payroll work visible until settlement.
 - Added support for HelperPayroll active day segments and midnight-spanning jobs.
-- Updated ModHub metadata to descVersion 114 and added the public GitHub project reference.
+- Updated ModHub metadata to descVersion 115 and added the public GitHub project reference.
 - Removed the conflicting default A key assignment and reduced routine runtime log chatter.
 - Rebalanced the Helper Roster UI for the Current Cost column.
 

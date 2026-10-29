@@ -48,8 +48,8 @@ jobs:
               ET.parse(path)
 
           root = ET.parse('modDesc.xml').getroot()
-          if root.attrib.get('descVersion') != '114':
-              raise SystemExit('Expected descVersion 114')
+          if root.attrib.get('descVersion') != '115':
+              raise SystemExit('Expected descVersion 115')
           if root.findtext('version') != '2.1.2.0':
               raise SystemExit('Expected version 2.1.2.0')
 
@@ -193,7 +193,7 @@ jobs:
               if any(name.startswith('FS25_HelperProfiles/') for name in names):
                   raise SystemExit('Package contains an unexpected wrapper directory')
               root = ET.fromstring(archive.read('modDesc.xml'))
-              if root.attrib.get('descVersion') != '114':
+              if root.attrib.get('descVersion') != '115':
                   raise SystemExit('Unexpected packaged descVersion')
               if root.findtext('version') != '2.1.2.0':
                   raise SystemExit('Unexpected packaged version')

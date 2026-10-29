@@ -84,6 +84,7 @@
         <text name="hp_roster_header_worker" text="AIDE"/>
         <text name="hp_roster_header_appearance" text="APPARENCE"/>
         <text name="hp_roster_header_role" text="RÔLE PAIE"/>
+        <text name="hp_roster_header_current_cost" text="COÛT ACTUEL"/>
         <text name="hp_roster_header_work_state" text="ÉTAT DE TRAVAIL"/>
         <text name="hp_roster_header_roster" text="LISTE"/>
         <text name="hp_roster_on" text="DANS LA LISTE"/>

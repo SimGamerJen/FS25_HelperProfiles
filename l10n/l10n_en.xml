@@ -37,6 +37,7 @@
         <text name="hp_no_helpers_available" text="No helpers available"/>
         <text name="hp_overlay_header_appearance" text="APPEARANCE"/>
         <text name="hp_overlay_header_role" text="ROLE"/>
+        <text name="hp_overlay_header_cost" text="COST"/>
         <text name="hp_overlay_payroll_waiting" text="WAITING"/>
         <text name="hp_overlay_payroll_unassigned" text="-"/>
         <text name="hp_overlay_header_next" text="NEXT"/>

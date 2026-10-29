@@ -1,0 +1,223 @@
+name: Build HelperProfiles 2.1.2.0
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - .github/workflows/release-2.1.2.0.yml
+      - modDesc.xml
+      - docs/releases/2.1.2.0.md
+      - README.md
+      - gui/**
+      - l10n/**
+      - scripts/**
+
+permissions:
+  contents: write
+
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Install Lua syntax checker
+        run: sudo apt-get update && sudo apt-get install -y lua5.4
+
+      - name: Validate release inputs
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+          import xml.etree.ElementTree as ET
+
+          xml_files = [
+              'modDesc.xml',
+              'gui/HP_AppearanceBindingsScreen.xml',
+              'gui/HP_RosterManagerScreen.xml',
+              'gui/guiProfiles.xml',
+              'l10n/l10n_en.xml',
+              'l10n/l10n_de.xml',
+              'l10n/l10n_fr.xml',
+          ]
+          for path in xml_files:
+              ET.parse(path)
+
+          root = ET.parse('modDesc.xml').getroot()
+          if root.attrib.get('descVersion') != '114':
+              raise SystemExit('Expected descVersion 114')
+          if root.findtext('version') != '2.1.2.0':
+              raise SystemExit('Expected version 2.1.2.0')
+
+          mod_desc = Path('modDesc.xml').read_text(encoding='utf-8')
+          required_text = [
+              'https://github.com/SimGamerJen/FS25_HelperProfiles',
+              'live accrued payroll-period costs',
+              'Changelog 2.1.2.0',
+          ]
+          for wanted in required_text:
+              if wanted not in mod_desc:
+                  raise SystemExit('Missing release metadata: ' + wanted)
+
+          if 'KEY_a' in mod_desc:
+              raise SystemExit('Conflicting KEY_a default is still present')
+
+          version_files = [
+              'scripts/HP_Config.lua',
+              'scripts/HP_UI.lua',
+              'scripts/HP_Debug.lua',
+              'scripts/HelperProfiles.lua',
+              'scripts/HP_IntegrationAPI.lua',
+              'scripts/gui/HP_AppearanceBindingsScreen.lua',
+          ]
+          for path in version_files:
+              if '2.1.2.0' not in Path(path).read_text(encoding='utf-8'):
+                  raise SystemExit('Internal version not aligned in ' + path)
+
+          api = Path('scripts/HP_IntegrationAPI.lua').read_text(encoding='utf-8')
+          for wanted in ['apiVersion = 7', 'modVersion = "2.1.2.0"', 'supportsScopedPreferredHire = true']:
+              if wanted not in api:
+                  raise SystemExit('Missing Integration API marker: ' + wanted)
+
+          roster_xml = Path('gui/HP_RosterManagerScreen.xml').read_text(encoding='utf-8')
+          if 'name="CurrentCost"' not in roster_xml:
+              raise SystemExit('CurrentCost roster cell missing')
+          if '$l10n_hp_roster_header_current_cost' not in roster_xml:
+              raise SystemExit('CurrentCost roster header missing')
+
+          payroll_cost = Path('scripts/HP_PayrollCost.lua').read_text(encoding='utf-8')
+          for wanted in ['pendingPayroll', 'activeJobs', 'dailyPayroll', 'workSegments', 'getCostsBySlot']:
+              if wanted not in payroll_cost:
+                  raise SystemExit('Missing payroll-period cost marker: ' + wanted)
+
+          allowed_print_files = {'scripts/HP_Debug.lua', 'scripts/HP_ProtectedCall.lua'}
+          for path in Path('scripts').rglob('*.lua'):
+              text = path.read_text(encoding='utf-8')
+              if 'print(' in text and path.as_posix() not in allowed_print_files:
+                  raise SystemExit('Unexpected runtime print() remains in ' + path.as_posix())
+
+          experimental = list(Path('scripts').glob('HP_World*.lua'))
+          if experimental:
+              raise SystemExit('Experimental World Workers files present: ' + ', '.join(map(str, experimental)))
+          PY
+
+      - name: Validate Lua syntax
+        shell: bash
+        run: |
+          set -euo pipefail
+          find scripts -name '*.lua' -print0 | while IFS= read -r -d '' file; do
+            luac -p "$file"
+          done
+
+      - name: Validate cumulative payroll projection
+        shell: bash
+        run: |
+          set -euo pipefail
+          lua <<'LUA'
+          dofile("scripts/HP_PayrollCost.lua")
+
+          local function assertCost(label, snapshot, slot, expected)
+              local costs = HP_PayrollCost.getCostsBySlot(snapshot)
+              local actual = costs[slot]
+              if expected == nil then
+                  if actual ~= nil then error(label .. ": expected nil") end
+                  return
+              end
+              if math.abs((actual or -9999) - expected) > 0.001 then
+                  error(string.format("%s: expected %.2f, got %s", label, expected, tostring(actual)))
+              end
+          end
+
+          local policy = {billingMode="dailyPayroll", calloutFee=0, legacyMinimum=5}
+
+          assertCost("active minimum", {
+              policy=policy,
+              pendingPayroll={},
+              activeJobs={{helperSlot="B", gameDate="Y1-M01-D1", farmId=1, payBasis="hourly", payRate=18, labourEstimate=1.25, chargeEstimate=5}}
+          }, "B", 5)
+
+          local pending = {{helperSlot="B", gameDate="Y1-M01-D1", farmId=1, payBasis="hourly", payRate=18, jobs=1, labour=1.25, chargeEstimate=5, minimumApplied=true}}
+          assertCost("completed pending", {policy=policy,pendingPayroll=pending,activeJobs={}}, "B", 5)
+
+          assertCost("pending plus second short job", {
+              policy=policy,
+              pendingPayroll=pending,
+              activeJobs={{helperSlot="B", gameDate="Y1-M01-D1", farmId=1, payBasis="hourly", payRate=18, labourEstimate=1.00, chargeEstimate=5}}
+          }, "B", 5)
+
+          assertCost("v4 active day segment", {
+              policy=policy,
+              pendingPayroll={},
+              activeJobs={{
+                  helperSlot="B", farmId=1, payBasis="hourly", payRate=18,
+                  workSegments={{gameDate="Y1-M01-D1", labourEstimate=9, chargeEstimate=9}}
+              }}
+          }, "B", 9)
+          LUA
+
+      - name: Build Farming Simulator mod package
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -f FS25_HelperProfiles.zip
+          zip -r FS25_HelperProfiles.zip modDesc.xml icon_helperProfiles.dds gui l10n scripts -x '*.DS_Store' '*__MACOSX*'
+          python - <<'PY'
+          import zipfile
+          import xml.etree.ElementTree as ET
+
+          with zipfile.ZipFile('FS25_HelperProfiles.zip', 'r') as archive:
+              names = set(archive.namelist())
+              required = {
+                  'modDesc.xml',
+                  'icon_helperProfiles.dds',
+                  'gui/HP_AppearanceBindingsScreen.xml',
+                  'gui/HP_RosterManagerScreen.xml',
+                  'scripts/HelperProfiles.lua',
+                  'scripts/HP_PayrollCost.lua',
+                  'scripts/HP_RosterState.lua',
+                  'scripts/HP_RosterFilter.lua',
+                  'scripts/HP_RosterManagerScreen.lua',
+                  'scripts/HP_TabbedManagement.lua',
+                  'scripts/HP_IntegrationAPI.lua',
+                  'scripts/HP_AutoDriveContinuity.lua',
+                  'scripts/HP_AutoDrivePayrollBridge.lua',
+                  'scripts/HP_HelperAcquisitionRouter.lua',
+              }
+              missing = sorted(required - names)
+              if missing:
+                  raise SystemExit('Missing required package files: ' + ', '.join(missing))
+              if any(name.startswith('FS25_HelperProfiles/') for name in names):
+                  raise SystemExit('Package contains an unexpected wrapper directory')
+              root = ET.fromstring(archive.read('modDesc.xml'))
+              if root.attrib.get('descVersion') != '114':
+                  raise SystemExit('Unexpected packaged descVersion')
+              if root.findtext('version') != '2.1.2.0':
+                  raise SystemExit('Unexpected packaged version')
+          PY
+
+      - name: Upload ModHub-ready package artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: FS25_HelperProfiles-2.1.2.0-ModHub
+          path: FS25_HelperProfiles.zip
+          if-no-files-found: error
+          retention-days: 7
+
+      - name: Publish GitHub release
+        if: github.event_name == 'workflow_dispatch'
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          TAG='2.1.2.0'
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release edit "$TAG" --title 'HelperProfiles 2.1.2.0' --notes-file docs/releases/2.1.2.0.md
+            gh release upload "$TAG" FS25_HelperProfiles.zip --clobber
+          else
+            gh release create "$TAG" FS25_HelperProfiles.zip --target main --title 'HelperProfiles 2.1.2.0' --notes-file docs/releases/2.1.2.0.md
+          fi

@@ -26,7 +26,7 @@ Choose who works next:
 
 Personalise your helpers with optional companion mods:
 - AvatarSwitcher lets you bind saved appearance presets to individual helpers through the Appearances tab. Bindings are saved separately for each savegame.
-- HelperPayroll adds a read-only role display plus live running cost information for active workers in both the overlay and Helper Roster. Manage roles, pay rates and wages in HelperPayroll.
+- HelperPayroll adds a read-only role display plus live accrued payroll-period costs in both the overlay and Helper Roster. With daily payroll, completed work remains visible until settlement. Manage roles, pay rates and wages in HelperPayroll.
 - Helper Profiles works without either companion mod; custom appearance bindings and payroll role information require the corresponding mod.
 
 Default keyboard controls:
@@ -42,7 +42,7 @@ Not compatible with Hired Helper Tool or conflicting helper-roster expansion mod
 GitHub: https://github.com/SimGamerJen/FS25_HelperProfiles
 
 Changelog 2.1.1.0:
-- Added live HelperPayroll running cost information for active workers in both the overlay and Helper Roster.
+- Added live HelperPayroll payroll-period costs to the overlay and Helper Roster. In dailyPayroll mode, completed work remains accumulated until payroll settlement.
 - Fixed texture and layout issues in the Helper Management appearance and roster screens.
 - Added support for compatible companion mods to request a specific available worker without changing your selected worker or hiring mode.
 - Fixed helper continuity with AutoDrive so an assigned worker is retained when AutoDrive temporarily releases and reacquires a helper.
@@ -69,7 +69,7 @@ Den nächsten Helfer auswählen:
 
 Helfer mit optionalen Begleitmods personalisieren:
 - Mit AvatarSwitcher kannst du einzelnen Helfern im Tab für Erscheinungsbilder gespeicherte Aussehensvorlagen zuweisen. Die Zuordnungen werden für jeden Spielstand separat gespeichert.
-- HelperPayroll ergänzt eine schreibgeschützte Rollenanzeige sowie live aktualisierte Kosten aktiver Helfer im Overlay und in der Helferliste. Rollen, Lohnsätze und Löhne werden in HelperPayroll verwaltet.
+- HelperPayroll ergänzt eine schreibgeschützte Rollenanzeige sowie live aktualisierte, aufgelaufene Abrechnungskosten im Overlay und in der Helferliste. Bei täglicher Abrechnung bleiben abgeschlossene Arbeiten bis zur Auszahlung sichtbar. Rollen, Lohnsätze und Löhne werden in HelperPayroll verwaltet.
 - Helferprofile funktioniert auch ohne diese Begleitmods. Eigene Erscheinungszuordnungen und Rolleninformationen benötigen den jeweiligen Mod.
 
 Standard-Tastaturbelegung:
@@ -85,7 +85,7 @@ Nicht kompatibel mit Hired Helper Tool oder kollidierenden Mods zur Erweiterung 
 GitHub: https://github.com/SimGamerJen/FS25_HelperProfiles
 
 Changelog 2.1.1.0:
-- Live aktualisierte HelperPayroll-Kosten für aktive Helfer wurden dem Overlay und der Helferliste hinzugefügt.
+- Live aktualisierte HelperPayroll-Abrechnungskosten wurden dem Overlay und der Helferliste hinzugefügt. Im dailyPayroll-Modus bleiben abgeschlossene Arbeiten bis zur Auszahlung kumuliert.
 - Textur- und Layoutfehler in den Ansichten für Erscheinungsbilder und Helferliste der Helferverwaltung wurden behoben.
 - Kompatible Begleitmods können gezielt einen verfügbaren Helfer anfordern, ohne den ausgewählten Helfer oder den Einstellungsmodus zu ändern.
 - Die Helfer-Kontinuität mit AutoDrive wurde behoben, sodass ein zugewiesener Helfer beibehalten wird, wenn AutoDrive ihn vorübergehend freigibt und erneut anfordert.
@@ -112,7 +112,7 @@ Choisissez qui travaillera ensuite :
 
 Personnalisez vos aides avec des mods complémentaires facultatifs :
 - AvatarSwitcher permet d'attribuer des apparences enregistrées à chaque aide dans l'onglet Apparences. Les associations sont enregistrées séparément pour chaque sauvegarde.
-- HelperPayroll ajoute un affichage des rôles en lecture seule ainsi que le coût courant mis à jour en direct pour les aides actives dans la superposition et la liste des aides. Les rôles, les tarifs et les salaires se gèrent dans HelperPayroll.
+- HelperPayroll ajoute un affichage des rôles en lecture seule ainsi que les coûts de paie cumulés de la période dans la superposition et la liste des aides. Avec la paie quotidienne, le travail terminé reste visible jusqu’au règlement. Les rôles, les tarifs et les salaires se gèrent dans HelperPayroll.
 - Profils d'aides fonctionne sans ces deux mods. Les associations d'apparences personnalisées et les informations de rôle nécessitent le mod correspondant.
 
 Commandes clavier par défaut :
@@ -128,7 +128,7 @@ Non compatible avec Hired Helper Tool ou les mods d'extension de la liste des ai
 GitHub: https://github.com/SimGamerJen/FS25_HelperProfiles
 
 Changelog 2.1.1.0 :
-- Ajout du coût HelperPayroll mis à jour en direct pour les aides actives dans la superposition et la liste des aides.
+- Ajout des coûts HelperPayroll cumulés de la période dans la superposition et la liste des aides. En mode dailyPayroll, le travail terminé reste cumulé jusqu’au règlement.
 - Correction des problèmes de textures et de mise en page dans les écrans Apparences et Liste des aides.
 - Les mods complémentaires compatibles peuvent demander une aide disponible précise sans modifier l'aide sélectionnée ni le mode d'embauche.
 - Correction de la continuité des aides avec AutoDrive afin qu'une aide affectée soit conservée lorsqu'AutoDrive la libère temporairement puis la réaffecte.

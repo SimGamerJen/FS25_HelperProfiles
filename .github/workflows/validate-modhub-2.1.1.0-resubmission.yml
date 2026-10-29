@@ -49,7 +49,7 @@ jobs:
           mod_desc = Path('modDesc.xml').read_text(encoding='utf-8')
           required = [
               'https://github.com/SimGamerJen/FS25_HelperProfiles',
-              'live HelperPayroll Current Cost column',
+              'live HelperPayroll running cost information',
               'Aligned ModHub version numbering with the existing public GitHub release history.',
           ]
           for wanted in required:
@@ -68,7 +68,12 @@ jobs:
           roster_lua = Path('scripts/HP_RosterManagerScreen.lua').read_text(encoding='utf-8')
           for wanted in ['getPayrollSnapshot', 'chargeEstimate', 'formatMoney', 'refreshPayrollCosts']:
               if wanted not in roster_lua:
-                  raise SystemExit('Missing live cost implementation marker: ' + wanted)
+                  raise SystemExit('Missing roster live cost implementation marker: ' + wanted)
+
+          overlay_lua = Path('scripts/HP_UI.lua').read_text(encoding='utf-8')
+          for wanted in ['getPayrollSnapshot', 'chargeEstimate', 'formatPayrollCost', 'costsBySlot']:
+              if wanted not in overlay_lua:
+                  raise SystemExit('Missing overlay live cost implementation marker: ' + wanted)
 
           allowed_print_files = {'scripts/HP_Debug.lua', 'scripts/HP_ProtectedCall.lua'}
           for path in Path('scripts').rglob('*.lua'):

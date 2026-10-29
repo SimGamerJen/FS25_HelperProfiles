@@ -292,12 +292,16 @@ local function refreshPayrollCache()
     if type(api.getPayrollSnapshot) == "function" then
         local okSnapshot, snapshot = HP_ProtectedCall.call(api.getPayrollSnapshot, api, {includeWorkers = false})
         if okSnapshot and type(snapshot) == "table" then
-            for _, job in ipairs(snapshot.activeJobs or {}) do
-                local slot = job ~= nil and job.helperSlot or nil
-                local estimate = job ~= nil and tonumber(job.chargeEstimate) or nil
-                if slot ~= nil and estimate ~= nil then
-                    local key = string.upper(tostring(slot))
-                    payrollCache.costsBySlot[key] = (tonumber(payrollCache.costsBySlot[key]) or 0) + estimate
+            if HP_PayrollCost ~= nil and type(HP_PayrollCost.getCostsBySlot) == "function" then
+                payrollCache.costsBySlot = HP_PayrollCost.getCostsBySlot(snapshot)
+            else
+                for _, job in ipairs(snapshot.activeJobs or {}) do
+                    local slot = job ~= nil and job.helperSlot or nil
+                    local estimate = job ~= nil and tonumber(job.chargeEstimate) or nil
+                    if slot ~= nil and estimate ~= nil then
+                        local key = string.upper(tostring(slot))
+                        payrollCache.costsBySlot[key] = (tonumber(payrollCache.costsBySlot[key]) or 0) + estimate
+                    end
                 end
             end
         end

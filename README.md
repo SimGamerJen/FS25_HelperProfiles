@@ -27,7 +27,7 @@
 - Ensures at least one worker always remains ON roster.
 - Preserves AvatarSwitcher bindings, HelperPayroll roles, compensation overrides and ledger identities when workers are disabled and later restored.
 - Keeps HelperPayroll roles visible when the operational roster is filtered.
-- Shows live HelperPayroll running cost estimates for active workers in both the overlay and Helper Roster.
+- Shows live HelperPayroll payroll-period costs in both the overlay and Helper Roster, retaining completed daily-payroll work until settlement.
 - Adds guarded **Disable Others** and **Enable All** actions.
 - Adds automatic A–J/K–T overlay paging.
 - Adds Hired Helper Tool and external-roster incompatibility protection.
@@ -245,7 +245,7 @@ The overlay can display:
 - `AVAILABLE` or `ACTIVE` status;
 - bound AvatarSwitcher appearance;
 - HelperPayroll role when the companion API is available;
-- live HelperPayroll running cost when the companion API is available;
+- live HelperPayroll accrued payroll-period cost when the companion API is available;
 - current HelperProfiles hiring mode.
 
 The compact default view displays ten rows. Selecting a worker in K–T shows the K–T page; selecting A–J returns to the first page. OFF-roster workers are not shown.
@@ -269,7 +269,7 @@ HelperPayroll is optional. With a compatible HelperPayroll build that exposes th
 - HelperProfiles supplies stable A–T slot identities and display names;
 - HelperPayroll manages roles, rates, overrides, settlement and ledger persistence;
 - the HelperProfiles overlay and roster tab display read-only payroll roles;
-- both the overlay and Helper Roster display live estimated running costs for active workers;
+- both the overlay and Helper Roster display live accrued payroll-period costs; with `dailyPayroll`, completed work remains visible until settlement;
 - roles remain assigned while workers are OFF roster.
 
 Payroll roles are edited in the HelperPayroll management screen, not HelperProfiles.

@@ -17,7 +17,7 @@ HP_AutoDrivePayrollBridge = HP_AutoDrivePayrollBridge or {
 local LOG = "[FS25_HelperProfiles/AutoDrivePayroll] "
 
 local function log(message, ...)
-    print(LOG .. string.format(tostring(message), ...))
+    -- Routine diagnostics are intentionally suppressed in release builds.
 end
 
 local function nowMs()

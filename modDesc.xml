@@ -27,6 +27,7 @@ Choose who works next:
 Personalise your helpers with optional companion mods:
 - AvatarSwitcher lets you bind saved appearance presets to individual helpers through the Appearances tab. Bindings are saved separately for each savegame.
 - HelperPayroll adds a read-only role display plus live accrued payroll-period costs in both the overlay and Helper Roster. With daily payroll, completed work remains visible until settlement. Manage roles, pay rates and wages in HelperPayroll.
+  HelperPayroll GitHub: https://github.com/SimGamerJen/FS25_HelperPayroll
 - Helper Profiles works without either companion mod; custom appearance bindings and payroll role information require the corresponding mod.
 
 Default keyboard controls:
@@ -70,6 +71,7 @@ Den nächsten Helfer auswählen:
 Helfer mit optionalen Begleitmods personalisieren:
 - Mit AvatarSwitcher kannst du einzelnen Helfern im Tab für Erscheinungsbilder gespeicherte Aussehensvorlagen zuweisen. Die Zuordnungen werden für jeden Spielstand separat gespeichert.
 - HelperPayroll ergänzt eine schreibgeschützte Rollenanzeige sowie live aktualisierte, aufgelaufene Abrechnungskosten im Overlay und in der Helferliste. Bei täglicher Abrechnung bleiben abgeschlossene Arbeiten bis zur Auszahlung sichtbar. Rollen, Lohnsätze und Löhne werden in HelperPayroll verwaltet.
+  HelperPayroll GitHub: https://github.com/SimGamerJen/FS25_HelperPayroll
 - Helferprofile funktioniert auch ohne diese Begleitmods. Eigene Erscheinungszuordnungen und Rolleninformationen benötigen den jeweiligen Mod.
 
 Standard-Tastaturbelegung:
@@ -113,6 +115,7 @@ Choisissez qui travaillera ensuite :
 Personnalisez vos aides avec des mods complémentaires facultatifs :
 - AvatarSwitcher permet d'attribuer des apparences enregistrées à chaque aide dans l'onglet Apparences. Les associations sont enregistrées séparément pour chaque sauvegarde.
 - HelperPayroll ajoute un affichage des rôles en lecture seule ainsi que les coûts de paie cumulés de la période dans la superposition et la liste des aides. Avec la paie quotidienne, le travail terminé reste visible jusqu’au règlement. Les rôles, les tarifs et les salaires se gèrent dans HelperPayroll.
+  HelperPayroll GitHub: https://github.com/SimGamerJen/FS25_HelperPayroll
 - Profils d'aides fonctionne sans ces deux mods. Les associations d'apparences personnalisées et les informations de rôle nécessitent le mod correspondant.
 
 Commandes clavier par défaut :

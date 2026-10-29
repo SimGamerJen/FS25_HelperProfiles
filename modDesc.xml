@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <modDesc descVersion="114">
     <author>SimGamerJen</author>
-    <version>2.1.1.0</version>
+    <version>2.1.2.0</version>
     <title>
         <en>Helper Profiles</en>
         <de>Helferprofile</de>
@@ -41,7 +41,7 @@ Not compatible with Hired Helper Tool or conflicting helper-roster expansion mod
 
 GitHub: https://github.com/SimGamerJen/FS25_HelperProfiles
 
-Changelog 2.1.1.0:
+Changelog 2.1.2.0:
 - Added live HelperPayroll payroll-period costs to the overlay and Helper Roster. In dailyPayroll mode, completed work remains accumulated until payroll settlement.
 - Fixed texture and layout issues in the Helper Management appearance and roster screens.
 - Added support for compatible companion mods to request a specific available worker without changing your selected worker or hiring mode.
@@ -84,7 +84,7 @@ Nicht kompatibel mit Hired Helper Tool oder kollidierenden Mods zur Erweiterung 
 
 GitHub: https://github.com/SimGamerJen/FS25_HelperProfiles
 
-Changelog 2.1.1.0:
+Changelog 2.1.2.0:
 - Live aktualisierte HelperPayroll-Abrechnungskosten wurden dem Overlay und der Helferliste hinzugefügt. Im dailyPayroll-Modus bleiben abgeschlossene Arbeiten bis zur Auszahlung kumuliert.
 - Textur- und Layoutfehler in den Ansichten für Erscheinungsbilder und Helferliste der Helferverwaltung wurden behoben.
 - Kompatible Begleitmods können gezielt einen verfügbaren Helfer anfordern, ohne den ausgewählten Helfer oder den Einstellungsmodus zu ändern.
@@ -127,7 +127,7 @@ Non compatible avec Hired Helper Tool ou les mods d'extension de la liste des ai
 
 GitHub: https://github.com/SimGamerJen/FS25_HelperProfiles
 
-Changelog 2.1.1.0 :
+Changelog 2.1.2.0 :
 - Ajout des coûts HelperPayroll cumulés de la période dans la superposition et la liste des aides. En mode dailyPayroll, le travail terminé reste cumulé jusqu’au règlement.
 - Correction des problèmes de textures et de mise en page dans les écrans Apparences et Liste des aides.
 - Les mods complémentaires compatibles peuvent demander une aide disponible précise sans modifier l'aide sélectionnée ni le mode d'embauche.

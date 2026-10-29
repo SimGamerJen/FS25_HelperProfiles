@@ -78,6 +78,10 @@ local function getPayrollCostSnapshot()
         return {}, false
     end
 
+    if HP_PayrollCost ~= nil and type(HP_PayrollCost.getCostsBySlot) == "function" then
+        return HP_PayrollCost.getCostsBySlot(snapshot), true
+    end
+
     local costs = {}
     for _, job in ipairs(snapshot.activeJobs or {}) do
         local slot = job ~= nil and job.helperSlot or nil

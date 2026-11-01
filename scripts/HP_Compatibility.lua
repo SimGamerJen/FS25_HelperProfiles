@@ -197,11 +197,13 @@ function HP_Compatibility:setBlocked(conflict, source)
 
     if not self.warningLogged then
         self.warningLogged = true
-        print(
-            LOG .. "HelperProfiles disabled for this session: incompatible helper-roster owner detected (" ..
-            self.conflictMod .. ", source=" .. self.conflictSource ..
-            "). Disable either HelperProfiles or Hired Helper Tool and reload the save."
-        )
+        if Logging ~= nil and Logging.warning ~= nil then
+            Logging.warning(
+                LOG .. "HelperProfiles disabled for this session: incompatible helper-roster owner detected (" ..
+                self.conflictMod .. ", source=" .. self.conflictSource ..
+                "). Disable either HelperProfiles or Hired Helper Tool and reload the save."
+            )
+        end
     end
     return true
 end
@@ -247,7 +249,6 @@ function HP_Compatibility:loadMap()
 
     local blocked = self:detect()
     if not blocked then
-        print(LOG .. "Guard initialized: Hired Helper Tool not active at HelperProfiles loadMap; checking late startup for " .. tostring(self.startupCheckRemainingMs) .. " ms.")
     end
 end
 

@@ -37,6 +37,7 @@
         <text name="hp_no_helpers_available" text="Keine Helfer verfügbar"/>
         <text name="hp_overlay_header_appearance" text="AUSSEHEN"/>
         <text name="hp_overlay_header_role" text="ROLLE"/>
+        <text name="hp_overlay_header_cost" text="KOSTEN"/>
         <text name="hp_overlay_payroll_waiting" text="WARTEN"/>
         <text name="hp_overlay_payroll_unassigned" text="-"/>
         <text name="hp_overlay_header_next" text="NÄCH."/>
@@ -84,6 +85,7 @@
         <text name="hp_roster_header_worker" text="HELFER"/>
         <text name="hp_roster_header_appearance" text="ERSCHEINUNGSBILD"/>
         <text name="hp_roster_header_role" text="LOHNROLLE"/>
+        <text name="hp_roster_header_current_cost" text="AKT. KOSTEN"/>
         <text name="hp_roster_header_work_state" text="ARBEITSSTATUS"/>
         <text name="hp_roster_header_roster" text="LISTE"/>
         <text name="hp_roster_on" text="IN LISTE"/>

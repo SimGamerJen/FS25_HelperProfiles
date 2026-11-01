@@ -1,5 +1,5 @@
 -- HP_AppearanceBindingsScreen.lua (FS25_HelperProfiles)
--- ModVersion: 2.1.1.0
+-- ModVersion: 2.1.2.6
 -- BuildTag: 20260727.2
 -- XML dialog for per-save AvatarSwitcher appearance bindings.
 -- Reworked to follow the known-working AvatarSwitcher XML dialog pattern:
@@ -9,7 +9,9 @@ HP_AppearanceBindingsScreen = {}
 local HP_AppearanceBindingsScreen_mt = Class(HP_AppearanceBindingsScreen, MessageDialog)
 
 local LOG = "[FS25_HelperProfiles/AppearanceBindingsXML] "
-local function hpPrint(msg) print(LOG .. tostring(msg)) end
+local function hpPrint(msg)
+    -- Routine diagnostics are intentionally suppressed in release builds.
+end
 
 local HP_GUI_MOD_DIR = g_currentModDirectory or ""
 
@@ -29,7 +31,7 @@ end
 
 local function hpI18n(key, fallback)
     if g_i18n ~= nil and g_i18n.getText ~= nil then
-        local ok, value = pcall(g_i18n.getText, g_i18n, key)
+        local ok, value = HP_ProtectedCall.call(g_i18n.getText, g_i18n, key)
         if ok and value ~= nil and value ~= "" and value ~= key then
             return value
         end
@@ -39,7 +41,7 @@ end
 
 local function hpFormat(key, fallback, ...)
     local pattern = hpI18n(key, fallback)
-    local ok, value = pcall(string.format, pattern, ...)
+    local ok, value = HP_ProtectedCall.call(string.format, pattern, ...)
     if ok then return value end
     return pattern
 end
@@ -70,7 +72,7 @@ end
 
 local function getDerivedDisplayNameForPreset(preset, fallback)
     if HP_ASBridge ~= nil and HP_ASBridge.deriveDisplayNameFromPreset ~= nil then
-        local ok, value = pcall(HP_ASBridge.deriveDisplayNameFromPreset, HP_ASBridge, preset, fallback)
+        local ok, value = HP_ProtectedCall.call(HP_ASBridge.deriveDisplayNameFromPreset, HP_ASBridge, preset, fallback)
         if ok and value ~= nil and tostring(value) ~= "" then return tostring(value) end
     end
     return tostring(fallback or "")
@@ -138,7 +140,7 @@ end
 local function getHelperDisplayName(helper, idx)
     local fallback = tostring((helper ~= nil and helper.name) or ("Helper " .. tostring(idx or "?")))
     if HelperProfiles ~= nil and HelperProfiles.getDisplayNameForHelper ~= nil then
-        local ok, displayName, baseName = pcall(HelperProfiles.getDisplayNameForHelper, HelperProfiles, helper, idx)
+        local ok, displayName, baseName = HP_ProtectedCall.call(HelperProfiles.getDisplayNameForHelper, HelperProfiles, helper, idx)
         if ok and displayName ~= nil and tostring(displayName) ~= "" then
             return tostring(displayName), tostring(baseName or fallback)
         end
@@ -182,7 +184,7 @@ end
 isHelperActive = function(helper)
     if helper == nil then return false end
     if HelperProfiles ~= nil and HelperProfiles.isHelperActive ~= nil then
-        local ok, active = pcall(HelperProfiles.isHelperActive, HelperProfiles, helper)
+        local ok, active = HP_ProtectedCall.call(HelperProfiles.isHelperActive, HelperProfiles, helper)
         if ok then return active == true end
     end
     return helper.inUse == true
@@ -281,7 +283,14 @@ function HP_AppearanceBindingsScreen:reloadData(reloadBridge)
 
     self.helperRows = getHelpers()
     if #self.helperRows == 0 then
-        table.insert(self.helperRows, { index = 1, slot = "A", helper = nil, name = hpI18n("hp_helper_fallback", "Helper 1"), displayName = hpI18n("hp_no_helpers_available", "No helpers available"), label = hpI18n("hp_no_helpers_available", "No helpers available") })
+        table.insert(self.helperRows, {
+            index = 1,
+            slot = "A",
+            helper = nil,
+            name = hpI18n("hp_helper_fallback", "Helper 1"),
+            displayName = hpI18n("hp_no_helpers_available", "No helpers available"),
+            label = hpI18n("hp_no_helpers_available", "No helpers available")
+        })
     end
 
     self.categoryRows = {}
@@ -487,7 +496,14 @@ function HP_AppearanceBindingsScreen:updateDetailText()
 
     local detail = hpI18n("hp_detail_select", "Select a helper slot and appearance.")
     if helperRow ~= nil and presetRow ~= nil and presetRow.id ~= nil and presetRow.id ~= "" then
-        detail = hpFormat("hp_detail_selected", "Selected: %s  |  %s  |  %s [%s]", tostring(helperRow.displayName or helperRow.name), tostring(category or "-"), tostring(presetRow.label or presetRow.id), tostring(presetRow.id))
+        detail = hpFormat(
+            "hp_detail_selected",
+            "Selected: %s  |  %s  |  %s [%s]",
+            tostring(helperRow.displayName or helperRow.name),
+            tostring(category or "-"),
+            tostring(presetRow.label or presetRow.id),
+            tostring(presetRow.id)
+        )
     end
 
     if helperRow ~= nil and self:isHelperRowReadOnly(helperRow) then
@@ -512,7 +528,12 @@ function HP_AppearanceBindingsScreen:updateDetailText()
         if bindingLabel ~= nil and bindingLabel ~= "" then
             status = status .. "  |  " .. hpFormat("hp_status_current_binding", "Current binding: %s → %s", tostring(helperRow.displayName or helperRow.name), bindingLabel)
         else
-            status = status .. "  |  " .. hpFormat("hp_status_current_binding", "Current binding: %s → %s", tostring(helperRow.displayName or helperRow.name), hpI18n("hp_state_unbound_title", "Unbound"))
+            status = status .. "  |  " .. hpFormat(
+                "hp_status_current_binding",
+                "Current binding: %s → %s",
+                tostring(helperRow.displayName or helperRow.name),
+                hpI18n("hp_state_unbound_title", "Unbound")
+            )
         end
     end
 
@@ -715,7 +736,7 @@ function HP_AppearanceBindingsGui:loadDialog()
     local profilePath = modDir .. "gui/guiProfiles.xml"
     local dialogPath = modDir .. "gui/HP_AppearanceBindingsScreen.xml"
 
-    local ok, err = pcall(function()
+    local ok, err = HP_ProtectedCall.call(function()
         if g_gui.loadProfiles ~= nil then
             g_gui:loadProfiles(profilePath)
         end

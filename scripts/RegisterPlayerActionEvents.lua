@@ -31,7 +31,7 @@ local function _isPhysicalKeyPressed(keyName)
         return false
     end
 
-    local ok, result = pcall(Input.isKeyPressed, key)
+    local ok, result = HP_ProtectedCall.call(Input.isKeyPressed, key)
     return ok and result == true
 end
 
@@ -105,16 +105,13 @@ end
 local function _registerPlayerAction(field, inputAction, target, callback, label)
     if HelperProfiles[field] ~= nil then return end
     if g_inputBinding == nil or inputAction == nil then
-        print(LOG .. "Failed to register " .. tostring(label) .. " (player): input action unavailable")
         return
     end
     local ok, id = g_inputBinding:registerActionEvent(inputAction, target, callback, false, true, false, true)
     if ok and id then
         HelperProfiles[field] = id
         _setActionEventLowPriority(id, true)
-        print(LOG .. "Registered " .. tostring(label) .. " (player)")
     else
-        print(LOG .. "Failed to register " .. tostring(label) .. " (player)")
     end
 end
 
@@ -123,7 +120,6 @@ local function _unregisterPlayerAction(field, label)
     if id ~= nil and g_inputBinding ~= nil then
         g_inputBinding:removeActionEvent(id)
         HelperProfiles[field] = nil
-        print(LOG .. "Unregistered " .. tostring(label) .. " (player)")
     end
 end
 
@@ -169,27 +165,21 @@ end
 
 local function _addVehicleAction(vehicle, spec, inputAction, target, callback, label, loggedFlagName)
     if inputAction == nil then
-        print(LOG .. "Failed to register " .. tostring(label) .. " (vehicle): input action unavailable")
         return nil
     end
     local _, id = vehicle:addActionEvent(spec.actionEvents, inputAction, target, callback, false, true, false, true)
     if id ~= nil then
         _setActionEventLowPriority(id, true)
         if loggedFlagName == "cycle" and not _loggedVehicleCycle then
-            print(LOG .. "Registered " .. tostring(label) .. " (vehicle)")
             _loggedVehicleCycle = true
         elseif loggedFlagName == "toggle" and not _loggedVehicleToggle then
-            print(LOG .. "Registered " .. tostring(label) .. " (vehicle)")
             _loggedVehicleToggle = true
         elseif loggedFlagName == "mode" and not _loggedVehicleMode then
-            print(LOG .. "Registered " .. tostring(label) .. " (vehicle)")
             _loggedVehicleMode = true
         elseif loggedFlagName == "appearance" and not _loggedVehicleAppearanceMenu then
-            print(LOG .. "Registered " .. tostring(label) .. " (vehicle)")
             _loggedVehicleAppearanceMenu = true
         end
     else
-        print(LOG .. "Failed to register " .. tostring(label) .. " (vehicle)")
     end
     return id
 end
@@ -216,11 +206,20 @@ local function _unregisterVehicleActions(vehicle)
     end
 end
 
+local function _getVehicleIsActiveForInput(vehicle)
+    if vehicle == nil or vehicle.getIsActiveForInput == nil then
+        return false
+    end
+
+    local ok, active = HP_ProtectedCall.call(vehicle.getIsActiveForInput, vehicle)
+    return ok and active == true
+end
+
 if Vehicle ~= nil and Vehicle.registerActionEvents ~= nil and Utils ~= nil and Utils.appendedFunction ~= nil then
     Vehicle.registerActionEvents = Utils.appendedFunction(
         Vehicle.registerActionEvents,
-        function(self, isActiveForInput, isActiveForGUI)
-            _registerVehicleActions(self, isActiveForInput)
+        function(self, excludedVehicle)
+            _registerVehicleActions(self, _getVehicleIsActiveForInput(self))
         end
     )
 end
@@ -249,7 +248,7 @@ if HP_AppearanceBindingsScreen ~= nil then
     local function _removeAppearanceClearAllAction(screen)
         local id = screen ~= nil and screen._clearAllBindingsActionEventId or nil
         if id ~= nil and g_inputBinding ~= nil and g_inputBinding.removeActionEvent ~= nil then
-            pcall(function()
+            HP_ProtectedCall.call(function()
                 g_inputBinding:removeActionEvent(id)
             end)
         end
@@ -270,11 +269,10 @@ if HP_AppearanceBindingsScreen ~= nil then
 
         local inputAction = InputAction ~= nil and InputAction.HP_CLEAR_ALL_BINDINGS or nil
         if screen == nil or g_inputBinding == nil or g_inputBinding.registerActionEvent == nil or inputAction == nil then
-            print(LOG .. "Failed to register HP_CLEAR_ALL_BINDINGS (appearance dialog): input action unavailable")
             return
         end
 
-        local callOk, registered, id = pcall(function()
+        local callOk, registered, id = HP_ProtectedCall.call(function()
             return g_inputBinding:registerActionEvent(
                 inputAction,
                 screen,
@@ -292,9 +290,7 @@ if HP_AppearanceBindingsScreen ~= nil then
             if g_inputBinding.setActionEventActive ~= nil then
                 g_inputBinding:setActionEventActive(id, true)
             end
-            print(LOG .. "Registered HP_CLEAR_ALL_BINDINGS (appearance dialog)")
         else
-            print(LOG .. "Failed to register HP_CLEAR_ALL_BINDINGS (appearance dialog)")
         end
     end
 

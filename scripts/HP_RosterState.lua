@@ -15,7 +15,7 @@ HP_RosterState = {
 local LOG = "[FS25_HelperProfiles/RosterState] "
 
 local function log(message, ...)
-    print(LOG .. string.format(tostring(message), ...))
+    -- Routine diagnostics are intentionally suppressed in release builds.
 end
 
 local function normalizePathSlashes(path)
@@ -287,7 +287,7 @@ function HP_RosterState:replaceSnapshot(snapshot)
     end
 
     if HelperProfiles ~= nil and HelperProfiles.onRosterAvailabilityChanged ~= nil then
-        pcall(HelperProfiles.onRosterAvailabilityChanged, HelperProfiles)
+        HP_ProtectedCall.call(HelperProfiles.onRosterAvailabilityChanged, HelperProfiles)
     end
 
     log("Saved per-save roster: enabled=%d disabled=%d", self:getEnabledCount(), self:getDisabledCount())

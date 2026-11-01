@@ -8,11 +8,13 @@ local HP_RosterManagerScreen_mt = Class(HP_RosterManagerScreen, MessageDialog)
 local LOG = "[FS25_HelperProfiles/RosterManager] "
 local MOD_DIR = g_currentModDirectory or ""
 
-local function hpPrint(message) print(LOG .. tostring(message)) end
+local function hpPrint(message)
+    -- Routine diagnostics are intentionally suppressed in release builds.
+end
 
 local function hpI18n(key, fallback)
     if g_i18n ~= nil and g_i18n.getText ~= nil then
-        local ok, value = pcall(g_i18n.getText, g_i18n, key)
+        local ok, value = HP_ProtectedCall.call(g_i18n.getText, g_i18n, key)
         if ok and value ~= nil and value ~= "" and value ~= key then return tostring(value) end
     end
     return fallback or key
@@ -58,16 +60,57 @@ end
 local function getRoleLabel(slot)
     local api = getPayrollAPI()
     if api == nil or type(api.getRoleForSlot) ~= "function" then return "-" end
-    local ok, roleData = pcall(api.getRoleForSlot, api, slot)
+    local ok, roleData = HP_ProtectedCall.call(api.getRoleForSlot, api, slot)
     if ok and type(roleData) == "table" then
         return tostring(roleData.roleName or roleData.roleId or "-")
     end
     return "-"
 end
 
+local function getPayrollCostSnapshot()
+    local api = getPayrollAPI()
+    if api == nil or type(api.getPayrollSnapshot) ~= "function" then
+        return {}, false
+    end
+
+    local ok, snapshot = HP_ProtectedCall.call(api.getPayrollSnapshot, api, {includeWorkers = false})
+    if not ok or type(snapshot) ~= "table" then
+        return {}, false
+    end
+
+    if HP_PayrollCost ~= nil and type(HP_PayrollCost.getCostsBySlot) == "function" then
+        return HP_PayrollCost.getCostsBySlot(snapshot), true
+    end
+
+    local costs = {}
+    for _, job in ipairs(snapshot.activeJobs or {}) do
+        local slot = job ~= nil and job.helperSlot or nil
+        local estimate = job ~= nil and tonumber(job.chargeEstimate) or nil
+        if slot ~= nil and estimate ~= nil then
+            local key = string.upper(tostring(slot))
+            costs[key] = (tonumber(costs[key]) or 0) + estimate
+        end
+    end
+
+    return costs, true
+end
+
+local function formatCurrentCost(value)
+    if value == nil then return "-" end
+    local amount = tonumber(value)
+    if amount == nil then return "-" end
+
+    if g_i18n ~= nil and g_i18n.formatMoney ~= nil then
+        local ok, formatted = HP_ProtectedCall.call(g_i18n.formatMoney, g_i18n, amount, 2, true, true)
+        if ok and formatted ~= nil then return tostring(formatted) end
+    end
+
+    return string.format("%.2f", amount)
+end
+
 local function getDisplayName(helper, stableIndex)
     if HelperProfiles ~= nil and HelperProfiles.getDisplayNameForHelper ~= nil then
-        local ok, displayName = pcall(HelperProfiles.getDisplayNameForHelper, HelperProfiles, helper, stableIndex)
+        local ok, displayName = HP_ProtectedCall.call(HelperProfiles.getDisplayNameForHelper, HelperProfiles, helper, stableIndex)
         if ok and displayName ~= nil and tostring(displayName) ~= "" then return tostring(displayName) end
     end
     return tostring(helper ~= nil and helper.name or ("Helper " .. tostring(stableIndex)))
@@ -75,7 +118,7 @@ end
 
 local function getAppearanceLabel(helper, stableIndex)
     if HelperProfiles ~= nil and HelperProfiles.getAppearanceLabelForHelper ~= nil then
-        local ok, label = pcall(HelperProfiles.getAppearanceLabelForHelper, HelperProfiles, helper, stableIndex)
+        local ok, label = HP_ProtectedCall.call(HelperProfiles.getAppearanceLabelForHelper, HelperProfiles, helper, stableIndex)
         if ok and label ~= nil and tostring(label) ~= "" then
             local text = tostring(label)
             local lower = string.lower(text)
@@ -92,7 +135,7 @@ end
 local function isActive(helper)
     if helper == nil then return false end
     if HelperProfiles ~= nil and HelperProfiles.isHelperActive ~= nil then
-        local ok, value = pcall(HelperProfiles.isHelperActive, HelperProfiles, helper)
+        local ok, value = HP_ProtectedCall.call(HelperProfiles.isHelperActive, HelperProfiles, helper)
         if ok then return value == true end
     end
     return helper.inUse == true
@@ -120,6 +163,9 @@ function HP_RosterManagerScreen.new(target, customMt)
     self.selectedIndex = 1
     self.actionMessage = nil
     self.dirty = false
+    self.currentCostBySlot = {}
+    self.payrollCostAvailable = false
+    self._payrollRefreshMs = 0
     self._bulkRosterActionEventId = nil
     return self
 end
@@ -139,7 +185,7 @@ end
 function HP_RosterManagerScreen:removeBulkRosterAction()
     local id = self._bulkRosterActionEventId
     if id ~= nil and g_inputBinding ~= nil and g_inputBinding.removeActionEvent ~= nil then
-        pcall(function() g_inputBinding:removeActionEvent(id) end)
+        HP_ProtectedCall.call(function() g_inputBinding:removeActionEvent(id) end)
     end
     self._bulkRosterActionEventId = nil
 end
@@ -153,7 +199,7 @@ function HP_RosterManagerScreen:registerBulkRosterAction()
         return
     end
 
-    local callOk, registered, id = pcall(function()
+    local callOk, registered, id = HP_ProtectedCall.call(function()
         return g_inputBinding:registerActionEvent(
             inputAction,
             self,
@@ -194,6 +240,36 @@ function HP_RosterManagerScreen:onClose()
     if HP_RosterManagerGui ~= nil then HP_RosterManagerGui.dialog = nil end
 end
 
+function HP_RosterManagerScreen:refreshPayrollCosts(force)
+    local costs, available = getPayrollCostSnapshot()
+    local changed = force == true or available ~= self.payrollCostAvailable
+    self.payrollCostAvailable = available
+
+    for _, row in ipairs(self.rows or {}) do
+        local key = string.upper(tostring(row.slot or ""))
+        local value = available and costs[key] or nil
+        if row.currentCost ~= value then
+            row.currentCost = value
+            changed = true
+        end
+    end
+
+    self.currentCostBySlot = costs
+    return changed
+end
+
+function HP_RosterManagerScreen:update(dt)
+    HP_RosterManagerScreen:superClass().update(self, dt)
+
+    self._payrollRefreshMs = (tonumber(self._payrollRefreshMs) or 0) - (tonumber(dt) or 0)
+    if self._payrollRefreshMs <= 0 then
+        self._payrollRefreshMs = 500
+        if self:refreshPayrollCosts(false) and self.rosterTable ~= nil then
+            self.rosterTable:reloadData()
+        end
+    end
+end
+
 function HP_RosterManagerScreen:reloadData()
     if HP_RosterState ~= nil and not HP_RosterState.initialized then HP_RosterState:init() end
     self.rows = {}
@@ -218,12 +294,15 @@ function HP_RosterManagerScreen:reloadData()
             displayName = getDisplayName(helper, stableIndex),
             appearance = getAppearanceLabel(helper, stableIndex),
             role = getRoleLabel(slot),
+            currentCost = nil,
             active = isActive(helper)
         }
     end
 
     self.selectedIndex = clamp(self.selectedIndex, 1, math.max(1, #self.rows))
     self.actionMessage = nil
+    self._payrollRefreshMs = 0
+    self:refreshPayrollCosts(true)
     self:refreshDirtyState()
     if self.rosterTable ~= nil then self.rosterTable:reloadData() end
     self:updateDetailText()
@@ -258,6 +337,7 @@ function HP_RosterManagerScreen:populateCellForItemInSection(list, section, inde
     cell:getAttribute("Worker"):setText(tostring(row.displayName or "-"))
     cell:getAttribute("Appearance"):setText(tostring(row.appearance or "-"))
     cell:getAttribute("Role"):setText(tostring(row.role or "-"))
+    cell:getAttribute("CurrentCost"):setText(formatCurrentCost(row.currentCost))
     cell:getAttribute("WorkState"):setText(row.active and hpI18n("hp_state_active", "ACTIVE") or hpI18n("hp_state_available", "AVAILABLE"))
     cell:getAttribute("RosterState"):setText(enabled and hpI18n("hp_roster_on", "ON ROSTER") or hpI18n("hp_roster_off", "OFF ROSTER"))
 end
@@ -455,7 +535,7 @@ function HP_RosterManagerGui:loadDialog()
     if g_gui == nil then return false end
 
     local modDir = self.modDirectory or MOD_DIR or g_currentModDirectory or ""
-    local ok, err = pcall(function()
+    local ok, err = HP_ProtectedCall.call(function()
         if g_gui.loadProfiles ~= nil then g_gui:loadProfiles(modDir .. "gui/guiProfiles.xml") end
         local frame = HP_RosterManagerScreen.new(g_i18n)
         g_gui:loadGui(modDir .. "gui/HP_RosterManagerScreen.xml", "HP_RosterManagerDialog", frame)

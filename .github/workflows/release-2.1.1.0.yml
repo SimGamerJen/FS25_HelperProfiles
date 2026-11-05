@@ -2,17 +2,6 @@ name: Build HelperProfiles 2.1.1.0
 
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - main
-    paths:
-      - .github/workflows/release-2.1.1.0.yml
-      - modDesc.xml
-      - docs/releases/2.1.1.0.md
-      - scripts/HP_AutoDriveContinuity.lua
-      - scripts/HP_AutoDrivePayrollBridge.lua
-      - scripts/HP_HelperAcquisitionRouter.lua
-      - scripts/HP_IntegrationAPI.lua
 
 permissions:
   contents: write

@@ -28,7 +28,9 @@ HP_ASBridge = HP_ASBridge or {
 }
 
 local LOG = "[FS25_HelperProfiles/ASBridge] "
-local function hpPrint(msg) print(LOG .. tostring(msg)) end
+local function hpPrint(msg)
+    -- Routine diagnostics are intentionally suppressed in release builds.
+end
 
 local STYLE_PARTS = {
     "facegear",

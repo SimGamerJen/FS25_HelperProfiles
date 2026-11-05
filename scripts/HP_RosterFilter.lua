@@ -8,7 +8,6 @@ local LOG = "[FS25_HelperProfiles/RosterFilter] "
 local rawGetProfiles = HelperProfiles ~= nil and HelperProfiles.getProfiles or nil
 
 if HelperProfiles == nil or type(rawGetProfiles) ~= "function" then
-    print(LOG .. "Core unavailable; roster filter not installed")
     return
 end
 
@@ -77,7 +76,6 @@ function HP_RosterFilter:update()
     installFallbackGuard("_orig_getFree")
     installFallbackGuard("_orig_getRandom")
     self.fallbackPatched = true
-    print(LOG .. "Operational roster filtering installed; engine fallback cannot allocate OFF-roster workers")
 end
 
 function HP_RosterFilter:deleteMap()

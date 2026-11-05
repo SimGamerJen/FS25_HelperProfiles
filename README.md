@@ -2,9 +2,20 @@
 
 **FS25 HelperProfiles** is a single-player helper-management mod for Farming Simulator 25. It expands the standard helper roster to 20 permanent worker identities, provides deterministic helper selection, adds per-save ON/OFF roster management, displays an autosizing helper overlay, and supports save-specific AvatarSwitcher appearance bindings.
 
-> **Current version:** `2.1.1.0`  
+> **Current version:** `2.1.2.0`  
 > **Game:** Farming Simulator 25  
 > **Multiplayer:** Not supported
+
+## Highlights in 2.1.2.0
+
+- Adds live **HelperPayroll payroll-period COST** information to both the main overlay and Helper Roster.
+- Keeps completed `dailyPayroll` work visible until HelperPayroll settles it.
+- Uses HelperPayroll's public payroll snapshot rather than duplicating wage calculations inside HelperProfiles.
+- Adds support for active payroll day segments, including jobs that cross midnight.
+- Updates ModHub metadata to **descVersion 115** and links the public GitHub project directly from the in-game description.
+- Removes the conflicting default `A` menu binding and reduces routine HelperProfiles log output.
+- Rebalances the roster-management table for the new Current Cost column.
+- Retains the Integration API v7, AutoDrive continuity and vehicle-input fixes from 2.1.1.0.
 
 ## Highlights in 2.1.1.0
 
@@ -38,7 +49,7 @@
 - Configurable `preferSelected` and `firstFree` hiring modes.
 - Autosizing tabular overlay showing selected, next, available and active workers.
 - Optional AvatarSwitcher appearance bindings stored per savegame.
-- Optional read-only HelperPayroll role information.
+- Optional read-only HelperPayroll role information and live accrued payroll-period costs.
 - Per-save roster availability stored independently from appearance and payroll data.
 - Console commands for selection, diagnostics, roster management and overlay configuration.
 - Integration API v7 for compatible companion mods, including scoped preferred-worker hiring.
@@ -244,6 +255,7 @@ The overlay can display:
 - `AVAILABLE` or `ACTIVE` status;
 - bound AvatarSwitcher appearance;
 - HelperPayroll role when the companion API is available;
+- live HelperPayroll accrued payroll-period cost when the companion API is available;
 - current HelperProfiles hiring mode.
 
 The compact default view displays ten rows. Selecting a worker in K–T shows the K–T page; selecting A–J returns to the first page. OFF-roster workers are not shown.
@@ -262,11 +274,12 @@ AvatarSwitcher is optional. Without it, HelperProfiles still provides roster exp
 
 ### HelperPayroll
 
-HelperPayroll is optional. With HelperPayroll `0.4.2.0` or a compatible later version:
+HelperPayroll is optional. With a compatible HelperPayroll build that exposes the payroll snapshot API:
 
 - HelperProfiles supplies stable A–T slot identities and display names;
 - HelperPayroll manages roles, rates, overrides, settlement and ledger persistence;
 - the HelperProfiles overlay and roster tab display read-only payroll roles;
+- both the overlay and Helper Roster display live accrued payroll-period costs; with `dailyPayroll`, completed work remains visible until settlement;
 - roles remain assigned while workers are OFF roster.
 
 Payroll roles are edited in the HelperPayroll management screen, not HelperProfiles.
@@ -360,6 +373,15 @@ Confirm HelperPayroll `0.4.2.0` or later is enabled for the same savegame and th
 
 ## Version History
 
+### Version 2.1.2.0
+
+- Added live HelperPayroll payroll-period COST information to the overlay and Helper Roster.
+- Kept completed daily-payroll work visible until settlement.
+- Added support for HelperPayroll active day segments and midnight-spanning jobs.
+- Updated ModHub metadata to descVersion 115 and added the public GitHub project reference.
+- Removed the conflicting default A key assignment and reduced routine runtime log chatter.
+- Rebalanced the Helper Roster UI for the Current Cost column.
+
 ### Version 2.1.1.0
 
 - Fixed Helper Management atlas/layout rendering issues.
@@ -387,7 +409,7 @@ Confirm HelperPayroll `0.4.2.0` or later is enabled for the same savegame and th
 
 ## Development Status
 
-Version `2.1.1.0` is the current stable maintenance release of the A–T identity pool, per-save roster availability manager and tabbed Helper Management interface, with Integration API v7 available for compatible companion mods.
+Version `2.1.2.0` is the current stable maintenance release of the A–T identity pool, per-save roster availability manager and tabbed Helper Management interface. It adds live HelperPayroll payroll-period costs while retaining Integration API v7 for compatible companion mods.
 
 A future HelperPayroll update may optionally filter or mark OFF-roster workers in its Workers tab while preserving payroll history and assignments.
 

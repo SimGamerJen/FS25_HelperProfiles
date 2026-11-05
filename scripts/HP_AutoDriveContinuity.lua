@@ -8,8 +8,6 @@
 -- AutoDrive's internal release/reacquire cycle without depending on AutoDrive's
 -- private event globals.
 
-print("[FS25_HelperProfiles/AutoDriveV5] Source loaded (worker-assignment continuity build)")
-
 -- Disable the original polling prototype in HP_Compatibility.lua. This module owns
 -- AutoDrive continuity on this branch.
 if HP_AutoDriveContinuity ~= nil then
@@ -31,7 +29,7 @@ HP_AutoDriveContinuityV5 = HP_AutoDriveContinuityV5 or {
 local LOG = "[FS25_HelperProfiles/AutoDriveV5] "
 
 local function log(message, ...)
-    print(LOG .. string.format(tostring(message), ...))
+    -- Routine diagnostics are intentionally suppressed in release builds.
 end
 
 local function nowMs()
@@ -319,7 +317,6 @@ function HP_AutoDriveContinuityV5:install()
     runtimeManager.getRandomHelper = function(manager, ...)
         local helper = HP_AutoDriveContinuityV5:_getPendingReacquire()
         if helper ~= nil then
-            print(("[FS25_HelperProfiles] getRandomHelper -> '%s' (autodrive-worker-continuity)"):format(helperName(helper)))
             return helper
         end
         return HP_AutoDriveContinuityV5.originalGetRandomHelper(manager, ...)

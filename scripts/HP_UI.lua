@@ -3,13 +3,13 @@
 
 -- ============================================================================
 -- FS25_HelperProfiles
--- ModVersion: 2.1.1.0
+-- ModVersion: 2.1.2.0
 -- Script:     HP_UI.lua
 -- BuildTag:   20260721-1
 -- ============================================================================
 
 do
-    local MOD_VERSION = "2.1.1.0"
+    local MOD_VERSION = "2.1.2.0"
     local SCRIPT_NAME = "HP_UI.lua"
     local BUILD_TAG = "20260728-1"
     local SCRIPT_VER = string.format("%s-%s+%s", MOD_VERSION, SCRIPT_NAME, BUILD_TAG)
@@ -241,7 +241,8 @@ local payrollCache = {
     refreshAfter = -1,
     present = false,
     available = false,
-    rolesBySlot = {}
+    rolesBySlot = {},
+    costsBySlot = {}
 }
 
 local function getPayrollAPI()
@@ -268,6 +269,7 @@ local function refreshPayrollCache()
 
     payrollCache.refreshAfter = now + 750
     payrollCache.rolesBySlot = {}
+    payrollCache.costsBySlot = {}
 
     local api = getPayrollAPI()
     local companion = rawget(_G, "HelperPayroll")
@@ -285,6 +287,24 @@ local function refreshPayrollCache()
         end
     else
         payrollCache.available = true
+    end
+
+    if type(api.getPayrollSnapshot) == "function" then
+        local okSnapshot, snapshot = HP_ProtectedCall.call(api.getPayrollSnapshot, api, {includeWorkers = false})
+        if okSnapshot and type(snapshot) == "table" then
+            if HP_PayrollCost ~= nil and type(HP_PayrollCost.getCostsBySlot) == "function" then
+                payrollCache.costsBySlot = HP_PayrollCost.getCostsBySlot(snapshot)
+            else
+                for _, job in ipairs(snapshot.activeJobs or {}) do
+                    local slot = job ~= nil and job.helperSlot or nil
+                    local estimate = job ~= nil and tonumber(job.chargeEstimate) or nil
+                    if slot ~= nil and estimate ~= nil then
+                        local key = string.upper(tostring(slot))
+                        payrollCache.costsBySlot[key] = (tonumber(payrollCache.costsBySlot[key]) or 0) + estimate
+                    end
+                end
+            end
+        end
     end
 
     if type(api.getRoleForSlot) ~= "function" then
@@ -309,6 +329,19 @@ local function refreshPayrollCache()
     end
 
     return payrollCache
+end
+
+local function formatPayrollCost(value)
+    if value == nil then return "-" end
+    local amount = tonumber(value)
+    if amount == nil then return "-" end
+
+    if g_i18n ~= nil and g_i18n.formatMoney ~= nil then
+        local ok, formatted = HP_ProtectedCall.call(g_i18n.formatMoney, g_i18n, amount, 2, true, true)
+        if ok and formatted ~= nil then return tostring(formatted) end
+    end
+
+    return string.format("%.2f", amount)
 end
 
 local function compactAppearanceLabel(label, workerName)
@@ -394,6 +427,7 @@ local function collectRows()
 
             local workerDisplayName = getDisplayName(helper, index)
             local payrollRole = nil
+            local payrollCost = nil
             if payroll.present == true then
                 payrollRole = payroll.rolesBySlot[slotLabel]
                 if payrollRole == nil then
@@ -401,12 +435,14 @@ local function collectRows()
                         and hpI18n("hp_overlay_payroll_unassigned", "-")
                         or hpI18n("hp_overlay_payroll_waiting", "WAITING")
                 end
+                payrollCost = formatPayrollCost(payroll.costsBySlot[string.upper(tostring(slotLabel))])
             end
 
             table.insert(rows, {
                 slot = slotLabel,
                 worker = workerDisplayName,
                 role = payrollRole,
+                cost = payrollCost,
                 status = isActive
                     and hpI18n("hp_state_active", "ACTIVE")
                     or hpI18n("hp_state_available", "AVAILABLE"),
@@ -452,6 +488,16 @@ local function getColumnKeys(rows, rowCount)
         end
     end
     if showRole then table.insert(keys, "role") end
+
+    local showCost = false
+    for index = 1, rowCount do
+        if rows[index].cost ~= nil then
+            showCost = true
+            break
+        end
+    end
+    if showCost then table.insert(keys, "cost") end
+
     table.insert(keys, "status")
 
     local showAppearance = false
@@ -474,6 +520,7 @@ local function getColumnHeaders()
         slot = hpI18n("hp_overlay_header_slot", "SLOT"),
         worker = hpI18n("hp_overlay_header_worker", "WORKER"),
         role = hpI18n("hp_overlay_header_role", "ROLE"),
+        cost = hpI18n("hp_overlay_header_cost", "COST"),
         status = hpI18n("hp_overlay_header_status", "STATUS"),
         appearance = hpI18n("hp_overlay_header_appearance", "APPEARANCE"),
         selected = hpI18n("hp_overlay_header_selected", "SEL"),
@@ -571,7 +618,6 @@ function HP_UI:onToggleAction(actionName, inputValue, callbackState, isAnalog)
     if self.visible then
         self:flash(hpI18n("hp_flash_overlay_on", "HelperProfiles overlay: ON"), 1.25)
     else
-        print("[FS25_HelperProfiles] Overlay: OFF")
     end
 end
 

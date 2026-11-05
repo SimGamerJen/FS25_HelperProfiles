@@ -13,7 +13,7 @@ HP_RosterExpansion = HP_RosterExpansion or {
 local LOG = "[FS25_HelperProfiles/Roster] "
 
 local function log(message, ...)
-    print(LOG .. string.format(tostring(message), ...))
+    -- Routine diagnostics are intentionally suppressed in release builds.
 end
 
 local function copyColor(color)

@@ -20,22 +20,24 @@
             <ThreePartBitmap profile="fs25_lineSeparatorTopHighlighted" position="45px -119px" size="1105px 2px" />
 
             <GuiElement id="rosterHeaderBox" position="45px -135px" size="1105px 50px">
-                <Text profile="hpHeaderLeft" position="10px 0px" size="55px 40.77px" text="$l10n_hp_roster_header_slot" />
-                <Text profile="hpHeaderLeft" position="75px 0px" size="210px 40.77px" text="$l10n_hp_roster_header_worker" />
-                <Text profile="hpHeaderLeft" position="295px 0px" size="270px 40.77px" text="$l10n_hp_roster_header_appearance" />
-                <Text profile="hpHeaderLeft" position="575px 0px" size="170px 40.77px" text="$l10n_hp_roster_header_role" />
-                <Text profile="hpHeaderLeft" position="755px 0px" size="140px 40.77px" text="$l10n_hp_roster_header_work_state" />
-                <Text profile="hpHeaderLeft" position="905px 0px" size="185px 40.77px" text="$l10n_hp_roster_header_roster" />
+                <Text profile="hpHeaderLeft" position="10px 0px" size="48px 40.77px" text="$l10n_hp_roster_header_slot" />
+                <Text profile="hpHeaderLeft" position="68px 0px" size="185px 40.77px" text="$l10n_hp_roster_header_worker" />
+                <Text profile="hpHeaderLeft" position="263px 0px" size="205px 40.77px" text="$l10n_hp_roster_header_appearance" />
+                <Text profile="hpHeaderLeft" position="478px 0px" size="145px 40.77px" text="$l10n_hp_roster_header_role" />
+                <Text profile="hpHeaderRight" position="633px 0px" size="120px 40.77px" text="$l10n_hp_roster_header_current_cost" />
+                <Text profile="hpHeaderLeft" position="763px 0px" size="130px 40.77px" text="$l10n_hp_roster_header_work_state" />
+                <Text profile="hpHeaderLeft" position="903px 0px" size="187px 40.77px" text="$l10n_hp_roster_header_roster" />
             </GuiElement>
 
             <SmoothList profile="hpList" id="rosterTable" position="50px -190px" size="1095px 345px" focusInit="onOpen" focusChangeTop="nil" focusChangeBottom="nil">
                 <ListItem profile="hpListItem" name="rosterRowTemplate" size="1095px 40.77px">
-                    <Text profile="hpRowCellLeft" position="12px 0px" size="50px 40.77px" name="Slot" />
-                    <Text profile="hpRowCellLeft" position="77px 0px" size="205px 40.77px" name="Worker" textLayoutMode="scrolling" />
-                    <Text profile="hpRowCellLeft" position="297px 0px" size="265px 40.77px" name="Appearance" textLayoutMode="scrolling" />
-                    <Text profile="hpRowCellLeft" position="577px 0px" size="165px 40.77px" name="Role" textLayoutMode="scrolling" />
-                    <Text profile="hpRowCellLeft" position="757px 0px" size="135px 40.77px" name="WorkState" />
-                    <Text profile="hpRowCellLeft" position="907px 0px" size="175px 40.77px" name="RosterState" />
+                    <Text profile="hpRowCellLeft" position="12px 0px" size="46px 40.77px" name="Slot" />
+                    <Text profile="hpRowCellLeft" position="70px 0px" size="183px 40.77px" name="Worker" textLayoutMode="scrolling" />
+                    <Text profile="hpRowCellLeft" position="265px 0px" size="203px 40.77px" name="Appearance" textLayoutMode="scrolling" />
+                    <Text profile="hpRowCellLeft" position="480px 0px" size="143px 40.77px" name="Role" textLayoutMode="scrolling" />
+                    <Text profile="hpRowCellRight" position="635px 0px" size="118px 40.77px" name="CurrentCost" />
+                    <Text profile="hpRowCellLeft" position="765px 0px" size="128px 40.77px" name="WorkState" />
+                    <Text profile="hpRowCellLeft" position="905px 0px" size="177px 40.77px" name="RosterState" />
                 </ListItem>
             </SmoothList>
 

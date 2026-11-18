@@ -1,16 +1,16 @@
 -- HP_IntegrationAPI.lua (FS25_HelperProfiles)
 -- Optional shared API for compatible mods such as FS25_HelperPayroll and
 -- FS25_RemoteDispatcher.
--- API v7 retains the v6 roster/identity contract and adds a scoped preferred
--- hire capability. A scoped hire is temporary, fail-closed, and does not alter
--- the user's normal HelperProfiles UI selection.
+-- API v8 preserves the v7 contract and adds an optional, non-mutating
+-- PlayerStyle factory for local visual previews. The caller owns the returned
+-- temporary style; this method does not select or hire a worker.
 
 if HP_RosterFilter == nil and source ~= nil then
     source((g_currentModDirectory or "") .. "scripts/HP_RosterFilter.lua")
 end
 
 HP_IntegrationAPI = HP_IntegrationAPI or {
-    apiVersion = 7,
+    apiVersion = 8,
     modVersion = "2.1.2.0",
     published = false,
     api = nil,
@@ -19,7 +19,7 @@ HP_IntegrationAPI = HP_IntegrationAPI or {
     scopedHireHooksInstalled = false,
     previousHelperMethods = {}
 }
-HP_IntegrationAPI.apiVersion = 7
+HP_IntegrationAPI.apiVersion = 8
 HP_IntegrationAPI.modVersion = "2.1.2.0"
 HP_IntegrationAPI.scopedHireStack = HP_IntegrationAPI.scopedHireStack or {}
 HP_IntegrationAPI.previousHelperMethods = HP_IntegrationAPI.previousHelperMethods or {}
@@ -338,7 +338,7 @@ function HP_IntegrationAPI:installScopedHireHooks()
     any = wrap("getFreeHelper") or any
     any = wrap("getRandomHelper") or any
     self.scopedHireHooksInstalled = any
-    if any then hpApiPrint("Installed API v7 scoped preferred-hire wrappers") end
+    if any then hpApiPrint("Installed scoped preferred-hire wrappers") end
     return any
 end
 
@@ -348,7 +348,8 @@ local function buildApi()
         modName = "FS25_HelperProfiles",
         modVersion = HP_IntegrationAPI.modVersion,
         readOnly = false,
-        supportsScopedPreferredHire = true
+        supportsScopedPreferredHire = true,
+        supportsPreviewPlayerStyle = true
     }
 
     function api:getStatus()
@@ -403,6 +404,24 @@ local function buildApi()
     end
 
     function api:getSlotData(slot) return getSlotData(slot) end
+
+    -- Creates a fresh, temporary PlayerStyle for a portrait consumer. It is
+    -- deliberately separate from selection, appearance changes and hiring.
+    -- Never expose a live helper object as a cross-mod API result.
+    function api:createPreviewPlayerStyle(slot)
+        if isCompatibilityBlocked() then return nil, "compatibility-blocked" end
+        local normalized, index = normalizeSlot(slot)
+        if normalized == nil or index == nil then return nil, "invalid-slot" end
+        if HP_ASBridge == nil or type(HP_ASBridge.createPlayerStyleForHelper) ~= "function" then
+            return nil, "appearance-bridge-unavailable"
+        end
+        local helper = getHelperForSlot(normalized, index)
+        if helper == nil then return nil, "helper-unavailable" end
+        local ok, style, err = pcall(HP_ASBridge.createPlayerStyleForHelper, HP_ASBridge, helper, index)
+        if not ok then return nil, "style-resolution-failed" end
+        if style == nil then return nil, tostring(err or "preset-unavailable") end
+        return style, nil
+    end
 
     function api:isSlotEnabled(slot)
         local data = getSlotData(slot)
@@ -497,6 +516,7 @@ function HP_IntegrationAPI:publish(reason)
     self.api.modVersion = self.modVersion
     self.api.readOnly = false
     self.api.supportsScopedPreferredHire = true
+    self.api.supportsPreviewPlayerStyle = true
 
     local changed = g_currentMission.helperProfilesAPI ~= self.api
         or g_currentMission.fs25HelperProfilesAPI ~= self.api

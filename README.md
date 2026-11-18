@@ -413,8 +413,8 @@ Version `2.1.2.0` is the current stable maintenance release of the A–T identit
 
 A future HelperPayroll update may optionally filter or mark OFF-roster workers in its Workers tab while preserving payroll history and assignments.
 
-## Permissions
+## Licence and Permissions
 
 Copyright © 2026 SimGamerJen. All rights reserved.
 
-You may download and use this mod for personal use. Redistribution, re-uploading, repackaging or publishing modified builds requires permission from SimGamerJen.
+You may download and use this mod for personal use. You may not modify, redistribute, re-upload, or publish this mod, in whole or in part, or any derivative version without prior written permission from SimGamerJen.
